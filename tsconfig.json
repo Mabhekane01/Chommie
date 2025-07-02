@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/utils" },
+    { "path": "packages/config" },
+    { "path": "packages/database" },
+    { "path": "packages/redis" },
+    { "path": "services/authUser" },
+    { "path": "services/notification" },
+    { "path": "apps/api-gateway" },
+    { "path": "apps/frontend" }
+  ],
+  "extends": "./tsconfig.base.json"
+}

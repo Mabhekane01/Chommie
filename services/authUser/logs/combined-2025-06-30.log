@@ -1,0 +1,4 @@
+{"level":"info","format":"json","environment":"production","timestamp":"2025-06-30T20:20:04.498Z","message":"Logger initialized"}
+{"service":"authUser","version":"1.0.0","environment":"production","level":"info","message":"Starting AuthUser service...","timestamp":"2025-06-30T20:20:04.994Z"}
+{"service":"authUser","host":"localhost","port":5432,"database":"auth_db","level":"info","message":"Initializing database connection...","timestamp":"2025-06-30T20:20:04.996Z"}
+{"service":"authUser","error":"Cannot connect to database","stack":"Error: Cannot connect to database\n    at initializeDatabase (C:\\Users\\ngwen\\MyProjects\\superApp\\services\\authUser\\src\\index.ts:33:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async startServer (C:\\Users\\ngwen\\MyProjects\\superApp\\services\\authUser\\src\\index.ts:234:5)","level":"error","message":"Database initialization failed","timestamp":"2025-06-30T20:20:05.196Z"}

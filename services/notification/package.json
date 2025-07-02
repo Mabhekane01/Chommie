@@ -1,0 +1,56 @@
+{
+  "name": "notification",
+  "version": "1.0.0",
+  "description": "Notification service handling messaging, alerts, and communication for the application",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "tsx watch ./src/db/scripts/migrate.ts",
+    "rollback": "tsx watch ./src/db/scripts/rollback.ts",
+    "seed": "tsx watch ./src/db/scripts/seed.ts",
+    "db-status": "tsx watch ./src/db/scripts/db-status.ts"
+  },
+  "keywords": [
+    "notification",
+    "messaging",
+    "alerts",
+    "microservices",
+    "typescript",
+    "express",
+    "api",
+    "communication"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.4",
+  "dependencies": {
+    "@packages/config": "workspace:*",
+    "@packages/database": "workspace:*",
+    "@packages/redis": "workspace:*",
+    "@packages/types": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "@types/pg": "^8.15.4",
+    "express": "^4.21.2",
+    "libphonenumber-js": "^1.12.9",
+    "pg": "^8.16.3",
+    "twilio": "^5.7.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.3"
+  }
+}

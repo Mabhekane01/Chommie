@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@packages/database": ["packages/database/src"],
+      "@packages/database/*": ["packages/database/src/*"],
+      "@packages/redis": ["packages/redis/src"],
+      "@packages/redis/*": ["packages/redis/src/*"],
+      "@packages/config": ["packages/config/src"],
+      "@packages/config/*": ["packages/config/src/*"],
+      "@packages/types": ["packages/types/src"],
+      "@packages/types/*": ["packages/types/src/*"],
+      "@packages/utils": ["packages/utils/src"],
+      "@packages/utils/*": ["packages/utils/src/*"]
+    }
+  }
+}

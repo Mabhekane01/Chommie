@@ -1,0 +1,9 @@
+packages:
+  - services/*
+  - packages/*
+  - apps/*
+
+onlyBuiltDependencies:
+  - bcrypt
+  - core-js
+  - esbuild

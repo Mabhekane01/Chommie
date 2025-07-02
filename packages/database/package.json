@@ -1,0 +1,61 @@
+{
+  "name": "@packages/database",
+  "version": "1.0.0",
+  "description": "Shared database utilities and client for microservices architecture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    },
+    "./init": {
+      "import": "./dist/init.js",
+      "types": "./dist/init.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --watch --project tsconfig.json",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "db:rollback": "tsx src/scripts/rollback.ts",
+    "db:status": "tsx src/scripts/db-status.ts",
+    "db:seed": "tsx src/scripts/seed.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "database",
+    "postgresql",
+    "shared",
+    "microservices",
+    "typescript",
+    "migrations"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "@packages/config": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.5.0",
+    "pg": "^8.16.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.15.32",
+    "@types/pg": "^8.15.4",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}

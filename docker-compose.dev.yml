@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+      target: development
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/api-gateway/src:/app/apps/api-gateway/src:cached
+      - apps_api_gateway_node_modules:/app/apps/api-gateway/node_modules
+      - packages_build_cache:/app/packages/config/dist
+      - packages_build_cache_database:/app/packages/database/dist
+      - packages_build_cache_redis:/app/packages/redis/dist
+      - packages_build_cache_types:/app/packages/types/dist
+      - packages_build_cache_utils:/app/packages/utils/dist
+    env_file:
+      - .env
+      - .env.docker.dev
+    depends_on:
+      api-gateway-redis:
+        condition: service_healthy
+    command: ['pnpm', '--filter', 'api-gateway', 'dev']
+    networks:
+      - app-network
+    restart: unless-stopped
+    init: true
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api-gateway/src
+          target: /app/apps/api-gateway/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./apps/api-gateway/package.json
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/health || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  api-gateway-redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --save 60 1 --loglevel notice
+    volumes:
+      - apps_api_gateway_redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  auth-user:
+    build:
+      context: .
+      dockerfile: services/authUser/Dockerfile
+      target: development
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./services/authUser/src:/app/services/authUser/src:cached
+      - auth_user_node_modules:/app/services/authUser/node_modules
+      - packages_build_cache:/app/packages/config/dist
+      - packages_build_cache_database:/app/packages/database/dist
+      - packages_build_cache_redis:/app/packages/redis/dist
+      - packages_build_cache_types:/app/packages/types/dist
+      - packages_build_cache_utils:/app/packages/utils/dist
+    env_file:
+      - .env
+      - .env.docker.dev
+    depends_on:
+      auth-user-redis:
+        condition: service_healthy
+      auth-user-db:
+        condition: service_healthy
+    command: ['pnpm', '--filter', 'auth-user', 'dev']
+    networks:
+      - app-network
+    restart: unless-stopped
+    init: true
+    develop:
+      watch:
+        - action: sync
+          path: ./services/authUser/src
+          target: /app/services/authUser/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./services/authUser/package.json
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/health || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  auth-user-redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --save 60 1 --loglevel notice
+    volumes:
+      - auth_user_redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  auth-user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: authdb
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8'
+    volumes:
+      - auth_user_db_data:/var/lib/postgresql/data
+      - ./services/authUser/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U authuser']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  api_gateway_node_modules:
+    driver: local
+  auth_user_node_modules:
+    driver: local
+  api_gateway_redis_data:
+    driver: local
+  auth_user_redis_data:
+    driver: local
+  auth_user_db_data:
+    driver: local
+  shared_build_cache:
+    driver: local
+  shared_build_cache_database:
+    driver: local
+  shared_build_cache_redis:
+    driver: local
+  shared_build_cache_types:
+    driver: local
+  shared_build_cache_utils:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: app-dev-bridge

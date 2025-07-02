@@ -1,0 +1,59 @@
+{
+  "name": "auth-user",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Authentication and user management service for microservices architecture",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "tsx watch ./src/db/scripts/migrate.ts",
+    "rollback": "tsx watch ./src/db/scripts/rollback.ts",
+    "seed": "tsx watch ./src/db/scripts/seed.ts",
+    "db-status": "tsx watch ./src/db/scripts/db-status.ts"
+  },
+  "keywords": [
+    "auth",
+    "authentication",
+    "user-management",
+    "microservices",
+    "jwt",
+    "typescript",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "@packages/config": "workspace:*",
+    "@packages/database": "workspace:*",
+    "@packages/redis": "workspace:*",
+    "@packages/types": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "@types/pg": "^8.15.4",
+    "geoip-lite": "^1.4.10",
+    "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.9",
+    "pg": "^8.16.3",
+    "twilio": "^5.7.1",
+    "ua-parser-js": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/geoip-lite": "^1.4.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.15.32",
+    "@types/twilio": "^3.19.3",
+    "@types/ua-parser-js": "^0.7.39",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["src/**", "tsconfig.json", "package.json"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "inputs": ["src/**", ".eslintrc.js", "tsconfig.json", "package.json"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"],
+      "inputs": ["src/**", ".eslintrc.js", "tsconfig.json", "package.json"],
+      "outputs": ["src/**"]
+    },
+    "format": {
+      "dependsOn": ["^format"],
+      "inputs": ["src/**", ".prettierrc", "package.json"],
+      "outputs": ["src/**"]
+    },
+    "format:check": {
+      "dependsOn": ["^format:check"],
+      "inputs": ["src/**", ".prettierrc", "package.json"]
+    },
+    "type-check": {
+      "dependsOn": ["^type-check"],
+      "inputs": ["src/**", "tsconfig.json", "package.json"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "inputs": ["src/**", "test/**", "jest.config.js", "package.json"]
+    },
+    "clean": {
+      "cache": false
+    }
+  },
+  "globalDependencies": [
+    "**/.env.*local",
+    ".eslintrc.js",
+    ".prettierrc",
+    "tsconfig.json"
+  ]
+}
