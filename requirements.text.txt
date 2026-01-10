@@ -1,0 +1,992 @@
+# Enterprise E-Commerce Platform - Production Requirements Document
+
+## Executive Summary
+Build a production-grade e-commerce platform competing with Amazon/Takealot, featuring a revolutionary "Buy Now, Pay Later" (BNPL) system with **NO CREDIT CHECKS** - providing true financial inclusion through a platform-based trust scoring system, same-day delivery, and competitive pricing through vendor aggregation.
+
+---
+
+## 1. CORE BUSINESS DIFFERENTIATORS
+
+### 1.1 Buy Now, Pay Later (BNPL) System
+**🎯 CORE DIFFERENTIATOR: NO CREDIT CHECKS REQUIRED**
+
+**Revolutionary Trust Score Engine (No Credit Bureau Checks):**
+- **MAJOR BENEFIT:** Unlike traditional BNPL services (Payflex, PayJustNow), we DO NOT check credit scores
+- Anyone can start regardless of credit history - true financial inclusion
+- Initial credit limit: R500 for ALL new users (just ID/email verification)
+- Build trust through platform behavior, not past financial history
+- Dynamic score calculation using ONLY platform data:
+  - Payment history (40% weight) - on-time payments on OUR platform
+  - Purchase frequency (20% weight) - engagement with OUR platform
+  - Account age (15% weight) - time as OUR customer
+  - Payment speed (15% weight) - how quickly they pay US
+  - Dispute/return ratio (10% weight) - behavior on OUR platform
+- Score tiers: Bronze (0-299), Silver (300-599), Gold (600-799), Platinum (800-1000)
+- Credit limit increases: +R500 per tier advancement (grow from R500 to R5000+)
+- Discount eligibility: 2% (Silver), 5% (Gold), 10% (Platinum)
+
+**Payment Plans:**
+- 2-week split (no interest, no fees) - available to ALL
+- 4-week installments (2% service fee)
+- 8-week installments (5% service fee)
+- 12-week installments (8% service fee)
+- Auto-debit with 48-hour grace period
+- Manual payment options via EFT, card, digital wallets
+
+**Risk Management (Without Credit Bureaus):**
+- Real-time fraud detection using ML models (behavioral patterns)
+- ID verification via government database (no credit check)
+- Bank account verification (ownership, not balance/credit)
+- Device fingerprinting and behavioral biometrics
+- Social proof: Phone number verification, email verification
+- Start-small, earn-more model minimizes default risk
+- Automated account suspension on 2 missed payments
+- Collections workflow after 30 days overdue
+- Legal escalation pathway at 60 days
+- ML model learns from platform defaults to improve risk assessment
+
+### 1.2 Vendor Aggregation Model
+- Backend vendor management portal (not customer-facing)
+- Automated vendor sourcing based on:
+  - Price competitiveness
+  - Quality ratings
+  - Delivery reliability
+  - Stock availability
+- Multi-vendor order splitting with unified customer experience
+- Automated vendor payment reconciliation
+
+### 1.3 Same-Day Delivery
+- Geofencing for service areas
+- Real-time driver tracking
+- Route optimization algorithm
+- Cut-off times: 10 AM (same day), after 10 AM (next day)
+- Integration with third-party logistics (Pargo, Courier Guy, etc.)
+
+---
+
+## 2. TECHNICAL ARCHITECTURE
+
+### 2.1 Monorepo Structure (Turborepo)
+```
+/apps
+  /web-customer        # Angular customer frontend
+  /web-admin           # Angular admin dashboard
+  /web-vendor          # Angular vendor portal
+  /mobile-customer     # Future: Ionic/Capacitor
+/packages
+  /ui-components       # Shared Tailwind components
+  /api-gateway         # NestJS API gateway
+  /auth-service        # NestJS microservice
+  /product-service     # NestJS microservice
+  /order-service       # NestJS microservice
+  /payment-service     # NestJS microservice
+  /bnpl-service        # NestJS microservice (Trust Score)
+  /notification-service # NestJS microservice
+  /search-service      # NestJS microservice (Elasticsearch)
+  /recommendation-service # NestJS microservice (ML)
+  /shared-types        # TypeScript types
+  /shared-utils        # Common utilities
+  /shared-config       # Configuration management
+/infrastructure
+  /docker              # Docker compose files
+  /kubernetes          # K8s manifests
+  /terraform           # Infrastructure as code
+```
+
+### 2.2 Database Architecture
+
+**PostgreSQL (Primary Transactional Data):**
+- Users & Authentication
+- Orders & Order Items
+- BNPL Accounts & Payment Plans
+- Transactions & Payment History
+- Vendors & Vendor Contracts
+- Delivery Zones & Logistics
+
+**MongoDB (Document Store):**
+- Product Catalog (flexible schema)
+- Product Reviews & Ratings
+- User Activity Logs
+- Search Query Analytics
+- Vendor Communication Logs
+
+**Redis (Caching & Real-time):**
+- Session management
+- Shopping cart state
+- Product inventory cache
+- Real-time price updates
+- Rate limiting
+- Job queues (Bull MQ)
+- WebSocket pub/sub for live updates
+
+### 2.3 Microservices Design Patterns
+
+**API Gateway Pattern:**
+- Single entry point for all client requests
+- JWT validation and refresh
+- Request routing and load balancing
+- Rate limiting per user tier
+- API versioning (v1, v2)
+- GraphQL federation layer (optional for complex queries)
+
+**Event-Driven Architecture:**
+- Event bus: RabbitMQ or Apache Kafka
+- Events: OrderCreated, PaymentReceived, TrustScoreUpdated, ProductRestocked
+- Saga pattern for distributed transactions
+- Event sourcing for BNPL trust score history
+
+**CQRS Pattern:**
+- Command side: Write operations to PostgreSQL
+- Query side: Optimized read models in MongoDB/Redis
+- Eventual consistency acceptable for non-critical reads
+
+**Circuit Breaker Pattern:**
+- Resilience4j or Hystrix for service calls
+- Fallback strategies for vendor API failures
+- Health checks and auto-recovery
+
+---
+
+## 3. USER INTERFACE REQUIREMENTS
+
+### 3.1 Design System (Tailwind CSS)
+
+**Color Palette:**
+```css
+/* Primary Colors */
+--color-black: #0A0A0A
+--color-dark-green: #1B4332
+--color-green: #2D6A4F
+--color-light-green: #40916C
+--color-brown: #5C4033
+--color-light-brown: #8B7355
+--color-white: #FFFFFF
+--color-off-white: #F8F9FA
+
+/* Semantic Colors */
+--color-success: #52B788
+--color-warning: #F77F00
+--color-error: #D62828
+--color-info: #023047
+
+/* Gradients */
+--gradient-primary: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)
+--gradient-cta: linear-gradient(135deg, #40916C 0%, #52B788 100%)
+```
+
+**Typography:**
+- Headings: Inter (Bold, 600-800 weight)
+- Body: Inter (Regular, 400-500 weight)
+- Monospace: JetBrains Mono (for codes, prices)
+
+**Unique UI Patterns (NOT Amazon/Takealot Clones):**
+
+1. **Card-Based Product Grid**
+   - Asymmetric masonry layout (Pinterest-style)
+   - Hover reveals BNPL eligibility badge
+   - Micro-interactions: scale + shadow on hover
+   - "Trust Score Discount" badge prominently displayed
+
+2. **Floating Action Button (FAB) Cart**
+   - Bottom-right fixed position
+   - Slide-out mini cart preview
+   - Real-time BNPL calculation as items added
+   - Pulse animation on add-to-cart
+
+3. **Trust Score Dashboard Widget**
+   - Circular progress indicator
+   - Gamified achievements (badges)
+   - Next reward countdown timer
+   - Embedded in user profile dropdown
+
+4. **Search Experience**
+   - Full-screen overlay search (not dropdown)
+   - Instant search with Algolia/Elasticsearch
+   - Voice search integration
+   - Visual search (upload image to find products)
+
+5. **Checkout Flow**
+   - Single-page checkout (no multi-step)
+   - Side-by-side layout: Cart | Payment | Delivery
+   - Real-time BNPL eligibility calculator
+   - Apple Pay / Google Pay prominent
+   - Address autocomplete with Google Places API
+
+### 3.2 Component Library Structure
+
+**Atomic Design Pattern:**
+```typescript
+/atoms
+  - Button (Primary, Secondary, Ghost, BNPL)
+  - Input (Text, Number, Currency, OTP)
+  - Badge (TrustScore, Discount, FastDelivery)
+  - Icon (Lucide Icons)
+  - Avatar, Spinner, Skeleton
+
+/molecules
+  - ProductCard
+  - SearchBar
+  - AddressForm
+  - PaymentMethodSelector
+  - TrustScoreMeter
+  - BNPLCalculator
+
+/organisms
+  - ProductGrid
+  - CheckoutSummary
+  - UserProfileHeader
+  - OrderHistoryTable
+  - VendorRatingCard
+
+/templates
+  - ProductListingPage
+  - ProductDetailPage
+  - CheckoutPage
+  - UserDashboard
+  - AdminDashboard
+
+/pages
+  - HomePage
+  - CategoryPage
+  - SearchResultsPage
+  - CartPage
+  - CheckoutPage
+  - OrderConfirmationPage
+  - UserProfilePage
+  - TrustScorePage
+```
+
+---
+
+## 4. FEATURE REQUIREMENTS
+
+### 4.1 Customer-Facing Features
+
+**Homepage:**
+- Hero banner with dynamic promotions
+- BNPL explainer section emphasizing "NO CREDIT CHECKS - Everyone Approved!" (video + infographic)
+- Trust score CTA: "Start with R500 - No Credit Check Required"
+- Trending products (algorithm-driven)
+- Category navigation with mega-menu
+- Trust score dashboard widget for logged-in users
+- Same-day delivery zones map
+- Success stories: "From R500 to R5000 - Real customer journeys"
+
+**Product Listing:**
+- Infinite scroll with virtual scrolling (performance)
+- Faceted search filters (price, brand, rating, BNPL eligible)
+- Sort by: Relevance, Price, Rating, Newest, BNPL Discount
+- Quick view modal (no page reload)
+- Comparison tool (up to 4 products)
+
+**Product Detail Page:**
+- Image gallery with zoom (360° view for select products)
+- Real-time stock indicator
+- BNPL payment plan calculator
+- Customer reviews with verified purchase badge
+- Q&A section
+- Related products carousel
+- "Frequently bought together" widget
+- Size guide / spec sheet download
+
+**Shopping Cart:**
+- Persistent cart (Redis)
+- Save for later functionality
+- BNPL eligibility indicator per item
+- Real-time shipping cost calculation
+- Promo code input with validation
+- Gift options (message, wrapping)
+
+**Checkout:**
+- Guest checkout option
+- Multiple delivery addresses
+- Delivery time slot selection
+- BNPL plan selection with terms display
+- Payment method: Card, EFT, BNPL, Zapper, SnapScan
+- Order summary with breakdown
+- OTP verification for high-value orders
+
+**User Account:**
+- Trust Score Dashboard:
+  - Current score with visual meter
+  - Score history graph (last 12 months)
+  - Upcoming rewards
+  - Tips to improve score
+- Order History:
+  - Filter by status, date range
+  - Reorder button
+  - Track shipment link
+  - Download invoice
+- BNPL Management:
+  - Active payment plans
+  - Payment schedule calendar
+  - Early payment option (discount incentive)
+  - Auto-debit management
+- Saved Addresses & Payment Methods
+- Wishlist with price drop alerts
+- Notification Preferences
+
+**Search & Discovery:**
+- Elasticsearch-powered search
+- Autocomplete with product suggestions
+- Search history
+- Trending searches
+- Category browse tree
+- Brand directory
+- Deals & promotions page
+- Personalized recommendations (ML-driven)
+
+### 4.2 Admin Dashboard Features
+
+**Dashboard Overview:**
+- Real-time KPIs: GMV, Active Orders, BNPL Default Rate
+- Revenue charts (daily, weekly, monthly)
+- Top products, categories, vendors
+- Alert center (low stock, payment issues, delivery delays)
+
+**Product Management:**
+- Bulk product upload (CSV, Excel)
+- Product categorization & tagging
+- Inventory management
+- Pricing rules engine
+- Image management with CDN
+- SEO metadata editor
+
+**Order Management:**
+- Order pipeline view (Kanban board)
+- Bulk actions (print labels, mark shipped)
+- Order details with timeline
+- Manual order creation
+- Refund/return processing
+- Delivery assignment to logistics partners
+
+**Vendor Management:**
+- Vendor onboarding workflow
+- Performance metrics per vendor
+- Automated payment reconciliation
+- Contract management
+- Communication hub
+
+**BNPL Management:**
+- Trust score distribution analytics
+- Default rate monitoring
+- Collections queue
+- Manual credit adjustments
+- Fraud detection dashboard
+
+**Customer Management:**
+- User search with filters
+- Account status management
+- Support ticket system
+- Impersonation mode (for support)
+
+**Analytics & Reporting:**
+- Sales reports (by product, category, vendor, time)
+- Customer cohort analysis
+- BNPL performance metrics
+- Delivery performance metrics
+- Custom report builder
+- Export to CSV/PDF
+
+**Settings:**
+- System configuration
+- Payment gateway settings
+- Delivery zone management
+- Email/SMS template editor
+- Role-based access control (RBAC)
+
+---
+
+## 5. ALGORITHM REQUIREMENTS
+
+### 5.1 Trust Score Calculation Algorithm
+
+**Pseudocode:**
+```
+function calculateTrustScore(user):
+    paymentHistory = getPaymentHistory(user)
+    purchaseFrequency = getPurchaseFrequency(user)
+    accountAge = getAccountAge(user)
+    paymentSpeed = getAveragePaymentSpeed(user)
+    disputeRatio = getDisputeRatio(user)
+    
+    paymentScore = (paymentHistory.onTimePayments / paymentHistory.totalPayments) * 400
+    frequencyScore = min(purchaseFrequency * 20, 200)
+    ageScore = min(accountAge.inMonths * 5, 150)
+    speedScore = (1 - paymentSpeed.averageDelayDays / 30) * 150
+    disputeScore = (1 - disputeRatio) * 100
+    
+    totalScore = paymentScore + frequencyScore + ageScore + speedScore + disputeScore
+    
+    return clamp(totalScore, 0, 1000)
+```
+
+**Decay Function:**
+- Recent behavior weighted 3x more than old behavior
+- Exponential decay over 12 months
+- Missed payments: -50 points (immediate)
+- On-time payments: +5 points (cumulative)
+
+### 5.2 Product Recommendation Algorithm
+
+**Collaborative Filtering:**
+- User-user similarity (cosine similarity)
+- Item-item similarity (Jaccard index)
+- Matrix factorization (ALS algorithm)
+
+**Content-Based Filtering:**
+- TF-IDF on product descriptions
+- Category and brand affinity
+- Price range preference
+
+**Hybrid Approach:**
+- Weighted combination: 60% collaborative, 40% content-based
+- Cold start handling with popularity-based recommendations
+
+**Real-Time Personalization:**
+- Session-based recommendations (last 5 viewed items)
+- Time-decay factor for stale preferences
+- A/B testing framework for algorithm tuning
+
+### 5.3 Search Ranking Algorithm
+
+**Elasticsearch Scoring:**
+```json
+{
+  "query": {
+    "function_score": {
+      "query": { "multi_match": { ... } },
+      "functions": [
+        { "field_value_factor": { "field": "popularity_score", "modifier": "log1p", "factor": 1.5 } },
+        { "field_value_factor": { "field": "rating", "modifier": "sqrt", "factor": 1.2 } },
+        { "field_value_factor": { "field": "bnpl_eligible", "modifier": "none", "factor": 1.1 } },
+        { "gauss": { "price": { "origin": "user_preferred_price", "scale": "50" } } },
+        { "random_score": { "seed": "user_id", "field": "_seq_no" } }
+      ],
+      "score_mode": "multiply",
+      "boost_mode": "multiply"
+    }
+  }
+}
+```
+
+### 5.4 Dynamic Pricing Algorithm
+
+**Competitive Pricing:**
+- Daily scraping of competitor prices (Takealot, Makro, Game)
+- Automated price matching with margin constraints
+- Flash sale triggers based on inventory age
+
+**Demand-Based Pricing:**
+- Price elasticity model per category
+- Surge pricing for high-demand items (limited)
+- Clearance pricing for slow movers
+
+### 5.5 Delivery Route Optimization
+
+**Algorithm:**
+- Vehicle Routing Problem (VRP) solver
+- Constraints: time windows, vehicle capacity, driver shifts
+- Integration with Google Maps Directions API
+- Real-time traffic data incorporation
+- Dynamic re-routing on delays
+
+---
+
+## 6. SECURITY & COMPLIANCE
+
+### 6.1 Authentication & Authorization
+
+**JWT-Based Auth:**
+- Access token (15 min expiry)
+- Refresh token (7 days expiry, httpOnly cookie)
+- Token rotation on refresh
+- Device fingerprinting for anomaly detection
+
+**Multi-Factor Authentication (MFA):**
+- SMS OTP (Twilio)
+- Email OTP
+- Authenticator app support (Google Authenticator)
+- Mandatory for BNPL accounts > R5000 limit
+
+**OAuth Integration:**
+- Google Sign-In
+- Facebook Login
+- Apple Sign-In
+
+**Role-Based Access Control (RBAC):**
+- Roles: Customer, Admin, Super Admin, Vendor, Support Agent
+- Permissions: granular resource-based permissions
+- Policy enforcement at API gateway level
+
+### 6.2 Data Security
+
+**Encryption:**
+- In-transit: TLS 1.3 for all connections
+- At-rest: AES-256 for sensitive data (PII, payment info)
+- Database encryption (PostgreSQL pgcrypto, MongoDB LUKS)
+
+**PCI DSS Compliance:**
+- No storage of CVV/CVC codes
+- Tokenization of card numbers via Stripe/PayFast
+- Annual compliance audit
+- Network segmentation for payment processing
+
+**POPIA Compliance (South African GDPR):**
+- Explicit consent for data collection
+- Right to access/delete personal data
+- Data retention policies (7 years for financial records)
+- Privacy policy and terms of service
+- Cookie consent banner
+
+**Penetration Testing:**
+- Quarterly pen tests by certified firms
+- Bug bounty program (HackerOne)
+- OWASP Top 10 mitigation
+
+### 6.3 Fraud Prevention
+
+**Real-Time Fraud Detection:**
+- IP geolocation mismatch
+- Device fingerprint changes
+- Unusual purchase patterns (ML model)
+- Velocity checks (multiple orders in short time)
+- Email/phone verification for new accounts
+
+**BNPL-Specific Fraud Checks (No Credit Bureau):**
+- ID verification via government database
+- Bank account ownership verification (not balance/credit)
+- Device fingerprinting and behavioral analysis
+- Phone number and email verification
+- Proof of residence for limits above R2000
+- Biometric verification (future: liveness detection)
+- ML-based fraud scoring using platform behavior patterns
+
+---
+
+## 7. PERFORMANCE REQUIREMENTS
+
+### 7.1 Frontend Performance
+
+**Metrics:**
+- Largest Contentful Paint (LCP): < 2.5s
+- First Input Delay (FID): < 100ms
+- Cumulative Layout Shift (CLS): < 0.1
+- Time to Interactive (TTI): < 3.5s
+
+**Optimization Strategies:**
+- Code splitting per route
+- Lazy loading for images (Intersection Observer API)
+- Service Worker for offline support
+- CDN for static assets (Cloudflare, AWS CloudFront)
+- Image optimization (WebP format, responsive images)
+- Bundle size budget: < 200KB initial load
+
+**Angular-Specific:**
+- OnPush change detection strategy
+- trackBy functions in *ngFor
+- Virtual scrolling for large lists (Angular CDK)
+- Preload critical routes
+- AOT compilation
+
+### 7.2 Backend Performance
+
+**API Response Times:**
+- Product search: < 200ms (p95)
+- Product detail: < 150ms (p95)
+- Add to cart: < 100ms (p95)
+- Checkout: < 500ms (p95)
+- Trust score calculation: < 300ms (p95)
+
+**Database Optimization:**
+- Connection pooling (PgBouncer for PostgreSQL)
+- Query optimization with EXPLAIN ANALYZE
+- Proper indexing strategy
+- Database replication (read replicas)
+- Query result caching (Redis)
+
+**Caching Strategy:**
+- L1: In-memory cache (Node.js)
+- L2: Redis cache (5 min - 24 hour TTL)
+- L3: CDN cache for static content
+- Cache invalidation on product/price updates
+
+**Horizontal Scaling:**
+- Kubernetes auto-scaling (HPA based on CPU/memory)
+- Load balancing (NGINX or AWS ALB)
+- Stateless service design
+
+### 7.3 Monitoring & Observability
+
+**Application Performance Monitoring (APM):**
+- New Relic, Datadog, or Elastic APM
+- Distributed tracing (OpenTelemetry)
+- Error tracking (Sentry)
+- Custom business metrics dashboards
+
+**Logging:**
+- Centralized logging (ELK stack or Loki)
+- Structured logging (JSON format)
+- Log levels: ERROR, WARN, INFO, DEBUG
+- Log retention: 30 days hot, 1 year cold storage
+
+**Alerting:**
+- PagerDuty integration for critical alerts
+- Slack notifications for warnings
+- Alert rules:
+  - API error rate > 5%
+  - Response time p95 > 1s
+  - Database connection pool exhausted
+  - BNPL default rate spike
+  - Low stock alerts
+
+---
+
+## 8. TESTING STRATEGY
+
+### 8.1 Testing Pyramid
+
+**Unit Tests (70%):**
+- Jest for backend (NestJS)
+- Jasmine/Karma for frontend (Angular)
+- Target coverage: > 80%
+- Test: business logic, utilities, pure functions
+
+**Integration Tests (20%):**
+- Supertest for API testing
+- Test: service-to-service communication
+- Database integration (test containers)
+- External API mocking
+
+**E2E Tests (10%):**
+- Cypress or Playwright
+- Critical user journeys:
+  - User registration → Product search → Add to cart → Checkout (BNPL) → Order confirmation
+  - Trust score improvement flow
+  - Admin order management
+- Run on staging environment nightly
+
+**Load Testing:**
+- K6 or Artillery
+- Target: 10,000 concurrent users
+- Test scenarios:
+  - Flash sale simulation
+  - Payment processing under load
+  - Search query flood
+
+**Security Testing:**
+- OWASP ZAP automated scans
+- SQL injection, XSS, CSRF tests
+- Authentication/authorization bypass attempts
+
+---
+
+## 9. DEPLOYMENT & DEVOPS
+
+### 9.1 CI/CD Pipeline
+
+**GitHub Actions Workflow:**
+```yaml
+1. Code pushed to feature branch
+2. Run linters (ESLint, Prettier)
+3. Run unit tests
+4. Build Docker images
+5. Push to container registry
+6. Deploy to dev environment
+7. Run integration tests
+8. PR approved → merge to main
+9. Deploy to staging
+10. Run E2E tests
+11. Manual approval gate
+12. Deploy to production (blue-green deployment)
+```
+
+**Environments:**
+- Development (auto-deploy on commit)
+- Staging (mirrors production)
+- Production (manual promotion)
+
+### 9.2 Infrastructure
+
+**Cloud Provider:** AWS (or Azure/GCP)
+
+**Services:**
+- **Compute:** EKS (Kubernetes) or ECS (Docker)
+- **Database:** RDS (PostgreSQL), DocumentDB (MongoDB)
+- **Cache:** ElastiCache (Redis)
+- **Storage:** S3 for images/documents
+- **CDN:** CloudFront
+- **Load Balancer:** ALB
+- **DNS:** Route 53
+- **Secrets:** AWS Secrets Manager
+- **Message Queue:** SQS + SNS (or EventBridge)
+
+**Infrastructure as Code:**
+- Terraform for AWS resources
+- Helm charts for Kubernetes deployments
+- GitOps with ArgoCD or Flux
+
+**Disaster Recovery:**
+- Automated daily backups (RDS, S3)
+- Cross-region replication for critical data
+- RTO: 4 hours, RPO: 1 hour
+- Disaster recovery runbook
+
+---
+
+## 10. THIRD-PARTY INTEGRATIONS
+
+### 10.1 Payment Gateways
+- **Primary:** PayFast (South African market leader)
+- **Secondary:** Stripe (international cards)
+- **Alternative:** Ozow (instant EFT)
+- **Digital Wallets:** Zapper, SnapScan, Apple Pay, Google Pay
+
+### 10.2 Delivery Partners
+- **Courier:** Courier Guy, Pargo, RAM Hand-to-Hand
+- **Tracking:** Integration via API for real-time updates
+- **Returns:** Reverse logistics flow
+
+### 10.3 SMS/Email
+- **SMS:** Twilio, BulkSMS
+- **Email:** SendGrid or AWS SES
+- **Templates:** Transactional emails (order confirmation, payment reminders, shipment tracking)
+
+### 10.4 Identity Verification
+- **Government ID Verification:** Integration with Department of Home Affairs API (or third-party like Smile Identity, Onfido)
+- **Bank Account Verification:** Ozow/Peach Payments (verify ownership, not credit)
+- **Phone/Email Verification:** OTP-based verification
+- **Purpose:** Identity confirmation WITHOUT credit checks - true financial inclusion
+
+### 10.5 Analytics
+- **Google Analytics 4:** User behavior tracking
+- **Segment:** Customer data platform
+- **Hotjar:** Heatmaps and session recordings
+- **Mixpanel:** Product analytics
+
+### 10.6 Customer Support
+- **Zendesk or Freshdesk:** Ticketing system
+- **Intercom:** Live chat widget
+- **Twilio Flex:** Call center integration
+
+---
+
+## 11. LAUNCH STRATEGY
+
+### Phase 1: MVP (Months 1-3)
+- Core e-commerce functionality
+- Basic BNPL (2-week split only)
+- 1-2 product categories
+- Johannesburg delivery only
+- Manual vendor management
+
+### Phase 2: Expansion (Months 4-6)
+- Full BNPL tiers and plans
+- 5-10 product categories
+- Expand to Cape Town, Durban
+- Automated vendor onboarding
+- Mobile-responsive web app
+
+### Phase 3: Scale (Months 7-12)
+- 20+ product categories
+- Nationwide delivery
+- Native mobile apps (iOS, Android)
+- Advanced recommendation engine
+- Loyalty program integration
+
+### Phase 4: Market Leader (Year 2+)
+- International expansion (Namibia, Botswana)
+- B2B wholesale platform
+- White-label BNPL solution
+- Marketplace model (limited sellers)
+
+---
+
+## 12. METRICS & KPIs
+
+### Business Metrics:
+- **GMV (Gross Merchandise Value):** Target R10M in Year 1
+- **AOV (Average Order Value):** Target R800
+- **Customer Acquisition Cost (CAC):** < R150
+- **Lifetime Value (LTV):** > R3000
+- **LTV:CAC Ratio:** > 3:1
+- **BNPL Adoption Rate:** > 40% of orders
+- **Default Rate:** < 5%
+
+### Technical Metrics:
+- **Uptime:** 99.9% (43 minutes downtime/month max)
+- **API Success Rate:** > 99.5%
+- **Page Load Time:** < 3s (p95)
+- **Deployment Frequency:** Daily to dev, weekly to production
+- **Mean Time to Recovery (MTTR):** < 1 hour
+
+---
+
+## 13. DOCUMENTATION REQUIREMENTS
+
+### For Development Team:
+- API documentation (OpenAPI/Swagger)
+- Architecture decision records (ADRs)
+- Database schema diagrams
+- Sequence diagrams for complex flows
+- Coding standards guide
+- Git branching strategy
+
+### For Users:
+- Help center with FAQs
+- Video tutorials for BNPL
+- Trust score explainer
+- Return/refund policy
+- Privacy policy
+- Terms of service
+
+---
+
+## 14. PROMPTING GUIDELINES FOR GEMINI
+
+### DO's:
+✅ Provide this entire document as context
+✅ Reference specific sections (e.g., "As per Section 4.1 Product Listing requirements...")
+✅ Ask for one microservice at a time
+✅ Request specific design patterns (e.g., "Implement Circuit Breaker pattern for vendor API calls")
+✅ Specify exact tech stack versions (Node 20.x, Angular 17, NestJS 10)
+✅ Request code with comprehensive error handling
+✅ Ask for unit tests alongside implementation
+✅ Request TypeScript strict mode compliance
+✅ Ask for accessibility (WCAG 2.1 AA) compliance
+✅ Request performance considerations in code
+
+### DON'Ts:
+❌ Ask Gemini to "build the entire app" in one prompt
+❌ Let Gemini choose technologies arbitrarily
+❌ Accept code without proper validation/sanitization
+❌ Skip testing requirements
+❌ Ignore security best practices
+❌ Forget to specify database schema constraints
+❌ Accept vague error handling ("throw error")
+❌ Skip TypeScript types (use any)
+❌ Ignore scalability considerations
+❌ Accept hardcoded values (use environment variables)
+
+### Sample Prompts:
+
+**Good Prompt:**
+"Using the requirements in Section 5.1, implement the Trust Score calculation algorithm as a NestJS service. Include:
+1. TypeScript interfaces for User, PaymentHistory, TrustScoreResult
+2. PostgreSQL queries to fetch payment data (use TypeORM)
+3. Redis caching for calculated scores (5-minute TTL)
+4. Unit tests with Jest (mock database calls)
+5. Exponential decay function for historical data
+6. OpenAPI decorator for API endpoint
+7. Input validation using class-validator
+8. Proper error handling and logging
+Target: < 300ms p95 response time."
+
+**Bad Prompt:**
+"Make a trust score calculator"
+
+---
+
+## 15. RISK MITIGATION
+
+### Technical Risks:
+- **Vendor API downtime:** Circuit breakers + fallback to cached data
+- **Database bottlenecks:** Read replicas + query optimization
+- **Payment gateway failures:** Multiple gateway failover
+- **Security breaches:** Regular audits + bug bounty + incident response plan
+
+### Business Risks:
+- **BNPL default spike:** Conservative credit limits + machine learning fraud detection
+- **Vendor reliability:** Multi-vendor strategy + quality SLAs
+- **Regulatory changes:** Legal consultation + compliance monitoring
+- **Competition:** Focus on BNPL USP + customer experience + price leadership
+
+---
+
+## APPENDIX A: Color Usage Guidelines
+
+| Color | Usage |
+|-------|-------|
+| Black (#0A0A0A) | Primary text, nav bar, footer background |
+| Dark Green (#1B4332) | Primary CTA buttons, trust score progress |
+| Green (#2D6A4F) | Secondary buttons, links, success states |
+| Light Green (#40916C) | Badges, highlights, hover states |
+| Brown (#5C4033) | Headings, premium badges |
+| Light Brown (#8B7355) | Subheadings, icons |
+| White (#FFFFFF) | Background, button text on dark |
+| Off-White (#F8F9FA) | Secondary backgrounds, cards |
+
+**Gradients for CTAs:**
+- Primary: `linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)`
+- Hover: `linear-gradient(135deg, #2D6A4F 0%, #40916C 100%)`
+
+---
+
+## APPENDIX B: Accessibility Checklist
+
+- [ ] WCAG 2.1 AA compliant color contrast ratios
+- [ ] Keyboard navigation support (Tab order)
+- [ ] Screen reader support (ARIA labels)
+- [ ] Focus indicators visible
+- [ ] Alt text for all images
+- [ ] Semantic HTML5 elements
+- [ ] Skip navigation links
+- [ ] Form label associations
+- [ ] Error messages descriptive
+- [ ] Video captions (where applicable)
+
+---
+
+## CONCLUSION
+
+This document provides production-grade requirements for an enterprise e-commerce platform with unique BNPL capabilities. Every decision prioritizes scalability, security, and competitive differentiation.
+
+**Next Steps:**
+1. Set up Turborepo monorepo structure
+2. Initialize NestJS microservices with Docker
+3. Create Angular workspace with shared component library
+4. Set up CI/CD pipeline
+5. Implement authentication service first
+6. Build product catalog service
+7. Develop BNPL trust score engine
+8. Iterate with user testing
+
+**Remember:** Start small (MVP), iterate fast, measure everything, and prioritize BNPL as the core differentiator.
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** January 2026  
+**Owner:** Startup Development Team
+
+
+ℹ Memory refreshed successfully. Loaded 6926 characters from 1 file(s).
+✦ I have significantly enhanced the BNPL Service to act as a true financial engine:
+
+  1. Backend Logic
+   - Credit Limit Algorithm: Implemented logic that assigns credit limits based on Trust Tiers:
+       * Bronze: R500 (Base)
+       * Silver: R1000
+       * Gold: R1500
+       * Platinum: R2000+
+   - Eligibility Check: Added a checkEligibility(userId, amount) endpoint that instantly verifies if an order can be
+     processed via BNPL.
+
+  2. Frontend Updates
+   - Visual Feedback: The Trust Score Widget now prominently displays the "Available Credit" (e.g., R500.00).
+   - Integration: The widget automatically reflects the limit derived from the user's score.
+
+  Current State:
+  A user can now see their score AND their spending power. The backend is ready to accept validation requests from the
+  checkout process.
+
+  Next Steps (Recommended):
+   1. Checkout Flow: Implement the "Add to Cart" and "Checkout" pages in Angular to demonstrate the checkEligibility
+      logic in action (e.g., disabling the BNPL option if the cart total > R500).
+   2. Payment Service: Build the service to actually capture the funds.
+   3. Vendor Portal: Start building the backend for vendor management.
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ You are running Gemini CLI in your home directory. It is recommended to run in a project-specific directory.         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+

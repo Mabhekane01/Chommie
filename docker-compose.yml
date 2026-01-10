@@ -1,0 +1,168 @@
+services:
+  # --- Databases ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: chommie_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chommie_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chommie-net
+
+  mongodb:
+    image: mongo:6.0
+    container_name: chommie_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - chommie-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: chommie_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - chommie-net
+
+  # --- Microservices ---
+  api-gateway:
+    build:
+      context: .
+      dockerfile: packages/api-gateway/Dockerfile
+    container_name: chommie_api_gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - auth-service
+      - product-service
+      - bnpl-service
+      - order-service
+      - payment-service
+    networks:
+      - chommie-net
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: packages/auth-service/Dockerfile
+    container_name: chommie_auth_service
+    environment:
+      - PORT=3001
+      - POSTGRES_HOST=postgres
+      - JWT_SECRET=supersecretkey
+    depends_on:
+      - postgres
+    networks:
+      - chommie-net
+
+  product-service:
+    build:
+      context: .
+      dockerfile: packages/product-service/Dockerfile
+    container_name: chommie_product_service
+    environment:
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongodb:27017/chommie_products
+    depends_on:
+      - mongodb
+    networks:
+      - chommie-net
+
+  bnpl-service:
+    build:
+      context: .
+      dockerfile: packages/bnpl-service/Dockerfile
+    container_name: chommie_bnpl_service
+    environment:
+      - PORT=3003
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - chommie-net
+
+  order-service:
+    build:
+      context: .
+      dockerfile: packages/order-service/Dockerfile
+    container_name: chommie_order_service
+    environment:
+      - PORT=3004
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - chommie-net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: packages/notification-service/Dockerfile
+    container_name: chommie_notification_service
+    environment:
+      - PORT=3005
+    networks:
+      - chommie-net
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: packages/payment-service/Dockerfile
+    container_name: chommie_payment_service
+    environment:
+      - PORT=3006
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - chommie-net
+
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: packages/recommendation-service/Dockerfile
+    container_name: chommie_recommendation_service
+    environment:
+      - PORT=3007
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - chommie-net
+
+  # --- Frontends ---
+  web-customer:
+    build:
+      context: .
+      dockerfile: apps/web-customer/Dockerfile
+    ports:
+      - "4200:80"
+    networks:
+      - chommie-net
+
+  web-vendor:
+    build:
+      context: .
+      dockerfile: apps/web-vendor/Dockerfile
+    ports:
+      - "4201:80"
+    networks:
+      - chommie-net
+
+networks:
+  chommie-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:

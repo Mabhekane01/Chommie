@@ -1,0 +1,35 @@
+<main class="main">
+  <div class="content" style="max-width: 1200px;">
+    <div class="left-side w-full">
+      <div class="flex justify-between items-center w-full mb-8 border-b pb-4">
+        <h1 class="text-2xl font-bold cursor-pointer text-green-800" routerLink="/">Chommie</h1>
+        <nav class="flex gap-6 items-center">
+          <a routerLink="/products" class="hover:text-green-700 font-medium">Shop</a>
+          <ng-container *ngIf="isLoggedIn()">
+            <a routerLink="/cart" class="hover:text-green-700 font-medium">Cart</a>
+            <a routerLink="/wishlist" class="hover:text-green-700 font-medium">Wishlist</a>
+            <a routerLink="/orders" class="hover:text-green-700 font-medium">My Orders</a>
+            <button (click)="logout()" class="text-gray-600 hover:text-red-600 font-medium">Logout</button>
+          </ng-container>
+          <ng-container *ngIf="!isLoggedIn()">
+            <a routerLink="/login" class="text-green-700 font-bold">Sign In</a>
+          </ng-container>
+        </nav>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="lg:col-span-3">
+          <router-outlet />
+        </div>
+        
+        <div class="lg:col-span-1" *ngIf="isLoggedIn() && userId()">
+           <app-trust-score-widget [userId]="userId()!"></app-trust-score-widget>
+           <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+             <h4 class="font-bold text-green-800 mb-2">BNPL Benefit</h4>
+             <p class="text-sm text-green-700">Shop now, pay later with 0% interest on 2-week plans. No credit checks!</p>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

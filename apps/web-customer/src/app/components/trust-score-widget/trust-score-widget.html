@@ -1,0 +1,44 @@
+<div class="trust-widget-card" *ngIf="profile">
+  <div class="header">
+    <h3>Trust Score</h3>
+    <span class="badge" [style.backgroundColor]="getTierColor(profile.tier)">
+      {{ profile.tier }}
+    </span>
+  </div>
+
+  <div class="score-container">
+    <div class="circular-progress" [style.background]="'conic-gradient(' + getTierColor(profile.tier) + ' ' + (getScorePercentage() * 3.6) + 'deg, #ededed 0deg)'">
+      <div class="inner-circle">
+        <span class="score-value">{{ profile.currentScore }}</span>
+        <span class="score-max">/ 1000</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="credit-limit-display" [style.color]="getTierColor(profile.tier)">
+    <span class="label">Available Credit</span>
+    <span class="amount">R{{ profile.creditLimit | number:'1.2-2' }}</span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span class="label">Payments</span>
+      <span class="value">{{ profile.onTimePayments }} / {{ profile.totalPayments }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="label">Disputes</span>
+      <span class="value">{{ profile.disputeCount }}</span>
+    </div>
+  </div>
+
+  <button class="recalc-btn" (click)="recalculate()" [disabled]="loading">
+    {{ loading ? 'Updating...' : 'Update Score' }}
+  </button>
+  
+  <p class="last-calc">Last updated: {{ profile.lastCalculatedAt | date:'short' }}</p>
+</div>
+
+<div class="loading-state" *ngIf="!profile && loading">
+  <div class="skeleton-circle"></div>
+  <div class="skeleton-line"></div>
+</div>

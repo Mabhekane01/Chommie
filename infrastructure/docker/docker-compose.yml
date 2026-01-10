@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Primary Transactional DB
+  postgres:
+    image: postgres:15-alpine
+    container_name: chommie-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: chommie_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # MongoDB - Product Catalog & Reviews
+  mongodb:
+    image: mongo:6.0
+    container_name: chommie-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # Redis - Caching & Session Store
+  redis:
+    image: redis:7-alpine
+    container_name: chommie-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # RabbitMQ - Event Bus (Optional if Kafka is not used initially)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: chommie-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
