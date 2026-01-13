@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #1B4332;
+  --color-primary-dark: #0D2219;
+  --color-primary-light: #2D6A4F;
+  
+  --color-action: #A0522D;
+  --color-action-hover: #8B4513;
+  --color-action-light: #CD853F;
+
+  /* Glass Colors */
+  --color-glass-light: rgba(255, 255, 255, 0.4);
+  --color-glass-dark: rgba(20, 20, 20, 0.6);
+  --color-glass-green: rgba(27, 67, 50, 0.75);
+  --color-glass-border: rgba(255, 255, 255, 0.5);
+
+  --color-amazon-bg: #Eef2f3;
+  --color-amazon-link: #1B4332;
+  --color-amazon-link-hover: #A0522D;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-glass-light backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)];
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+  }
+  
+  .glass-dark {
+    @apply bg-glass-dark backdrop-blur-xl border border-white/10 shadow-lg text-white;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.8));
+  }
+
+  .glass-green {
+    @apply backdrop-blur-xl border-b border-white/20 shadow-lg text-white;
+    background: linear-gradient(135deg, rgba(27, 67, 50, 0.85), rgba(13, 34, 25, 0.9));
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-panel {
+    @apply backdrop-blur-2xl border border-white/60 shadow-lg rounded-xl;
+    background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
+    box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.1),
+      inset 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  
+  .glass-btn {
+    @apply bg-action text-white shadow-lg backdrop-blur-md hover:bg-action-hover active:scale-95 transition-all duration-200 border border-white/20;
+    background-image: linear-gradient(to bottom right, rgba(255,255,255,0.2), rgba(0,0,0,0.1));
+    box-shadow: 0 4px 15px rgba(160, 82, 45, 0.4);
+  }
+}
+
+body {
+  @apply bg-amazon-bg text-gray-900;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(27, 67, 50, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(160, 82, 45, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+}

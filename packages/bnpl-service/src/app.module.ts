@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { TrustScoreModule } from './trust-score/trust-score.module';
+import { PaymentPlanModule } from './payment-plan/payment-plan.module';
 import { TrustProfile } from './trust-score/entities/trust-profile.entity';
+import { PaymentPlan } from './payment-plan/entities/payment-plan.entity';
 
 @Module({
   imports: [
@@ -14,10 +16,11 @@ import { TrustProfile } from './trust-score/entities/trust-profile.entity';
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'Ntando@postgresql!!522',
       database: process.env.POSTGRES_DB || 'chommie_db',
-      entities: [TrustProfile],
+      entities: [TrustProfile, PaymentPlan],
       synchronize: true, // Auto-create tables (Dev only)
     }),
     TrustScoreModule,
+    PaymentPlanModule,
   ],
 })
 export class AppModule {}

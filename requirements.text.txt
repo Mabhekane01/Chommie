@@ -958,35 +958,27 @@ This document provides production-grade requirements for an enterprise e-commerc
 **Document Version:** 1.0  
 **Last Updated:** January 2026  
 **Owner:** Startup Development Team
+continue adding more features that will allow this tool to compete with amazon and takealot
 
+✦ To make Chommie a true competitor to giants like Amazon and Takealot, we need to move beyond simple transactions and focus on User Convenience and
+  Personalization.
 
-ℹ Memory refreshed successfully. Loaded 6926 characters from 1 file(s).
-✦ I have significantly enhanced the BNPL Service to act as a true financial engine:
+  I propose we implement the following "Power Features":
 
-  1. Backend Logic
-   - Credit Limit Algorithm: Implemented logic that assigns credit limits based on Trust Tiers:
-       * Bronze: R500 (Base)
-       * Silver: R1000
-       * Gold: R1500
-       * Platinum: R2000+
-   - Eligibility Check: Added a checkEligibility(userId, amount) endpoint that instantly verifies if an order can be
-     processed via BNPL.
+   1. Address Book & Wallet Management: Amazon and Takealot dominate because they make the "One-Click" experience seamless. We'll add a section to the User
+      Profile where users can save multiple addresses (Home, Office) and manage their default payment methods.
+   2. Advanced Search Faceting: Adding filters for "Brand", "Price Range", and "Customer Rating" to the product listing page, matching the Amazon sidebar
+      experience.
+   3. Order Tracking Progress: A visual timeline in the Order History (Ordered -> Processing -> Shipped -> Out for Delivery -> Delivered).
+   4. "People also bought" Recommendations: A recommendation engine on the Product Detail page.
 
-  2. Frontend Updates
-   - Visual Feedback: The Trust Score Widget now prominently displays the "Available Credit" (e.g., R500.00).
-   - Integration: The widget automatically reflects the limit derived from the user's score.
+  I'll start by building the Address Book Management in the User Profile, as this is critical for a smooth checkout experience.
 
-  Current State:
-  A user can now see their score AND their spending power. The backend is ready to accept validation requests from the
-  checkout process.
+  First, let's see what we currently have in the profile or account pages.
+⠇ Assessing Profile Management (esc to cancel, 5m 33s)
 
-  Next Steps (Recommended):
-   1. Checkout Flow: Implement the "Add to Cart" and "Checkout" pages in Angular to demonstrate the checkEligibility
-      logic in action (e.g., disabling the BNPL option if the cart total > R500).
-   2. Payment Service: Build the service to actually capture the funds.
-   3. Vendor Portal: Start building the backend for vendor management.
-
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ You are running Gemini CLI in your home directory. It is recommended to run in a project-specific directory.         │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
+ Using: 1 GEMINI.md file
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ >   Type your message or @path/to/file                                                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ ~\Documents\Projects\chommie (main*)                             no sandbox (see /docs)                             Manual (gemini-3-flash-preview) /model

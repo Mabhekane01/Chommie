@@ -15,4 +15,24 @@ export class ReviewController {
   findByProduct(@Payload() productId: string) {
     return this.reviewService.findByProduct(productId);
   }
+
+  @MessagePattern({ cmd: 'get_vendor_reviews' })
+  findByVendor(@Payload() vendorId: string) {
+    return this.reviewService.findByVendor(vendorId);
+  }
+
+  @MessagePattern({ cmd: 'vote_helpful' })
+  voteHelpful(@Payload() reviewId: string) {
+    return this.reviewService.voteHelpful(reviewId);
+  }
+
+  @MessagePattern({ cmd: 'create_seller_review' })
+  createSellerReview(@Payload() data: any) {
+    return this.reviewService.createSellerReview(data);
+  }
+
+  @MessagePattern({ cmd: 'get_seller_reviews' })
+  getSellerReviews(@Payload() vendorId: string) {
+    return this.reviewService.findByVendorId(vendorId);
+  }
 }

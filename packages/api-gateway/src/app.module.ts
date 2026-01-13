@@ -10,6 +10,7 @@ import { PaymentController } from './payment/payment.controller';
 import { ReviewController } from './product/review.controller';
 import { WishlistController } from './product/wishlist.controller';
 import { RecommendationController } from './recommendation/recommendation.controller';
+import { NotificationController } from './notifications/notifications.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,14 @@ import { RecommendationController } from './recommendation/recommendation.contro
         },
       },
       {
+        name: 'NOTIFICATION_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3005,
+        },
+      },
+      {
         name: 'PAYMENT_SERVICE',
         transport: Transport.TCP,
         options: {
@@ -64,7 +73,18 @@ import { RecommendationController } from './recommendation/recommendation.contro
       },
     ]),
   ],
-  controllers: [AppController, AuthController, ProductController, BnplController, OrderController, PaymentController, ReviewController, WishlistController, RecommendationController],
+  controllers: [
+    AppController, 
+    AuthController, 
+    ProductController, 
+    BnplController, 
+    OrderController, 
+    PaymentController, 
+    ReviewController, 
+    WishlistController, 
+    RecommendationController,
+    NotificationController
+  ],
   providers: [AppService],
 })
 export class AppModule {}

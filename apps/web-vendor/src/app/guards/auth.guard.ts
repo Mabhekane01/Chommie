@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -8,8 +8,8 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   if (authService.isLoggedIn()) {
     return true;
-  } else {
-    router.navigate(['/login']);
-    return false;
   }
+
+  // Store the attempted URL for redirecting
+  return router.createUrlTree(['/login']);
 };

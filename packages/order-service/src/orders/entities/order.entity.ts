@@ -4,9 +4,13 @@ import { OrderItem } from './order-item.entity';
 export enum OrderStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
+  CONFIRMED = 'CONFIRMED',
+  PACKED = 'PACKED',
   SHIPPED = 'SHIPPED',
+  OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
+  RETURNED = 'RETURNED',
 }
 
 export enum PaymentMethod {
@@ -28,10 +32,23 @@ export class Order {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;
 
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  discountAmount: number;
+
+  @Column({ nullable: true })
+  couponCode: string;
+
+  @Column({
+    type: 'simple-enum',
+    enum: OrderStatus,
+    default: OrderStatus.PENDING
+  })
   status: OrderStatus;
 
-  @Column({ type: 'enum', enum: PaymentMethod })
+  @Column({
+    type: 'simple-enum',
+    enum: PaymentMethod
+  })
   paymentMethod: PaymentMethod;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
@@ -39,6 +56,9 @@ export class Order {
 
   @Column({ nullable: true })
   shippingAddress: string;
+
+  @Column({ type: 'json', nullable: true })
+  trackingHistory: { status: string, timestamp: Date, description: string }[];
 
   @CreateDateColumn()
   createdAt: Date;

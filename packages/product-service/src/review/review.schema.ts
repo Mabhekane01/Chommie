@@ -19,6 +19,15 @@ export class Review {
 
   @Prop({ required: true })
   comment: string;
+
+  @Prop({ default: false })
+  verified: boolean;
+
+  @Prop({ default: 0 })
+  helpfulVotes: number;
+
+  @Prop([String])
+  images: string[];
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review);

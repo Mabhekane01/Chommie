@@ -1,5 +1,6 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { BnplService, TrustProfile, TrustTier } from '../../services/bnpl.service';
 
 @Component({
@@ -9,15 +10,25 @@ import { BnplService, TrustProfile, TrustTier } from '../../services/bnpl.servic
   templateUrl: './trust-score-widget.html',
   styleUrl: './trust-score-widget.css'
 })
-export class TrustScoreWidgetComponent implements OnInit {
+export class TrustScoreWidgetComponent implements OnInit, OnDestroy {
   @Input() userId: string = ''; 
   profile: TrustProfile | null = null;
   loading: boolean = false;
+  private refreshSub: Subscription | null = null;
 
   constructor(private bnplService: BnplService) {}
 
   ngOnInit() {
     this.loadProfile();
+    this.refreshSub = this.bnplService.refreshProfile$.subscribe(() => {
+      this.loadProfile();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.refreshSub) {
+      this.refreshSub.unsubscribe();
+    }
   }
 
   loadProfile() {

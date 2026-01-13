@@ -35,6 +35,30 @@ export class Product {
   @Prop({ default: 0 })
   trustScoreDiscount: number;
 
+  @Prop()
+  discountPrice?: number;
+
+  @Prop()
+  dealEndsAt?: Date;
+
+  @Prop({ default: false })
+  isLightningDeal: boolean;
+
+  @Prop({ default: 0 })
+  lightningDealStock: number;
+
+  @Prop({ default: 0 })
+  lightningDealSold: number;
+
+  @Prop({ type: [{ name: String, options: [{ value: String, priceModifier: Number, stock: Number, image: String }] }] })
+  variants?: any[];
+
+  @Prop([String])
+  badges?: string[];
+
+  @Prop({ type: [{ minQuantity: Number, discountPercentage: Number }] })
+  bulkPricing?: { minQuantity: number, discountPercentage: number }[];
+
   @Prop({ required: true })
   vendorId: string;
 }

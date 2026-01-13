@@ -9,14 +9,18 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --concurrency=15",
-    "lint": "turbo run lint",
     "test": "turbo run test",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "lint": "turbo run lint",
+    "seed": "node scripts/seed.js"
   },
   "devDependencies": {
+    "node-fetch": "^3.3.2",
     "prettier": "^3.0.0",
     "turbo": "^2.7.3",
     "typescript": "^5.0.0"
   },
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@10.0.0",
+  "dependencies": {
+    "@angular/animations": "^21.0.8"
+  }
 }

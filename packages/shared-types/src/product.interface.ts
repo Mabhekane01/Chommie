@@ -1,5 +1,6 @@
 export interface IProduct {
   id?: string;
+  _id?: any;
   name: string;
   description: string;
   price: number;
@@ -10,9 +11,28 @@ export interface IProduct {
   numReviews: number;
   bnplEligible: boolean;
   trustScoreDiscount: number;
+  discountPrice?: number;
+  dealEndsAt?: Date;
   vendorId: string;
+  isLightningDeal?: boolean;
+  lightningDealStock?: number;
+  lightningDealSold?: number;
+  variants?: IProductVariant[];
+  badges?: string[]; // e.g., ["AMAZON_CHOICE", "BEST_SELLER"]
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IProductVariant {
+  name: string; // e.g., "Color", "Size"
+  options: IVariantOption[];
+}
+
+export interface IVariantOption {
+  value: string; // e.g., "Red", "XL"
+  priceModifier?: number; // e.g., +R50
+  stock?: number;
+  image?: string;
 }
 
 export class CreateProductDto {
@@ -23,6 +43,11 @@ export class CreateProductDto {
   stock!: number;
   images?: string[];
   bnplEligible?: boolean;
+  discountPrice?: number;
+  dealEndsAt?: Date;
+  isLightningDeal?: boolean;
+  lightningDealStock?: number;
+  variants?: IProductVariant[];
   vendorId!: string;
 }
 
@@ -34,5 +59,10 @@ export class UpdateProductDto implements Partial<CreateProductDto> {
   stock?: number;
   images?: string[];
   bnplEligible?: boolean;
+  discountPrice?: number;
+  dealEndsAt?: Date;
+  isLightningDeal?: boolean;
+  lightningDealStock?: number;
+  variants?: IProductVariant[];
   vendorId?: string;
 }

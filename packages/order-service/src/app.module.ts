@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { Return } from './orders/entities/return.entity';
+import { Coupon } from './orders/entities/coupon.entity';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'Ntando@postgresql!!522',
       database: process.env.POSTGRES_DB || 'chommie_db',
-      entities: [Order, OrderItem],
+      entities: [Order, OrderItem, Return, Coupon],
       synchronize: true, // Auto-create tables (Dev only)
     }),
     OrdersModule,

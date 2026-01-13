@@ -1,0 +1,349 @@
+ting compilation in watch mode...
+api-gateway:dev:
+recommendation-service:dev: [10:26:28] Found 0 errors. Watching for file changes.
+recommendation-service:dev:
+web-vendor:dev: √ Building...
+web-vendor:dev: Initial chunk files | Names         |  Raw size
+web-vendor:dev: main.js             | main          | 166.00 kB |
+web-vendor:dev: styles.css          | styles        |  42.90 kB |
+web-vendor:dev: polyfills.js        | polyfills     |  95 bytes |
+web-vendor:dev:
+web-vendor:dev:                     | Initial total | 209.00 kB
+web-vendor:dev:
+web-vendor:dev: Application bundle generation complete. [122.869 seconds] - 2026-01-13T08:26:30.629Z
+web-vendor:dev:
+web-vendor:dev: Watch mode enabled. Watching for file changes...
+web-vendor:dev: NOTE: Raw file sizes do not reflect development server per-request transformations.
+web-vendor:dev:   ➜  Local:   http://localhost:4201/
+notification-service:dev: [10:26:44] Found 0 errors. Watching for file changes.
+notification-service:dev:
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:45     LOG [NestFactory] Starting Nest application...
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:45     LOG [InstanceLoader] AppModule dependencies initialized +551ms
+api-gateway:dev: [10:26:46] Found 0 errors. Watching for file changes.
+api-gateway:dev:
+bnpl-service:dev: [10:26:46] Found 0 errors. Watching for file changes.
+bnpl-service:dev:
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:46     LOG [InstanceLoader] ClientsModule dependencies initialized +98ms
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:46     LOG [InstanceLoader] ClientsModule dependencies initialized +1ms
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:46     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:46     LOG [InstanceLoader] ConfigModule dependencies initialized +3ms
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:46     LOG [InstanceLoader] RecommendationsModule dependencies initialized +0ms
+recommendation-service:dev: [Nest] 4064  - 2026/01/13, 10:26:47     LOG [NestMicroservice] Nest microservice successfully started +1234ms
+recommendation-service:dev: Recommendation Microservice is listening on port 3007
+payment-service:dev: [10:26:48] Found 0 errors. Watching for file changes.
+payment-service:dev:
+auth-service:dev: [10:26:58] Found 0 errors. Watching for file changes.
+auth-service:dev:
+order-service:dev: [10:27:01] Found 0 errors. Watching for file changes.
+order-service:dev:
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:36     LOG [NestFactory] Starting Nest application...
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:37     LOG [InstanceLoader] ClientsModule dependencies initialized +937ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:37     LOG [InstanceLoader] AppModule dependencies initialized +34ms
+notification-service:dev: [Nest] 24508  - 2026/01/13, 10:27:55     LOG [NestFactory] Starting Nest application...
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RoutesResolver] AppController {/}: +18135ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/, GET} route +117ms
+notification-service:dev: [Nest] 24508  - 2026/01/13, 10:27:55     LOG [InstanceLoader] AppModule dependencies initialized +401ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RoutesResolver] AuthController {/auth}: +0ms
+notification-service:dev: [Nest] 24508  - 2026/01/13, 10:27:55   ERROR [ExceptionHandler] UnknownDependenciesException [Error]: Nest can't resolve dependencies of the NotificationsService (?). Please make sure that the argument "NotificationRepository" at index [0] is available in the NotificationsModule context.
+notification-service:dev:
+notification-service:dev: Potential solutions:
+notification-service:dev: - Is NotificationsModule a valid NestJS module?
+notification-service:dev: - If "NotificationRepository" is a provider, is it part of the current NotificationsModule?
+notification-service:dev: - If "NotificationRepository" is exported from a separate @Module, is that module imported within NotificationsModule?
+notification-service:dev:   @Module({
+notification-service:dev:     imports: [ /* the Module containing "NotificationRepository" */ ]
+notification-service:dev:   })
+notification-service:dev:
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/login, POST} route +62ms
+notification-service:dev: For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+notification-service:dev:     at Injector.lookupComponentInParentModules (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\injector.js:290:19)
+notification-service:dev:     at async resolveParam (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\injector.js:140:38)
+notification-service:dev:     at async Promise.all (index 0)
+notification-service:dev:     at async Injector.resolveConstructorParams (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\injector.js:169:27)
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/register, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/forgot-password, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/reset-password, POST} route +14ms
+notification-service:dev:     at async Injector.loadInstance (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\injector.js:75:13)
+notification-service:dev:     at async Injector.loadProvider (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\injector.js:103:9)
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/address, POST} route +21ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/address/:userId/:addressId, DELETE} route +20ms
+notification-service:dev:     at async C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\instance-loader.js:56:13
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/profile/:userId, GET} route +21ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:27:57     LOG [NestFactory] Starting Nest application...
+notification-service:dev:     at async Promise.all (index 3)
+notification-service:dev:     at async InstanceLoader.createInstancesOfProviders (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\instance-loader.js:55:9)
+notification-service:dev:     at async C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\@nestjs\core\injector\instance-loader.js:40:13 {
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/auth/favorite-category, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RoutesResolver] ProductController {/products}: +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products, POST} route +19ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products, GET} route +3ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/filter, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/search/query, GET} route +1ms
+notification-service:dev:   type: 'NotificationsService',
+notification-service:dev:   context: {
+notification-service:dev:     index: 0,
+notification-service:dev:     dependencies: [
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/search/suggest, GET} route +16ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:27:57     LOG [NestFactory] Starting Nest application...
+notification-service:dev:       'NotificationRepository'
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/:id, GET} route +1ms
+notification-service:dev:     ],
+notification-service:dev:     name: 'NotificationRepository'
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/:id, PATCH} route +1ms
+notification-service:dev:   },
+notification-service:dev:   metadata: {
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/:id, DELETE} route +14ms
+notification-service:dev:     id: 'b93189779bd852bd5cc81'
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/category/:category, GET} route +1ms
+notification-service:dev:   },
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/vendor/:vendorId, GET} route +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/questions, POST} route +17ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/questions/:id/answer, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/products/:id/questions, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RoutesResolver] BnplController {/bnpl}: +0ms
+notification-service:dev:   moduleRef: {
+notification-service:dev:     id: '924adb34688fdeb931897'
+notification-service:dev:   }
+notification-service:dev: }
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/trust-score/:userId, POST} route +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/trust-score/:userId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/trust-score/:userId/calculate, POST} route +40ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/eligibility, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/plans/:userId, GET} route +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RouterExplorer] Mapped {/bnpl/pay, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:55     LOG [RoutesResolver] OrderController {/orders}: +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders, POST} route +14ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/user/:userId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/vendor/:vendorId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/:id, GET} route +0ms
+product-service:dev: [10:28:00] Found 0 errors. Watching for file changes.
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:00     LOG [InstanceLoader] AppModule dependencies initialized +3511ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:00     LOG [InstanceLoader] AppModule dependencies initialized +3527ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/:id/status, POST} route +13ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/return, POST} route +2ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/returns/:userId, GET} route +16ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:00     LOG [InstanceLoader] TypeOrmModule dependencies initialized +1ms
+product-service:dev:
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:00     LOG [InstanceLoader] TypeOrmModule dependencies initialized +38ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/validate-coupon, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/coupons, POST} route +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/orders/coupons/vendor/:vendorId, GET} route +1ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:01     LOG [InstanceLoader] ConfigHostModule dependencies initialized +53ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:00     LOG [InstanceLoader] ClientsModule dependencies initialized +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RoutesResolver] PaymentController {/payments}: +20ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/payments/process, POST} route +1ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:00     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:01     LOG [InstanceLoader] ConfigModule dependencies initialized +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/payments/:orderId, GET} route +1ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:00     LOG [InstanceLoader] ConfigModule dependencies initialized +0ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +2571ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TypeOrmModule dependencies initialized +2ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +2685ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TypeOrmModule dependencies initialized +95ms
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:03     LOG [InstanceLoader] PaymentsModule dependencies initialized +58ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TypeOrmModule dependencies initialized +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RoutesResolver] ReviewController {/reviews}: +0ms
+web-customer:dev: √ Building...
+payment-service:dev: [Nest] 14964  - 2026/01/13, 10:28:04     LOG [NestMicroservice] Nest microservice successfully started +810ms
+payment-service:dev: Payment Microservice is listening on port 3006
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews, POST} route +13ms
+web-customer:dev: ▲ [WARNING] NG8113: TrustScoreWidgetComponent is not used within the template of App [plugin angular-compiler]
+web-customer:dev:
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:05     LOG [NestFactory] Starting Nest application...
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews/product/:productId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews/vendor/:vendorId, GET} route +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews/seller, POST} route +13ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews/seller/:vendorId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/reviews/:id/helpful, POST} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RoutesResolver] WishlistController {/wishlist}: +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/wishlist/:userId, GET} route +1ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:03     LOG [InstanceLoader] TrustScoreModule dependencies initialized +141ms
+web-customer:dev: Application bundle generation failed. [219.956 seconds] - 2026-01-13T08:28:04.417Z
+web-customer:dev:     src/app/app.ts:18:65:
+web-customer:dev:       18 │ ...Link, FormsModule, TrustScoreWidgetComponent, FabCartComponent,...
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:03     LOG [InstanceLoader] PaymentPlanModule dependencies initialized +1ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:05     LOG [NestFactory] Starting Nest application...
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/wishlist, POST} route +11ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/wishlist/:userId/:productId, DELETE} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RoutesResolver] RecommendationController {/recommendations}: +0ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/recommendations/related/:productId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/recommendations/frequently-bought/:productId, GET} route +16ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/recommendations/comparison/:productId, GET} route +13ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/recommendations/user/:userId, GET} route +1ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RoutesResolver] NotificationController {/notifications}: +13ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/notifications/:userId, GET} route +7ms
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [RouterExplorer] Mapped {/notifications/:id/read, POST} route +14ms
+bnpl-service:dev: [Nest] 13132  - 2026/01/13, 10:28:04     LOG [NestMicroservice] Nest microservice successfully started +811ms
+bnpl-service:dev: BNPL Microservice is listening on port 3003
+api-gateway:dev: [Nest] 22652  - 2026/01/13, 10:27:56     LOG [NestApplication] Nest application successfully started +26ms
+web-customer:dev:
+api-gateway:dev: API Gateway is running on: http://localhost:3000
+web-customer:dev:          ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~
+web-customer:dev:
+web-customer:dev:
+web-customer:dev: ▲ [WARNING] NG8113: FabCartComponent is not used within the template of App [plugin angular-compiler]
+web-customer:dev:
+web-customer:dev:     src/app/app.ts:18:92:
+web-customer:dev:       18 │ ...e, TrustScoreWidgetComponent, FabCartComponent, SidebarComponent],
+web-customer:dev:          ╵                                  ~~~~~~~~~~~~~~~~
+web-customer:dev:
+web-customer:dev:
+web-customer:dev: ▲ [WARNING] NG8113: RouterLink is not used within the template of ForgotPasswordComponent [plugin angular-compiler]
+web-customer:dev:
+web-customer:dev: Watch mode enabled. Watching for file changes...
+web-customer:dev:     src/app/pages/forgot-password/forgot-password.component.ts:10:39:
+web-customer:dev:       10 │   imports: [CommonModule, FormsModule, RouterLink],
+web-customer:dev:          ╵                                        ~~~~~~~~~~
+web-customer:dev:
+web-customer:dev:
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:07     LOG [InstanceLoader] AppModule dependencies initialized +1997ms
+web-customer:dev: X [ERROR] TS2304: Cannot find name 'computed'. [plugin angular-compiler]
+web-customer:dev:
+web-customer:dev:     src/app/pages/product-detail/product-detail.component.ts:430:21:
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:07     LOG [InstanceLoader] TypeOrmModule dependencies initialized +1ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] AppModule dependencies initialized +2231ms
+web-customer:dev:       430 │   bnplInstallments = computed(() => {
+web-customer:dev:           ╵                      ~~~~~~~~
+web-customer:dev:
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ClientsModule dependencies initialized +0ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] TypeOrmModule dependencies initialized +2ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ClientsModule dependencies initialized +0ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ConfigHostModule dependencies initialized +0ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ConfigModule dependencies initialized +20ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ConfigModule dependencies initialized +23ms
+@chommie/shared-types:dev:
+@chommie/shared-types:dev: 10:28:10 - Found 0 errors. Watching for file changes.
+web-customer:dev:
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:09   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (1)...
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] ConfigModule dependencies initialized +0ms
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:07     LOG [InstanceLoader] JwtModule dependencies initialized +1ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:08     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +900ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:08     LOG [InstanceLoader] TypeOrmModule dependencies initialized +0ms
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:08     LOG [InstanceLoader] OrdersModule dependencies initialized +1ms
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+order-service:dev: [Nest] 8780  - 2026/01/13, 10:28:08     LOG [NestMicroservice] Nest microservice successfully started +23ms
+order-service:dev: Order Microservice is listening on port 3004
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:12   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (2)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:17   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (3)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:22   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (4)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [NestFactory] Starting Nest application...
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] AppModule dependencies initialized +196ms
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] MongooseModule dependencies initialized +1ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] ClientsModule dependencies initialized +0ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] ConfigHostModule dependencies initialized +6ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] ConfigModule dependencies initialized +3ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:23     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] MongooseCoreModule dependencies initialized +1403ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] MongooseModule dependencies initialized +47ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] MongooseModule dependencies initialized +1ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] MongooseModule dependencies initialized +0ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] ProductModule dependencies initialized +17ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] ReviewModule dependencies initialized +0ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:24     LOG [InstanceLoader] WishlistModule dependencies initialized +1ms
+product-service:dev: [Nest] 19592  - 2026/01/13, 10:28:25     LOG [NestMicroservice] Nest microservice successfully started +322ms
+product-service:dev: Product Microservice is listening on port 3002
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:26   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (5)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:29   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (6)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:32   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (7)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:36   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (8)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:39   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (9)...
+auth-service:dev: DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)
+auth-service:dev: [Nest] 4044  - 2026/01/13, 10:28:39   ERROR [ExceptionHandler] DataTypeNotSupportedError: Data type "Object" in "User.resetPasswordToken" is not supported by "postgres" database.
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:133:31)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validate (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:128:18)
+auth-service:dev:     at <anonymous> (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:43:18)
+auth-service:dev:     at Array.forEach (<anonymous>)
+auth-service:dev:     at EntityMetadataValidator.validateMany (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\metadata-builder\src\metadata-builder\EntityMetadataValidator.ts:42:25)
+auth-service:dev:     at DataSource.buildMetadatas (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:753:33)
+auth-service:dev:     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+auth-service:dev:     at async DataSource.initialize (C:\Users\Bheki Ngwenya\Documents\Projects\chommie\node_modules\typeorm\data-source\src\data-source\DataSource.ts:264:13)

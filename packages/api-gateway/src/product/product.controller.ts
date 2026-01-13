@@ -18,9 +18,26 @@ export class ProductController {
     return this.productClient.send({ cmd: 'findAllProducts' }, {});
   }
 
+  @Get('filter')
+  findFiltered(@Query() filters: any) {
+    // Convert string numbers to actual numbers if they exist
+    if (filters.minPrice) filters.minPrice = parseFloat(filters.minPrice);
+    if (filters.maxPrice) filters.maxPrice = parseFloat(filters.maxPrice);
+    if (filters.minRating) filters.minRating = parseFloat(filters.minRating);
+    if (filters.inStock === 'true') filters.inStock = true;
+    if (filters.inStock === 'false') filters.inStock = false;
+    
+    return this.productClient.send({ cmd: 'findFilteredProducts' }, filters);
+  }
+
   @Get('search/query')
   search(@Query('q') query: string) {
     return this.productClient.send({ cmd: 'searchProducts' }, query);
+  }
+
+  @Get('search/suggest')
+  suggest(@Query('q') query: string) {
+    return this.productClient.send({ cmd: 'search_suggestions' }, query);
   }
 
   @Get(':id')
@@ -41,5 +58,25 @@ export class ProductController {
   @Get('category/:category')
   findByCategory(@Param('category') category: string) {
     return this.productClient.send({ cmd: 'findProductsByCategory' }, category);
+  }
+
+  @Get('vendor/:vendorId')
+  findByVendor(@Param('vendorId') vendorId: string) {
+    return this.productClient.send({ cmd: 'get_vendor_products' }, vendorId);
+  }
+
+  @Post('questions')
+  askQuestion(@Body() data: any) {
+    return this.productClient.send({ cmd: 'ask_question' }, data);
+  }
+
+  @Post('questions/:id/answer')
+  answerQuestion(@Param('id') id: string, @Body() data: any) {
+    return this.productClient.send({ cmd: 'answer_question' }, { questionId: id, answer: data });
+  }
+
+  @Get(':id/questions')
+  getQuestions(@Param('id') id: string) {
+    return this.productClient.send({ cmd: 'get_product_questions' }, id);
   }
 }

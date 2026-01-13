@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { BnplService } from '../../services/bnpl.service';
 import { OrderService } from '../../services/order.service';
@@ -8,92 +8,144 @@ import { OrderService } from '../../services/order.service';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+    <div class="bg-[#EAEDED] min-h-screen pb-12">
+      <div class="container mx-auto px-4 py-8 max-w-[1500px]">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- Left: Cart Items -->
+          <div class="lg:col-span-3 bg-white p-6 rounded-sm shadow-sm border border-gray-200">
+             <div class="flex justify-between items-end border-b pb-2 mb-4">
+                 <h1 class="text-3xl font-normal text-[#111111]">Shopping Cart</h1>
+                 <span class="text-sm text-gray-500">Price</span>
+             </div>
 
-      <div *ngIf="cartService.cartItems().length === 0" class="text-center py-10 bg-white rounded-lg shadow">
-        <p class="text-gray-500 text-xl mb-4">Your cart is empty.</p>
-        <button class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 transition-colors" routerLink="/products">
-          Continue Shopping
-        </button>
-      </div>
+             <div *ngIf="cartService.cartItems().length === 0" class="py-8">
+                <p class="text-lg mb-4">Your Amazon Cart is empty.</p>
+                <a routerLink="/products" class="text-amazon-link hover:text-action hover:underline">Shop today's deals</a>
+             </div>
 
-      <div *ngIf="cartService.cartItems().length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Cart Items List -->
-        <div class="lg:col-span-2 space-y-4">
-          <div *ngFor="let item of cartService.cartItems()" class="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-            <div class="w-24 h-24 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-              <img *ngIf="item.images && item.images.length" [src]="item.images[0]" [alt]="item.name" class="w-full h-full object-cover">
-              <div *ngIf="!item.images || !item.images.length" class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
-            </div>
-            
-            <div class="flex-grow">
-              <h3 class="font-semibold text-lg">{{ item.name }}</h3>
-              <p class="text-gray-600 text-sm">{{ item.category }}</p>
-              <div class="mt-2 flex items-center gap-4">
-                <span class="font-bold text-green-800">R{{ item.price | number:'1.2-2' }}</span>
-                <div class="flex items-center border rounded">
-                  <button (click)="decreaseQty(item.id!)" class="px-3 py-1 hover:bg-gray-100">-</button>
-                  <span class="px-3 py-1 border-x">{{ item.quantity }}</span>
-                  <button (click)="increaseQty(item.id!)" class="px-3 py-1 hover:bg-gray-100">+</button>
-                </div>
+             <div class="space-y-6" *ngIf="cartService.cartItems().length > 0">
+                 <div *ngFor="let item of cartService.cartItems()" class="flex gap-4 border-b pb-6 last:border-0">
+                     <!-- Image -->
+                     <div class="w-[180px] h-[180px] flex items-center justify-center bg-gray-50 cursor-pointer" [routerLink]="['/products', item.id]">
+                         <img *ngIf="item.images && item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-w-full max-h-full object-contain">
+                     </div>
+
+                     <!-- Details -->
+                     <div class="flex-grow">
+                         <div class="flex justify-between">
+                             <h3 class="text-xl font-medium text-black hover:text-action hover:underline cursor-pointer" [routerLink]="['/products', item.id]">{{ item.name }}</h3>
+                             <div class="text-xl font-bold text-[#111111]">R{{ item.price | number:'1.2-2' }}</div>
+                         </div>
+                         
+                         <!-- Selected Variants -->
+                         <div *ngIf="item.selectedVariants" class="text-xs text-gray-600 mb-1 flex flex-wrap gap-x-4">
+                             <div *ngFor="let v of item.selectedVariants | keyvalue">
+                                 <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
+                             </div>
+                         </div>
+
+                         <div class="text-sm text-green-700 mb-1">In Stock</div>
+                         <div class="text-xs text-gray-500 mb-2">Sold by Chommie Retail</div>
+                         
+                         <div class="flex items-center gap-4 mt-2">
+                             <div class="flex items-center border border-gray-300 rounded-[4px] shadow-sm bg-[#F0F2F2] hover:bg-[#E3E6E6]">
+                                 <button (click)="decreaseQty(item)" class="px-3 py-1 text-sm font-medium border-r border-gray-300">-</button>
+                                 <span class="px-4 py-1 text-sm bg-white">{{ item.quantity }}</span>
+                                 <button (click)="increaseQty(item)" class="px-3 py-1 text-sm font-medium border-l border-gray-300">+</button>
+                             </div>
+                             <span class="text-gray-300">|</span>
+                             <button (click)="removeItem(item)" class="text-sm text-amazon-link hover:underline hover:text-action">Delete</button>
+                             <span class="text-gray-300">|</span>
+                             <button (click)="saveForLater(item)" class="text-sm text-amazon-link hover:underline hover:text-action">Save for later</button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
+             <div class="text-right mt-4" *ngIf="cartService.cartItems().length > 0">
+                 <span class="text-lg">Subtotal ({{ cartService.cartItems().length }} items): </span>
+                 <span class="text-lg font-bold">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
+             </div>
+          </div>
+
+          <!-- Saved for Later Section -->
+          <div class="lg:col-span-3 bg-white p-6 rounded-sm shadow-sm border border-gray-200 mt-6" *ngIf="cartService.savedItems().length > 0">
+             <div class="border-b pb-2 mb-4">
+                 <h2 class="text-2xl font-normal text-[#111111]">Saved for later ({{ cartService.savedItems().length }} items)</h2>
+             </div>
+
+             <div class="space-y-6">
+                 <div *ngFor="let item of cartService.savedItems()" class="flex gap-4 border-b pb-6 last:border-0">
+                     <!-- Image -->
+                     <div class="w-[120px] h-[120px] flex items-center justify-center bg-gray-50 cursor-pointer" [routerLink]="['/products', item.id]">
+                         <img *ngIf="item.images && item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-w-full max-h-full object-contain">
+                     </div>
+
+                     <!-- Details -->
+                     <div class="flex-grow">
+                         <div class="flex justify-between">
+                             <h3 class="text-lg font-medium text-black hover:text-action hover:underline cursor-pointer" [routerLink]="['/products', item.id]">{{ item.name }}</h3>
+                             <div class="text-lg font-bold text-[#B12704]">R{{ item.price | number:'1.2-2' }}</div>
+                         </div>
+                         
+                         <!-- Selected Variants -->
+                         <div *ngIf="item.selectedVariants" class="text-xs text-gray-600 mb-1 flex flex-wrap gap-x-4">
+                             <div *ngFor="let v of item.selectedVariants | keyvalue">
+                                 <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
+                             </div>
+                         </div>
+
+                         <div class="text-xs text-green-700 mb-1">In Stock</div>
+                         
+                         <div class="flex items-center gap-4 mt-2">
+                             <button (click)="moveToCart(item)" class="bg-white border border-gray-300 rounded shadow-sm py-1 px-3 text-sm hover:bg-gray-50">Move to Cart</button>
+                             <span class="text-gray-300">|</span>
+                             <button (click)="cartService.removeFromSaved(item.id!, item.selectedVariants)" class="text-sm text-amazon-link hover:underline hover:text-action">Delete</button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+          </div>
+
+          <!-- Right: Summary Box -->
+          <div class="lg:col-span-1" *ngIf="cartService.cartItems().length > 0">
+              <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200">
+                  <!-- BNPL Indicator -->
+                  <div class="mb-4 text-sm" *ngIf="userId">
+                      <div class="flex items-center gap-1 mb-1" [ngClass]="eligible() ? 'text-green-700' : 'text-red-700'">
+                          <svg *ngIf="eligible()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                          <span class="font-bold">{{ eligible() ? 'BNPL Eligible' : 'Credit Limit Exceeded' }}</span>
+                      </div>
+                      <p class="text-xs text-gray-600">{{ eligibilityReason() }}</p>
+                  </div>
+
+                  <div class="text-lg mb-4">
+                      Subtotal ({{ cartService.cartItems().length }} items): <span class="font-bold">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
+                  </div>
+
+                  <div class="text-xs text-gray-600 mb-4">
+                      Shipping to <span class="font-bold">{{ currentLocation() }}</span>
+                  </div>
+
+                  <button 
+                    (click)="proceedToCheckout()"
+                    class="w-full bg-action hover:bg-action-hover text-white py-2 rounded-[20px] shadow-sm text-sm mb-4 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-action"
+                  >
+                    Proceed to checkout
+                  </button>
               </div>
-            </div>
-
-            <button (click)="removeItem(item.id!)" class="text-red-500 hover:text-red-700 p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Order Summary -->
-        <div class="bg-white p-6 rounded-lg shadow h-fit">
-          <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-          
-          <div class="flex justify-between mb-2">
-            <span class="text-gray-600">Subtotal</span>
-            <span class="font-semibold">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
-          </div>
-          <div class="flex justify-between mb-4">
-            <span class="text-gray-600">Shipping</span>
-            <span class="text-green-600 font-semibold">Free</span>
-          </div>
-          
-          <div class="border-t pt-4 mb-6">
-            <div class="flex justify-between items-center">
-              <span class="text-xl font-bold">Total</span>
-              <span class="text-2xl font-bold text-green-800">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
-            </div>
-          </div>
-
-          <!-- BNPL Eligibility Check -->
-          <div class="mb-6 p-4 rounded border" [ngClass]="eligible() ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="font-bold" [ngClass]="eligible() ? 'text-green-800' : 'text-red-800'">
-                {{ eligible() ? 'BNPL Eligible' : 'BNPL Unavailable' }}
+              
+              <!-- Recommendations (Mock) -->
+              <div class="mt-4 bg-white p-4 rounded-sm shadow-sm border border-gray-200 hidden lg:block">
+                  <h4 class="font-bold text-sm mb-2">Sponsored Products</h4>
+                  <div class="h-24 bg-gray-100 flex items-center justify-center text-xs text-gray-400">Ad Space</div>
               </div>
-            </div>
-            <p class="text-sm" [ngClass]="eligible() ? 'text-green-700' : 'text-red-700'">
-              {{ eligibilityReason() }}
-            </p>
           </div>
 
-          <button 
-            (click)="checkoutWithBnpl()"
-            [disabled]="!eligible() || processing()"
-            class="w-full py-3 rounded font-bold text-white transition-colors mb-3"
-            [ngClass]="eligible() && !processing() ? 'bg-green-700 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'"
-          >
-            {{ processing() ? 'Processing...' : 'Check Out with BNPL' }}
-          </button>
-          
-          <button class="w-full py-3 rounded font-bold border border-gray-300 hover:bg-gray-50 transition-colors">
-            Pay with Card / EFT
-          </button>
         </div>
       </div>
     </div>
@@ -102,20 +154,22 @@ import { OrderService } from '../../services/order.service';
 export class CartComponent implements OnInit {
   eligible = signal(false);
   eligibilityReason = signal('Checking eligibility...');
-  processing = signal(false);
+  currentLocation = signal(localStorage.getItem('delivery_location') || 'South Africa');
   userId = '';
 
   constructor(
     public cartService: CartService,
     private bnplService: BnplService,
-    private orderService: OrderService,
     private router: Router
   ) {
     this.userId = localStorage.getItem('user_id') || '';
     effect(() => {
       const total = this.cartService.totalAmount();
-      if (total > 0) {
+      if (total > 0 && this.userId) {
         this.checkEligibility(total);
+      } else {
+        this.eligible.set(true); // Default to true if not logged in or empty, handled at checkout
+        this.eligibilityReason.set('');
       }
     });
   }
@@ -123,68 +177,45 @@ export class CartComponent implements OnInit {
   ngOnInit() {}
 
   checkEligibility(amount: number) {
-    this.bnplService.getProfile(this.userId).subscribe(profile => {
-        if (!profile) {
-            this.eligible.set(false);
-            this.eligibilityReason.set('Please sign in to check eligibility.');
-            return;
-        }
-
-        if (amount <= profile.creditLimit) {
-            this.eligible.set(true);
-            this.eligibilityReason.set(`Within your credit limit of R${profile.creditLimit}.`);
+    this.bnplService.checkEligibility(this.userId, amount).subscribe({
+      next: (result) => {
+        this.eligible.set(result.eligible);
+        if (result.eligible) {
+          this.eligibilityReason.set(`Credit Available: R${result.limit}`);
         } else {
-            this.eligible.set(false);
-            this.eligibilityReason.set(`Total exceeds your credit limit of R${profile.creditLimit}.`);
+          this.eligibilityReason.set(result.reason || 'Limit exceeded');
         }
-    });
-  }
-
-  checkoutWithBnpl() {
-    this.processing.set(true);
-    
-    const orderItems = this.cartService.cartItems().map(item => ({
-      productId: item.id!,
-      productName: item.name,
-      quantity: item.quantity,
-      price: item.price
-    }));
-
-    const orderData = {
-      userId: this.userId,
-      paymentMethod: 'BNPL' as const,
-      items: orderItems,
-      shippingAddress: '123 Main St, Sandton, Johannesburg' // Mock address
-    };
-
-    this.orderService.createOrder(orderData).subscribe({
-      next: (order) => {
-        console.log('Order created:', order);
-        this.cartService.clearCart();
-        this.processing.set(false);
-        this.router.navigate(['/orders']); // We need to create this page
       },
-      error: (err) => {
-        console.error('Order creation failed:', err);
-        this.processing.set(false);
-        alert('Failed to place order. Please try again.');
+      error: () => {
+        this.eligible.set(false);
+        this.eligibilityReason.set('Eligibility check failed');
       }
     });
   }
 
-  increaseQty(id: string) {
-    const item = this.cartService.cartItems().find(i => i.id === id);
-    if (item) this.cartService.updateQuantity(id, item.quantity + 1);
+  proceedToCheckout() {
+    this.router.navigate(['/checkout']);
   }
 
-  decreaseQty(id: string) {
-    const item = this.cartService.cartItems().find(i => i.id === id);
-    if (item && item.quantity > 1) {
-      this.cartService.updateQuantity(id, item.quantity - 1);
+  increaseQty(item: any) {
+    this.cartService.updateQuantity(item.id!, item.quantity + 1, item.selectedVariants);
+  }
+
+  decreaseQty(item: any) {
+    if (item.quantity > 1) {
+      this.cartService.updateQuantity(item.id!, item.quantity - 1, item.selectedVariants);
     }
   }
 
-  removeItem(id: string) {
-    this.cartService.removeFromCart(id);
+  removeItem(item: any) {
+    this.cartService.removeFromCart(item.id!, item.selectedVariants);
+  }
+
+  saveForLater(item: any) {
+    this.cartService.saveForLater(item.id!, item.selectedVariants);
+  }
+
+  moveToCart(item: any) {
+    this.cartService.moveToCart(item.id!, item.selectedVariants);
   }
 }

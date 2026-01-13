@@ -18,6 +18,12 @@ export class OrderItem {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
+  @Column({ type: 'json', nullable: true })
+  selectedVariants: Record<string, string>;
+
+  @Column()
+  vendorId: string;
+
   @ManyToOne(() => Order, (order) => order.items)
   order: Order;
 }

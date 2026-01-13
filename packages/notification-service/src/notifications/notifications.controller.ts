@@ -8,8 +8,18 @@ export class NotificationsController {
 
   @EventPattern('order_created')
   async handleOrderCreated(@Payload() data: any) {
-    const { email, orderId, totalAmount } = data;
-    await this.notificationsService.sendOrderConfirmation(email, orderId, totalAmount);
+    const { email, orderId, totalAmount, userId } = data;
+    await this.notificationsService.sendOrderConfirmation(email, orderId, totalAmount, userId);
+  }
+
+  @MessagePattern({ cmd: 'get_user_notifications' })
+  async getUserNotifications(@Payload() data: { userId: string }) {
+    return this.notificationsService.getUserNotifications(data.userId);
+  }
+
+  @MessagePattern({ cmd: 'mark_notification_read' })
+  async markAsRead(@Payload() data: { id: string }) {
+    return this.notificationsService.markAsRead(data.id);
   }
 
   @MessagePattern({ cmd: 'send_email' })

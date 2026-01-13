@@ -23,11 +23,23 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  createOrder(order: CreateOrderDto): Observable<any> {
-    return this.http.post(this.apiUrl, order);
+  createOrder(orderData: any): Observable<any> {
+    return this.http.post(this.apiUrl, orderData);
+  }
+
+  requestReturn(userId: string, returnData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/return`, { userId, returnData });
+  }
+
+  getUserReturns(userId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/returns/${userId}`);
   }
 
   getUserOrders(userId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`);
+  }
+
+  validateCoupon(code: string, orderAmount: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/validate-coupon`, { code, orderAmount });
   }
 }

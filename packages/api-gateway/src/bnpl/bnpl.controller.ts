@@ -22,8 +22,56 @@ export class BnplController {
     return this.bnplClient.send({ cmd: 'calculate_score' }, { userId });
   }
 
-  @Post('eligibility')
-  checkEligibility(@Body() data: { userId: string; amount: number }) {
-    return this.bnplClient.send({ cmd: 'check_eligibility' }, data);
-  }
-}
+    @Post('eligibility')
+
+    checkEligibility(@Body() data: { userId: string; amount: number }) {
+
+      return this.bnplClient.send({ cmd: 'check_eligibility' }, data);
+
+    }
+
+  
+
+      @Get('plans/:userId')
+
+  
+
+      getUserPlans(@Param('userId') userId: string) {
+
+  
+
+        return this.bnplClient.send({ cmd: 'get_user_plans' }, { userId });
+
+  
+
+      }
+
+  
+
+    
+
+  
+
+      @Post('pay')
+
+  
+
+      payInstallment(@Body() data: { planId: string; installmentIndex: number }) {
+
+  
+
+        return this.bnplClient.send({ cmd: 'pay_installment' }, data);
+
+  
+
+      }
+
+  
+
+    }
+
+  
+
+    
+
+  

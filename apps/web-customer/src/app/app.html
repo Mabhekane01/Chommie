@@ -1,35 +1,233 @@
-<main class="main">
-  <div class="content" style="max-width: 1200px;">
-    <div class="left-side w-full">
-      <div class="flex justify-between items-center w-full mb-8 border-b pb-4">
-        <h1 class="text-2xl font-bold cursor-pointer text-green-800" routerLink="/">Chommie</h1>
-        <nav class="flex gap-6 items-center">
-          <a routerLink="/products" class="hover:text-green-700 font-medium">Shop</a>
-          <ng-container *ngIf="isLoggedIn()">
-            <a routerLink="/cart" class="hover:text-green-700 font-medium">Cart</a>
-            <a routerLink="/wishlist" class="hover:text-green-700 font-medium">Wishlist</a>
-            <a routerLink="/orders" class="hover:text-green-700 font-medium">My Orders</a>
-            <button (click)="logout()" class="text-gray-600 hover:text-red-600 font-medium">Logout</button>
-          </ng-container>
-          <ng-container *ngIf="!isLoggedIn()">
-            <a routerLink="/login" class="text-green-700 font-bold">Sign In</a>
-          </ng-container>
-        </nav>
-      </div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div class="lg:col-span-3">
-          <router-outlet />
-        </div>
-        
-        <div class="lg:col-span-1" *ngIf="isLoggedIn() && userId()">
-           <app-trust-score-widget [userId]="userId()!"></app-trust-score-widget>
-           <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-             <h4 class="font-bold text-green-800 mb-2">BNPL Benefit</h4>
-             <p class="text-sm text-green-700">Shop now, pay later with 0% interest on 2-week plans. No credit checks!</p>
-           </div>
-        </div>
+<!-- Header -->
+<header class="glass-header text-white sticky top-0 z-50 transition-all duration-300">
+  <!-- Top Bar -->
+  <div class="flex items-center justify-between px-6 py-3 h-[72px] gap-4">
+    
+    <!-- Logo: Chommie.za -->
+    <a routerLink="/" class="text-2xl font-extrabold tracking-tighter hover:opacity-80 px-1 rounded cursor-pointer whitespace-nowrap transition-all flex items-center">
+      Chommie<span class="text-action">.za</span>
+    </a>
+
+    <!-- Delivery Location -->
+    <div (click)="showLocationModal.set(true)" class="hidden lg:flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
+      <span class="text-white/60 font-medium">Deliver to</span>
+      <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          </svg>
+          <span class="font-bold text-sm tracking-tight">{{ currentLocation() }}</span>
       </div>
     </div>
+
+    <!-- Seamless Search Bar -->
+    <div class="flex-grow max-w-2xl h-11 seamless-search group/search">
+      <select 
+        [(ngModel)]="selectedCategory"
+        class="h-full px-4 bg-white/5 text-white text-xs cursor-pointer hover:bg-white/10 outline-none appearance-none font-semibold border-r border-white/10"
+      >
+        <option *ngFor="let cat of categories()" [value]="cat" class="text-black">{{ cat }}</option>
+      </select>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (keyup.enter)="performSearch()"
+        (focus)="onSearchInput()"
+        class="search-input" 
+        [placeholder]="ts.t('search.placeholder')"
+      >
+      <button 
+        (click)="performSearch()"
+        class="h-full px-5 bg-action hover:bg-action-hover text-white transition-all flex items-center justify-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+
+      <!-- Autocomplete Dropdown (Glass Panel) -->
+      <div *ngIf="showSuggestions()" 
+           class="absolute top-full left-0 right-0 mt-2 glass-panel z-[100] p-2 shadow-2xl border border-white/20">
+        <ul class="space-y-1">
+          <li *ngFor="let suggestion of suggestions()" 
+              (click)="selectSuggestion(suggestion)"
+              class="px-4 py-2.5 hover:bg-primary/5 rounded-xl cursor-pointer text-black text-sm flex items-center gap-3 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {{ suggestion }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex items-center gap-2 md:gap-4">
+      
+      <!-- Language -->
+      <div (click)="showLanguageModal.set(true)" class="hidden md:flex items-center gap-1.5 text-xs hover:bg-white/10 px-3 py-2.5 rounded-xl cursor-pointer transition-all font-bold">
+         <span class="text-base leading-none">🇿🇦</span>
+         <span>{{ currentLanguage() }}</span>
+         <span class="text-white/40">▼</span>
+      </div>
+
+      <!-- Account & Lists -->
+      <div *ngIf="!isLoggedIn()" routerLink="/login" class="flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
+        <span class="text-white/60 font-medium">Hello, sign in</span>
+        <span class="font-bold text-sm tracking-tight">Account & Lists</span>
+      </div>
+      
+      <div *ngIf="isLoggedIn()" class="group relative flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
+        <span class="text-white/60 font-medium">Hello, User</span>
+        <span class="font-bold text-sm tracking-tight">Account & Lists</span>
+        
+        <!-- Dropdown (Glass Panel) -->
+        <div class="hidden group-hover:block absolute top-full right-0 w-56 glass-panel text-black shadow-2xl mt-2 z-50 p-2 border border-white/20">
+            <div class="p-2 space-y-1">
+              <a routerLink="/account" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors font-bold">Your Account</a>
+              <a routerLink="/orders" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Your Orders</a>
+              <a routerLink="/wishlist" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Your Wishlist</a>
+              <a routerLink="/bnpl" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Trust Score</a>
+              <hr class="my-2 border-gray-100">
+              <button (click)="logout()" class="text-left w-full py-2 hover:bg-red-50 hover:text-red-600 rounded-xl px-3 transition-colors">Sign Out</button>
+            </div>
+        </div>
+      </div>
+
+      <!-- Cart -->
+      <a routerLink="/cart" class="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-xl cursor-pointer relative transition-all group">
+        <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span class="absolute -top-2 -right-2 bg-action text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg shadow-action/30 border-2 border-primary-dark">
+                {{ cartItemCount() }}
+            </span>
+        </div>
+        <span class="font-bold text-sm hidden md:inline">Cart</span>
+      </a>
+    </nav>
   </div>
+
+  <!-- Sub-Header -->
+  <div class="glass-subnav text-sm px-6 py-1.5 flex items-center gap-8 overflow-x-auto scrollbar-hide font-medium tracking-tight">
+    <div (click)="showSidebar.set(true)" class="flex items-center gap-2 font-bold cursor-pointer hover:bg-white/10 px-3 py-1 rounded-lg transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+      </svg>
+      All
+    </div>
+    <a routerLink="/products" [queryParams]="{deals: true}" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.deals') }}</a>
+    <a routerLink="/help" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.help') }}</a>
+    <a routerLink="/wishlist" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.wishlist') }}</a>
+    <a routerLink="/gift-cards" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.giftcards') }}</a>
+    <a routerLink="/sell" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.sell') }}</a>
+  </div>
+</header>
+
+<app-sidebar *ngIf="showSidebar()" (close)="showSidebar.set(false)"></app-sidebar>
+
+<!-- Main Content -->
+<main class="min-h-screen bg-amazon-bg pb-12">
+  <router-outlet></router-outlet>
 </main>
+
+<!-- Footer -->
+<footer class="bg-primary-dark text-white text-center py-8">
+  <div class="bg-primary hover:bg-opacity-90 py-4 mb-8 cursor-pointer text-sm" (click)="scrollToTop()">
+    Back to top
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto text-left px-4 text-sm text-gray-300">
+    <div>
+      <h5 class="font-bold text-white mb-2">Get to Know Us</h5>
+      <ul class="space-y-1">
+        <li><a href="#" class="hover:underline">Careers</a></li>
+        <li><a href="#" class="hover:underline">About Chommie</a></li>
+        <li><a href="#" class="hover:underline">Investor Relations</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 class="font-bold text-white mb-2">Make Money with Us</h5>
+      <ul class="space-y-1">
+        <li><a href="#" class="hover:underline">Sell products on Chommie</a></li>
+        <li><a href="#" class="hover:underline">Become an Affiliate</a></li>
+        <li><a href="#" class="hover:underline">Advertise Your Products</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 class="font-bold text-white mb-2">Chommie Payment Products</h5>
+      <ul class="space-y-1">
+        <li><a href="#" class="hover:underline">Chommie BNPL</a></li>
+        <li><a href="#" class="hover:underline">Shop with Points</a></li>
+        <li><a href="#" class="hover:underline">Reload Your Balance</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 class="font-bold text-white mb-2">Let Us Help You</h5>
+      <ul class="space-y-1">
+        <li><a routerLink="/account" class="hover:underline cursor-pointer">Your Account</a></li>
+        <li><a routerLink="/orders" class="hover:underline cursor-pointer">Your Orders</a></li>
+        <li><a routerLink="/help" class="hover:underline cursor-pointer">Shipping Rates & Policies</a></li>
+        <li><a href="#" class="hover:underline">Help</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="mt-8 pt-8 border-t border-gray-700 text-xs text-gray-400">
+    &copy; 2024-2026, Chommie, Inc. or its affiliates
+  </div>
+</footer>
+
+<!-- Modals -->
+<!-- Location Modal -->
+<div *ngIf="showLocationModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-scale-up">
+        <div class="bg-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="font-bold text-lg text-[#111111]">Choose your location</h3>
+            <button (click)="showLocationModal.set(false)" class="text-gray-500 hover:text-gray-700 font-bold text-xl">×</button>
+        </div>
+        <div class="p-6">
+            <p class="text-sm text-gray-600 mb-4">Delivery options and speeds may vary for different locations.</p>
+            <div class="space-y-2">
+                <button (click)="updateLocation('South Africa')" class="w-full text-left p-3 rounded border hover:border-action hover:bg-orange-50 transition-colors flex justify-between items-center" [class.border-action]="currentLocation() === 'South Africa'" [class.bg-orange-50]="currentLocation() === 'South Africa'">
+                    <span>South Africa (Default)</span>
+                    <span *ngIf="currentLocation() === 'South Africa'" class="text-green-600 font-bold">✓</span>
+                </button>
+                <button (click)="updateLocation('United States')" class="w-full text-left p-3 rounded border border-gray-300 hover:border-action hover:bg-orange-50 transition-colors">United States</button>
+                <button (click)="updateLocation('United Kingdom')" class="w-full text-left p-3 rounded border border-gray-300 hover:border-action hover:bg-orange-50 transition-colors">United Kingdom</button>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button (click)="showLocationModal.set(false)" class="bg-[#F0C14B] border border-[#a88734] rounded-[8px] py-1.5 px-6 text-sm shadow-sm font-medium hover:bg-[#F4D078]">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Language Modal -->
+<div *ngIf="showLanguageModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-scale-up">
+        <div class="bg-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="font-bold text-lg text-[#111111]">Language Settings</h3>
+            <button (click)="showLanguageModal.set(false)" class="text-gray-500 hover:text-gray-700 font-bold text-xl">×</button>
+        </div>
+        <div class="p-6">
+            <p class="text-sm text-gray-600 mb-4">Select the language you prefer for browsing, shopping, and communications.</p>
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="lang" [checked]="currentLanguage() === 'EN'" (change)="updateLanguage('EN')" class="accent-action w-5 h-5">
+                    <span class="group-hover:text-action">English - EN</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="lang" [checked]="currentLanguage() === 'ZU'" (change)="updateLanguage('ZU')" class="accent-action w-5 h-5">
+                    <span class="group-hover:text-action">isiZulu - ZU</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="lang" [checked]="currentLanguage() === 'AF'" (change)="updateLanguage('AF')" class="accent-action w-5 h-5">
+                    <span class="group-hover:text-action">Afrikaans - AF</span>
+                </label>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button (click)="showLanguageModal.set(false)" class="bg-[#F0C14B] border border-[#a88734] rounded-[8px] py-1.5 px-6 text-sm shadow-sm font-medium hover:bg-[#F4D078]">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

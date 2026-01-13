@@ -16,4 +16,24 @@ export class ReviewController {
   findByProduct(@Param('productId') productId: string) {
     return this.productClient.send({ cmd: 'get_product_reviews' }, productId);
   }
+
+  @Get('vendor/:vendorId')
+  findByVendor(@Param('vendorId') vendorId: string) {
+    return this.productClient.send({ cmd: 'get_vendor_reviews' }, vendorId);
+  }
+
+  @Post('seller')
+  createSellerReview(@Body() data: any) {
+    return this.productClient.send({ cmd: 'create_seller_review' }, data);
+  }
+
+  @Get('seller/:vendorId')
+  getSellerReviews(@Param('vendorId') vendorId: string) {
+    return this.productClient.send({ cmd: 'get_seller_reviews' }, vendorId);
+  }
+
+  @Post(':id/helpful')
+  voteHelpful(@Param('id') id: string) {
+    return this.productClient.send({ cmd: 'vote_helpful' }, id);
+  }
 }
