@@ -9,197 +9,153 @@ import { VendorService } from '../../services/vendor.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="bg-[#F0F2F2] min-h-screen">
-      <!-- Navbar -->
-      <nav class="bg-white border-b border-gray-300 px-6 py-2 flex justify-between items-center shadow-sm">
-          <div class="flex items-center gap-4">
-              <span class="text-xl font-bold text-primary">Chommie <span class="font-normal text-black text-sm uppercase tracking-wide">Seller Central</span></span>
-              <div class="h-6 w-px bg-gray-300"></div>
-              <a routerLink="/dashboard" class="text-sm font-bold text-gray-700 hover:text-action">Dashboard</a>
-              <span class="text-sm font-bold text-[#E77600]">Add a Product</span>
+    <div class="min-h-screen bg-neutral-100 text-neutral-charcoal pb-32">
+      
+      <!-- Standard Vendor Nav -->
+      <nav class="bg-white border-b border-neutral-300 px-8 py-3 flex justify-between items-center sticky top-0 z-50">
+          <div class="flex items-center gap-8">
+              <a routerLink="/" class="font-header font-bold text-2xl tracking-tight text-neutral-charcoal flex items-center gap-1">
+                Chommie<span class="text-primary">.central</span>
+              </a>
+              <div class="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-600">
+                  <a routerLink="/dashboard" class="hover:text-primary transition-colors">Dashboard</a>
+                  <a href="#" class="hover:text-primary transition-colors text-primary font-bold">Catalog</a>
+                  <a routerLink="/orders" class="hover:text-primary transition-colors">Orders</a>
+              </div>
           </div>
-          <div class="text-sm text-gray-600">
-              store_v123 | <a href="#" class="text-amazon-link hover:underline">Help</a>
+          <div class="text-xs text-neutral-500 hidden sm:block">
+              Listing ID: <span class="font-mono text-neutral-700">NEW_DRAFT</span>
           </div>
       </nav>
 
-      <div class="p-6 max-w-[1000px] mx-auto">
+      <div class="p-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
         
-        <!-- Tabs -->
-        <div class="bg-white border border-gray-300 border-b-0 rounded-t-[4px] flex">
-            <div class="px-6 py-3 border-b-2 border-[#E77600] font-bold text-[#111111] text-sm bg-white cursor-pointer">
-                Vital Info
-            </div>
-            <div class="px-6 py-3 border-b border-gray-300 text-amazon-link hover:text-action hover:underline text-sm bg-[#F7FAFA] cursor-pointer">
-                Variations
-            </div>
-            <div class="px-6 py-3 border-b border-gray-300 text-amazon-link hover:text-action hover:underline text-sm bg-[#F7FAFA] cursor-pointer">
-                Offer
-            </div>
-            <div class="px-6 py-3 border-b border-gray-300 text-amazon-link hover:text-action hover:underline text-sm bg-[#F7FAFA] cursor-pointer">
-                Images
-            </div>
-            <div class="flex-grow border-b border-gray-300 bg-[#F7FAFA]"></div>
+        <div class="flex justify-between items-center pb-4 border-b border-neutral-200">
+           <h1 class="text-3xl font-header font-bold text-neutral-charcoal">Add a Product</h1>
+           <div class="text-sm text-neutral-500">
+              <span class="font-bold text-primary">Draft</span> - Information provided will be used to create your listing.
+           </div>
         </div>
 
-        <div class="bg-white border border-gray-300 border-t-0 p-8 shadow-sm">
-            <h1 class="text-2xl font-normal text-[#111111] mb-6">Product Identity</h1>
-
-            <form (ngSubmit)="onSubmit()" class="space-y-6 max-w-3xl">
+        <form (ngSubmit)="onSubmit()" class="space-y-8">
+            
+            <!-- Core Info -->
+            <div class="bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-neutral-charcoal mb-6 pb-2 border-b border-neutral-100">Vital Info</h2>
                 
-                <div class="grid grid-cols-12 gap-4 items-center">
-                    <label class="col-span-3 text-right text-sm font-bold text-gray-600">
-                        Product Name <span class="text-red-700">*</span>
-                    </label>
-                    <div class="col-span-9">
-                        <input type="text" name="name" [(ngModel)]="product.name" required
-                            class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-[#E77600] focus:ring-1 focus:ring-[#E77600] outline-none shadow-inner">
-                        <p class="text-xs text-gray-500 mt-1">Include brand, series, and key features.</p>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
+                            Product Name <span class="text-red-600">*</span>
+                        </label>
+                        <div class="md:col-span-9">
+                           <input type="text" name="name" [(ngModel)]="product.name" required
+                               class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none shadow-inner"
+                               placeholder="e.g. Wireless Noise Cancelling Headphones">
+                           <p class="text-xs text-neutral-500 mt-1">Include brand, model, and key features.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-12 gap-4 items-start">
-                    <label class="col-span-3 text-right text-sm font-bold text-gray-600 mt-2">
-                        Description <span class="text-red-700">*</span>
-                    </label>
-                    <div class="col-span-9">
-                        <textarea name="description" rows="4" [(ngModel)]="product.description" required
-                            class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-[#E77600] focus:ring-1 focus:ring-[#E77600] outline-none shadow-inner"></textarea>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
+                            Description <span class="text-red-600">*</span>
+                        </label>
+                        <div class="md:col-span-9">
+                           <textarea name="description" rows="5" [(ngModel)]="product.description" required
+                               class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none shadow-inner"
+                               placeholder="Enter product description..."></textarea>
+                        </div>
                     </div>
-                </div>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-bold mb-1">Category</label>
-                            <select [(ngModel)]="product.category" name="category" class="w-full p-2 border border-gray-300 rounded-sm text-sm focus:border-[#e77600] focus:shadow-outline-orange outline-none">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
+                            Category
+                        </label>
+                        <div class="md:col-span-9">
+                            <select [(ngModel)]="product.category" name="category" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none bg-white">
                                 <option>Electronics</option>
                                 <option>Fashion</option>
                                 <option>Home & Kitchen</option>
                                 <option>Books</option>
+                                <option>Beauty</option>
+                                <option>Sports</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Badges -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-bold mb-2">Badges</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="checkbox" [checked]="product.badges.includes('BEST_SELLER')" (change)="toggleBadge('BEST_SELLER')" class="w-4 h-4">
-                                    Best Seller
-                                </label>
-                                <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="checkbox" [checked]="product.badges.includes('AMAZON_CHOICE')" (change)="toggleBadge('AMAZON_CHOICE')" class="w-4 h-4">
-                                    Chommie's Choice
-                                </label>
-                            </div>
+            <!-- Offer -->
+            <div class="bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-neutral-charcoal mb-6 pb-2 border-b border-neutral-100">Offer</h2>
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
+                            Your Price <span class="text-red-600">*</span>
+                        </label>
+                        <div class="md:col-span-9 flex items-center gap-2">
+                            <span class="text-sm font-bold text-neutral-500">ZAR</span>
+                            <input type="number" name="price" [(ngModel)]="product.price" required min="0"
+                                class="w-48 border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none shadow-inner">
                         </div>
+                    </div>
 
-                <hr class="my-6 border-gray-200">
-                <h2 class="text-xl font-normal text-[#111111] mb-6">Offer & Images</h2>
-
-                <div class="grid grid-cols-12 gap-4 items-center">
-                    <label class="col-span-3 text-right text-sm font-bold text-gray-600">
-                        Your Price <span class="text-red-700">*</span>
-                    </label>
-                    <div class="col-span-9 flex items-center gap-2">
-                        <span class="text-sm font-bold">ZAR</span>
-                        <input type="number" name="price" [(ngModel)]="product.price" required min="0"
-                            class="w-32 border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-[#E77600] focus:ring-1 focus:ring-[#E77600] outline-none shadow-inner text-right">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
+                            Quantity <span class="text-red-600">*</span>
+                        </label>
+                        <div class="md:col-span-9">
+                            <input type="number" name="stock" [(ngModel)]="product.stock" required min="0"
+                                class="w-32 border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none shadow-inner">
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-12 gap-4 items-center">
-                    <label class="col-span-3 text-right text-sm font-bold text-gray-600">
-                        Quantity <span class="text-red-700">*</span>
-                    </label>
-                    <div class="col-span-9">
-                        <input type="number" name="stock" [(ngModel)]="product.stock" required min="0"
-                            class="w-32 border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-[#E77600] focus:ring-1 focus:ring-[#E77600] outline-none shadow-inner">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-12 gap-4 items-center">
-                    <label class="col-span-3 text-right text-sm font-bold text-gray-600">
+            <!-- Images -->
+            <div class="bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-neutral-charcoal mb-6 pb-2 border-b border-neutral-100">Images</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    <label class="md:col-span-3 text-sm font-bold text-neutral-700 pt-2 text-right">
                         Main Image URL
                     </label>
-                    <div class="col-span-9">
+                    <div class="md:col-span-9">
                         <input type="text" name="image" [(ngModel)]="product.image" 
-                            class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-[#E77600] focus:ring-1 focus:ring-[#E77600] outline-none shadow-inner" placeholder="https://">
+                            class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none shadow-inner" placeholder="https://...">
+                        <p class="text-xs text-neutral-500 mt-1">Provide a direct link to your product image.</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Variations -->
-                <div class="grid grid-cols-12 gap-4 items-start">
-                    <div class="col-span-3 text-right text-sm font-bold text-gray-600 mt-2">Variations</div>
-                    <div class="col-span-9 p-4 border border-gray-200 bg-gray-50 rounded-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-bold text-xs uppercase text-gray-500">Add options like size or color</h4>
-                            <button type="button" (click)="addVariant()" class="text-xs text-[#007185] hover:underline font-bold">+ Add Variation</button>
-                        </div>
-
-                        <div *ngFor="let variant of product.variants; let i = index" class="mb-4 p-3 border border-gray-300 bg-white rounded-sm">
-                            <div class="flex gap-2 mb-2">
-                                <input [(ngModel)]="variant.name" [name]="'vName' + i" placeholder="Variation Name (e.g. Color)" class="flex-grow p-1 border border-gray-400 rounded-[3px] text-sm focus:border-[#E77600] outline-none">
-                                <button type="button" (click)="removeVariant(i)" class="text-red-700 text-xs font-bold hover:underline">Remove</button>
-                            </div>
-
-                            <div class="pl-4 border-l-2 border-gray-200 space-y-2">
-                                <div *ngFor="let option of variant.options; let j = index" class="flex gap-2 items-center">
-                                    <input [(ngModel)]="option.value" [name]="'vOptValue' + i + j" placeholder="Value (e.g. Blue)" class="w-1/4 p-1 border border-gray-400 rounded-[3px] text-xs">
-                                    <input [(ngModel)]="option.priceModifier" [name]="'vOptPrice' + i + j" type="number" placeholder="+Price" class="w-1/5 p-1 border border-gray-400 rounded-[3px] text-xs">
-                                    <input [(ngModel)]="option.stock" [name]="'vOptStock' + i + j" type="number" placeholder="Stock" class="w-1/5 p-1 border border-gray-400 rounded-[3px] text-xs">
-                                    <input [(ngModel)]="option.image" [name]="'vOptImg' + i + j" placeholder="Img URL" class="flex-grow p-1 border border-gray-400 rounded-[3px] text-xs">
-                                    <button type="button" (click)="removeOption(i, j)" class="text-gray-400 text-lg hover:text-red-700">×</button>
-                                </div>
-                                <button type="button" (click)="addOption(i)" class="text-[10px] text-[#007185] font-bold hover:underline">+ Add Option</button>
-                            </div>
-                        </div>
+            <!-- More Options -->
+            <div class="bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-5 items-center">
+                        <input id="bnpl" name="bnplEligible" type="checkbox" [(ngModel)]="product.bnplEligible"
+                            class="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer">
+                    </div>
+                    <div class="text-sm">
+                        <label for="bnpl" class="font-bold text-neutral-700">Enable Buy Now Pay Later</label>
+                        <p class="text-neutral-500">Allow customers to purchase this item using Chommie BNPL credit.</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-12 gap-4 items-center">
-                    <div class="col-span-3"></div>
-                    <div class="col-span-9">
-                        <div class="flex items-center gap-2 p-2 bg-[#F0F2F2] border border-gray-300 rounded-[3px]">
-                            <input id="bnpl" name="bnplEligible" type="checkbox" [(ngModel)]="product.bnplEligible"
-                                class="h-4 w-4 text-action focus:ring-action border-gray-300 rounded">
-                            <label for="bnpl" class="text-sm font-bold text-gray-700">Enable Chommie BNPL (Buy Now Pay Later)</label>
-                        </div>
-                    </div>
-                </div>
+            <!-- Footer Actions -->
+            <div class="flex justify-end items-center gap-4 pt-4 border-t border-neutral-200">
+                <button type="button" routerLink="/dashboard"
+                    class="btn-secondary py-2 px-6 rounded-md text-sm">
+                    Cancel
+                </button>
+                <button type="submit" [disabled]="submitting()"
+                    class="btn-primary py-2 px-8 rounded-md text-sm shadow-sm disabled:opacity-50">
+                    {{ submitting() ? 'Saving...' : 'Save and Finish' }}
+                </button>
+            </div>
 
-                <!-- Bulk Pricing -->
-                <div class="grid grid-cols-12 gap-4 items-start">
-                    <div class="col-span-3 text-right text-sm font-bold text-gray-600 mt-2">Bulk Pricing</div>
-                    <div class="col-span-9 p-4 border border-gray-200 bg-gray-50 rounded-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs text-gray-500">Offer discounts for larger quantities</span>
-                            <button type="button" (click)="addBulkTier()" class="text-xs text-[#007185] hover:underline font-bold">+ Add Tier</button>
-                        </div>
-                        <div *ngFor="let tier of product.bulkPricing; let i = index" class="flex gap-2 mb-2 items-center">
-                            <span class="text-xs">Buy</span>
-                            <input type="number" [(ngModel)]="tier.minQuantity" [name]="'tierQty' + i" placeholder="Qty" class="w-20 border rounded px-2 py-1 text-sm">
-                            <span class="text-xs">+ items, get</span>
-                            <input type="number" [(ngModel)]="tier.discountPercentage" [name]="'tierDisc' + i" placeholder="%" class="w-20 border rounded px-2 py-1 text-sm">
-                            <span class="text-xs">% Off</span>
-                            <button type="button" (click)="removeBulkTier(i)" class="text-red-600 ml-2">×</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Actions -->
-                <div class="border-t border-gray-200 mt-8 pt-6 flex justify-end gap-4">
-                    <button type="button" routerLink="/dashboard"
-                        class="bg-white border border-gray-400 hover:bg-gray-50 text-black py-1 px-4 rounded-[3px] shadow-sm text-sm font-medium">
-                        Cancel
-                    </button>
-                    <button type="submit" [disabled]="submitting()"
-                        class="bg-action hover:bg-[#B12704] text-white py-1 px-4 rounded-[3px] shadow-sm text-sm font-medium border border-transparent disabled:opacity-50">
-                        {{ submitting() ? 'Saving...' : 'Save and finish' }}
-                    </button>
-                </div>
-
-            </form>
-        </div>
+        </form>
       </div>
     </div>
   `
@@ -261,7 +217,6 @@ export class ProductCreateComponent {
 
   onSubmit() {
     this.submitting.set(true);
-    // Transform simple image string to array for backend
     const productData = {
         ...this.product,
         images: this.product.image ? [this.product.image] : []
@@ -275,7 +230,7 @@ export class ProductCreateComponent {
       error: (err) => {
         console.error(err);
         this.submitting.set(false);
-        alert('Failed to create product');
+        alert('Failed to create product.');
       }
     });
   }

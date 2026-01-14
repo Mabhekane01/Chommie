@@ -56,19 +56,39 @@ export class BnplController {
 
   
 
-      payInstallment(@Body() data: { planId: string; installmentIndex: number }) {
+            payInstallment(@Body() data: { planId: string; installmentIndex: number }) {
 
   
 
-        return this.bnplClient.send({ cmd: 'pay_installment' }, data);
+              return this.bnplClient.send({ cmd: 'pay_installment' }, data);
 
   
 
-      }
+            }
 
   
 
-    }
+      
+
+  
+
+            @Post('use-coins')
+
+  
+
+            useCoins(@Body() data: { userId: string; amount: number }) {
+
+  
+
+              return this.bnplClient.send({ cmd: 'use_coins' }, data);
+
+  
+
+            }
+
+  
+
+          }
 
   
 

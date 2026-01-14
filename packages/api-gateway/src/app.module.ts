@@ -11,6 +11,7 @@ import { ReviewController } from './product/review.controller';
 import { WishlistController } from './product/wishlist.controller';
 import { RecommendationController } from './recommendation/recommendation.controller';
 import { NotificationController } from './notifications/notifications.controller';
+import { EventsGateway } from './events.gateway';
 
 @Module({
   imports: [
@@ -85,6 +86,6 @@ import { NotificationController } from './notifications/notifications.controller
     RecommendationController,
     NotificationController
   ],
-  providers: [AppService],
+  providers: [AppService, EventsGateway],
 })
 export class AppModule {}

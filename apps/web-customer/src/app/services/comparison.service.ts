@@ -1,11 +1,18 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, effect } from '@angular/core';
 import { IProduct } from '@chommie/shared-types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ComparisonService {
-  compareList = signal<IProduct[]>([]);
+  compareList = signal<IProduct[]>(JSON.parse(localStorage.getItem('comparison_list') || '[]'));
+
+  constructor() {
+    // Sync with local storage
+    effect(() => {
+      localStorage.setItem('comparison_list', JSON.stringify(this.compareList()));
+    });
+  }
 
   addToCompare(product: IProduct) {
     // Limit to 4 items

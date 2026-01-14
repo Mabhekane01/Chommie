@@ -3,42 +3,45 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen flex flex-col items-center bg-amazon-bg py-12 px-4 sm:px-6 lg:px-8 font-sans text-[#0F1111]">
+    <div class="min-h-screen bg-[#FAF3E1] flex flex-col items-center pt-12 px-4">
       
       <!-- Logo -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold tracking-tight text-primary">Chommie</h1>
+        <a routerLink="/" class="font-header font-black text-3xl tracking-tighter text-[#222222]">
+          Chommie<span class="text-primary">.za</span>
+        </a>
       </div>
 
       <!-- Auth Card -->
-      <div class="w-full max-w-[400px] glass-panel p-8 shadow-2xl">
-        <h1 class="text-3xl font-light mb-6 text-center">Sign in</h1>
+      <div class="w-full max-w-[350px] bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+        <h1 class="text-2xl font-medium text-[#222222] mb-4">{{ ts.t('auth.signin') }}</h1>
 
-        <form (ngSubmit)="onSubmit()" class="space-y-5">
+        <form (ngSubmit)="onSubmit()" class="space-y-4">
           
-          <div>
-            <label for="email" class="block text-sm font-bold text-[#0F1111] mb-1">Email or mobile phone number</label>
+          <div class="space-y-1">
+            <label for="email" class="block text-xs font-bold text-[#222222]">{{ ts.t('auth.email') }}</label>
             <input 
                 id="email" 
                 name="email" 
                 type="email" 
                 [(ngModel)]="email" 
                 required
-                class="block w-full rounded-lg border-gray-300 border bg-white/80 backdrop-blur-sm px-3 py-2 text-sm focus:border-action focus:ring-1 focus:ring-action focus:outline-none transition-all shadow-inner"
+                class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
             >
           </div>
 
-          <div>
-            <div class="flex justify-between items-center mb-1">
-                <label for="password" class="block text-sm font-bold text-[#0F1111]">Password</label>
-                <a routerLink="/forgot-password" class="text-sm text-action hover:text-action-hover hover:underline cursor-pointer">
-                    Forgot your password?
+          <div class="space-y-1">
+            <div class="flex justify-between items-center">
+                <label for="password" class="block text-xs font-bold text-[#222222]">{{ ts.t('auth.password') }}</label>
+                <a routerLink="/forgot-password" class="text-xs text-primary hover:underline hover:text-primary-dark">
+                    {{ ts.t('auth.forgot') }}
                 </a>
             </div>
             <input 
@@ -47,64 +50,54 @@ import { AuthService } from '../../services/auth.service';
                 type="password" 
                 [(ngModel)]="password" 
                 required
-                class="block w-full rounded-lg border-gray-300 border bg-white/80 backdrop-blur-sm px-3 py-2 text-sm focus:border-action focus:ring-1 focus:ring-action focus:outline-none transition-all shadow-inner"
+                class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
             >
           </div>
 
-          <div *ngIf="error()" class="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-50/80 backdrop-blur-sm border border-red-300 rounded-lg">
-            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
+          <div *ngIf="error()" class="flex items-start gap-2 p-3 text-xs text-red-700 bg-red-50 border border-red-200 rounded-sm">
+            <svg class="w-4 h-4 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             {{ error() }}
           </div>
 
-          <button 
-            type="submit" 
-            [disabled]="loading()"
-            class="w-full glass-btn rounded-full py-2.5 text-sm font-bold tracking-wide shadow-lg hover:shadow-xl transform transition-all hover:-translate-y-0.5"
-          >
-            {{ loading() ? 'Signing in...' : 'Sign in' }}
-          </button>
+          <div class="pt-2">
+            <button 
+              type="submit" 
+              [disabled]="loading()"
+              class="w-full btn-primary py-1.5 rounded-[3px] text-xs font-normal"
+            >
+              {{ loading() ? 'Please wait...' : ts.t('auth.signin') }}
+            </button>
+          </div>
+
+          <div class="text-[11px] text-neutral-600 leading-tight py-2">
+            By continuing, you agree to Chommie's <a href="#" class="text-primary hover:underline">Conditions of Use</a> and <a href="#" class="text-primary hover:underline">Privacy Notice</a>.
+          </div>
 
           <!-- Divider -->
-          <div class="relative mt-8 mb-6">
+          <div class="relative py-2">
             <div class="absolute inset-0 flex items-center">
-              <span class="w-full border-t border-gray-300/50"></span>
+              <span class="w-full border-t border-neutral-200"></span>
             </div>
-            <div class="relative flex justify-center text-xs text-gray-500">
-              <span class="bg-white/50 px-2 rounded backdrop-blur-sm">or</span>
+            <div class="relative flex justify-center text-[10px] text-neutral-500 uppercase">
+              <span class="bg-white px-2">{{ ts.t('auth.new_customer') }}</span>
             </div>
           </div>
 
-          <!-- Google Login -->
-          <button type="button" (click)="loginWithGoogle()" class="w-full bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 rounded-full py-2.5 text-sm text-[#0F1111] flex items-center justify-center gap-2 shadow-sm transition-all">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
-            Sign in with Google
-          </button>
+          <a routerLink="/register" class="w-full btn-secondary py-1.5 rounded-[3px] text-xs text-center block">
+            {{ ts.t('auth.create_account') }}
+          </a>
 
         </form>
-
-        <p class="mt-8 text-xs text-gray-500 text-center">
-            By continuing, you agree to Chommie's <a href="#" class="text-action hover:underline">Conditions of Use</a> and <a href="#" class="text-action hover:underline">Privacy Notice</a>.
-        </p>
-
-        <div class="mt-6 border-t border-gray-200/50 pt-6">
-             <div class="text-sm font-bold text-[#0F1111] mb-2 text-center">New to Chommie?</div>
-             <a routerLink="/register" class="block w-full text-center bg-white/50 backdrop-blur-sm border border-white/60 hover:bg-white/80 rounded-full py-2.5 text-sm text-[#0F1111] shadow-sm transition-all cursor-pointer">
-                Create your Chommie account
-             </a>
-        </div>
-
       </div>
 
-      <div class="mt-12 text-xs text-center text-gray-500 space-y-2">
-        <div class="space-x-4">
-            <a href="#" class="hover:text-action hover:underline">Conditions of Use</a>
-            <a href="#" class="hover:text-action hover:underline">Privacy Notice</a>
-            <a href="#" class="hover:text-action hover:underline">Help</a>
+      <footer class="mt-8 text-[11px] text-neutral-500 space-y-4 max-w-[350px] w-full border-t border-neutral-200 pt-6 text-center">
+        <div class="flex gap-6 justify-center text-primary">
+            <a href="#" class="hover:underline">Conditions of Use</a>
+            <a href="#" class="hover:underline">Privacy Notice</a>
+            <a href="#" class="hover:underline">Help</a>
         </div>
-        <p>&copy; 2024-2026, Chommie, Inc. or its affiliates</p>
-      </div>
+        <p>&copy; 2026, Chommie.za, Inc. or its affiliates</p>
+      </footer>
     </div>
   `
 })
@@ -114,7 +107,7 @@ export class LoginComponent {
   loading = signal(false);
   error = signal('');
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, public ts: TranslationService) {}
 
   onSubmit() {
     this.loading.set(true);

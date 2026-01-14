@@ -20,6 +20,8 @@ import { GiftCardsComponent } from './pages/gift-cards/gift-cards.component';
 import { SellComponent } from './pages/sell/sell.component';
 import { AccountComponent } from './pages/account/account.component';
 import { SecurityComponent } from './pages/account/security/security.component';
+import { AddressesComponent } from './pages/account/addresses/addresses.component';
+import { MessagesComponent } from './pages/messages/messages.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -33,11 +35,13 @@ export const routes: Routes = [
   { path: 'orders', component: OrderHistoryComponent, canActivate: [authGuard] },
   { path: 'orders/track/:id', component: OrderTrackingComponent, canActivate: [authGuard] },
   { path: 'returns/:id', component: ReturnRequestComponent, canActivate: [authGuard] },
+  { path: 'messages', component: MessagesComponent, canActivate: [authGuard] },
   { path: 'help', component: HelpComponent },
   { path: 'gift-cards', component: GiftCardsComponent },
   { path: 'sell', component: SellComponent },
   { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'account/security', component: SecurityComponent, canActivate: [authGuard] },
+  { path: 'account/addresses', component: AddressesComponent, canActivate: [authGuard] },
   { path: 'bnpl', component: BnplDashboardComponent, canActivate: [authGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },

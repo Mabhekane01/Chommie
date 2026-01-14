@@ -48,4 +48,7 @@ export class TrustProfile {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 500.00 })
   creditLimit: number;
+
+  @Column({ type: 'int', default: 0 })
+  coinsBalance: number;
 }

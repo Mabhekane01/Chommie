@@ -7,6 +7,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { ComparisonService } from '../../services/comparison.service';
+import { TranslationService } from '../../services/translation.service';
 import { IProduct } from '@chommie/shared-types';
 
 @Component({
@@ -14,212 +15,201 @@ import { IProduct } from '@chommie/shared-types';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="container mx-auto px-4 py-4 max-w-[1500px]">
-      <div class="flex flex-col md:flex-row gap-6">
-        
-        <!-- Sidebar Filters (Col 3) -->
-        <aside class="w-full md:w-64 flex-shrink-0 space-y-6">
-          <!-- Department -->
-          <div>
-            <h3 class="font-bold text-sm mb-2">Department</h3>
-            <ul class="text-sm space-y-1">
-              <li 
-                (click)="filterByCategory('')" 
-                [class.font-bold]="selectedCategory() === ''"
-                class="cursor-pointer hover:text-action transition-colors"
-              >All Departments</li>
-              <li 
-                *ngFor="let cat of categories" 
-                (click)="filterByCategory(cat)"
-                [class.font-bold]="selectedCategory() === cat"
-                class="cursor-pointer hover:text-action transition-colors pl-2"
-              >{{ cat }}</li>
-            </ul>
-          </div>
-          
-          <!-- Brands -->
-          <div *ngIf="availableBrands().length > 0">
-            <h3 class="font-bold text-sm mb-2">Brands</h3>
-            <ul class="text-sm space-y-1">
-              <li *ngFor="let brand of availableBrands()" class="flex items-center gap-2">
-                 <input type="checkbox" [checked]="selectedBrands().includes(brand)" (change)="toggleBrand(brand)" class="rounded border-gray-300 text-action focus:ring-action cursor-pointer">
-                 <span class="text-gray-700 hover:text-action cursor-pointer" (click)="toggleBrand(brand)">{{ brand }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Customer Review -->
-          <div>
-            <h3 class="font-bold text-sm mb-2">Customer Reviews</h3>
-            <ul class="text-sm space-y-1">
-              <li (click)="setRating(4)" class="cursor-pointer flex items-center gap-1 hover:text-action group">
-                <span class="text-yellow-500">★★★★</span><span class="text-gray-300">★</span> 
-                <span [class.font-bold]="minRating() === 4" class="group-hover:underline">& Up</span>
-              </li>
-              <li (click)="setRating(3)" class="cursor-pointer flex items-center gap-1 hover:text-action group">
-                <span class="text-yellow-500">★★★</span><span class="text-gray-300">★★</span> 
-                <span [class.font-bold]="minRating() === 3" class="group-hover:underline">& Up</span>
-              </li>
-              <li (click)="setRating(2)" class="cursor-pointer flex items-center gap-1 hover:text-action group">
-                <span class="text-yellow-500">★★</span><span class="text-gray-300">★★★</span> 
-                <span [class.font-bold]="minRating() === 2" class="group-hover:underline">& Up</span>
-              </li>
-              <li (click)="setRating(1)" class="cursor-pointer flex items-center gap-1 hover:text-action group">
-                <span class="text-yellow-500">★</span><span class="text-gray-300">★★★★</span> 
-                <span [class.font-bold]="minRating() === 1" class="group-hover:underline">& Up</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Price Range -->
-          <div>
-            <h3 class="font-bold text-sm mb-2">Price</h3>
-            <div class="flex flex-col gap-2">
-               <button (click)="setPriceRange(0, 500)" class="text-sm text-left hover:text-action" [class.font-bold]="maxPrice() === 500">Under R500</button>
-               <button (click)="setPriceRange(500, 1000)" class="text-sm text-left hover:text-action" [class.font-bold]="minPrice() === 500 && maxPrice() === 1000">R500 to R1,000</button>
-               <button (click)="setPriceRange(1000, 2000)" class="text-sm text-left hover:text-action" [class.font-bold]="minPrice() === 1000 && maxPrice() === 2000">R1,000 to R2,000</button>
-               <button (click)="setPriceRange(2000, null)" class="text-sm text-left hover:text-action" [class.font-bold]="minPrice() === 2000">R2,000 & Above</button>
-               
-               <div class="flex gap-2 items-center mt-2">
-                  <input type="number" [(ngModel)]="customMin" placeholder="Min" class="w-full border rounded px-2 py-1 text-xs">
-                  <input type="number" [(ngModel)]="customMax" placeholder="Max" class="w-full border rounded px-2 py-1 text-xs">
-                  <button (click)="applyCustomPrice()" class="border rounded px-2 py-1 text-xs hover:bg-gray-50">Go</button>
-               </div>
-            </div>
-          </div>
-
-          <!-- Availability -->
-          <div>
-            <h3 class="font-bold text-sm mb-2">Availability</h3>
-            <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" [checked]="inStockOnly()" (change)="toggleInStock()" class="rounded border-gray-300 text-action focus:ring-action">
-              Include Out of Stock
-            </label>
-          </div>
-
-          <!-- Deals -->
-          <div>
-            <h3 class="font-bold text-sm mb-2">Deals & Discounts</h3>
-            <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" [checked]="onlyDeals()" (change)="toggleDeals()" class="rounded border-gray-300 text-action focus:ring-action">
-              Today's Deals
-            </label>
-          </div>
-        </aside>
-
-        <!-- Main Content (Col 9) -->
-        <main class="flex-grow">
-          <!-- Top Bar -->
-          <div class="flex justify-between items-center mb-4 pb-4 border-b">
-            <div class="text-sm">
-              <span class="font-bold">{{ products().length }}</span> results
-              <span *ngIf="searchQuery"> for <span class="text-[#c45500] font-bold">"{{ searchQuery }}"</span></span>
+    <div class="min-h-screen bg-white text-neutral-charcoal pb-32">
+      
+      <!-- Top Bar / Breadcrumbs & Result Count -->
+      <div class="shadow-sm border-b border-neutral-200 bg-white sticky top-[124px] z-30">
+        <div class="w-full px-4 py-3 flex justify-between items-center">
+            <div class="text-sm text-neutral-charcoal">
+                <span class="font-bold">{{ products().length }}</span> results for <span class="text-primary font-bold">"{{ searchQuery || selectedCategory() || 'All Products' }}"</span>
             </div>
             
             <div class="flex items-center gap-2">
-              <label class="text-xs text-gray-600">Sort by:</label>
-              <select 
-                (change)="onSortChange($event)" 
-                class="bg-gray-100 border border-gray-300 text-xs rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-action shadow-sm"
-              >
-                <option value="createdAt:desc">Featured</option>
-                <option value="price:asc">Price: Low to High</option>
-                <option value="price:desc">Price: High to Low</option>
-                <option value="ratings:desc">Avg. Customer Review</option>
-                <option value="createdAt:desc">Newest Arrivals</option>
-              </select>
+                <span class="text-xs text-neutral-500">Sort by:</span>
+                <select 
+                  (change)="onSortChange($event)" 
+                  class="bg-neutral-100 border border-neutral-300 text-xs rounded-md px-2 py-1 outline-none cursor-pointer hover:bg-neutral-200"
+                >
+                  <option value="createdAt:desc">Newest Arrivals</option>
+                  <option value="price:asc">Price: Low to High</option>
+                  <option value="price:desc">Price: High to Low</option>
+                  <option value="ratings:desc">Avg. Customer Review</option>
+                </select>
             </div>
-          </div>
-
-          <!-- Loading State -->
-          <div *ngIf="loading()" class="flex justify-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-action"></div>
-          </div>
-
-          <!-- Empty State -->
-          <div *ngIf="!loading() && products().length === 0" class="text-center py-20">
-            <p class="text-gray-500 text-lg">No products found matching your criteria.</p>
-            <button (click)="resetFilters()" class="mt-4 text-amazon-link hover:underline">Clear all filters</button>
-          </div>
-
-          <!-- Product Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div *ngFor="let product of products()" class="flex flex-col border border-gray-200 rounded-sm overflow-hidden bg-white group hover:shadow-lg transition-shadow">
-              
-              <!-- Image -->
-              <div class="h-64 flex items-center justify-center p-4 cursor-pointer relative" [routerLink]="['/products', product.id || product._id]">
-                <img *ngIf="product.images?.length" [src]="product.images[0]" [alt]="product.name" class="object-contain h-full w-full transition-transform group-hover:scale-105">
-                <div *ngIf="!product.images?.length" class="text-gray-400 text-xs">No Image</div>
-                
-                <div *ngIf="product.bnplEligible" class="absolute top-2 left-2 bg-[#1B4332] text-white text-[10px] font-bold px-2 py-1 rounded">
-                    BNPL AVAILABLE
-                </div>
-              </div>
-
-              <!-- Info -->
-              <div class="p-4 flex flex-col flex-grow">
-                <div class="flex flex-wrap gap-1 mb-1" *ngIf="product.badges?.length">
-                   <div *ngFor="let badge of product.badges">
-                      <div *ngIf="badge === 'BEST_SELLER'" class="bg-[#E47911] text-white text-[9px] px-1.5 py-0.5 font-bold uppercase tracking-tighter">
-                         Best Seller
-                      </div>
-                   </div>
-                </div>
-                <h2 class="text-sm font-medium leading-snug mb-1 text-black cursor-pointer hover:text-action line-clamp-2" [routerLink]="['/products', product.id || product._id]">
-                  {{ product.name }}
-                </h2>
-
-                <div class="flex items-center mb-1">
-                     <div class="flex text-yellow-500 text-sm">
-                       <span *ngFor="let s of [1,2,3,4,5]">{{ s <= Math.round(product.ratings || 0) ? '★' : '☆' }}</span>
-                     </div>
-                     <span class="text-xs text-amazon-link ml-1 hover:underline cursor-pointer">{{ product.numReviews || 0 }}</span>
-                </div>
-                
-                <div class="mb-1">
-                  <span class="text-lg font-medium text-black">R{{ product.price | number:'1.2-2' }}</span>
-                </div>
-
-                <div class="text-xs text-gray-600 mb-4">
-                    Get it by <span class="font-bold">Tomorrow, Jan 13</span>
-                    <br>
-                    FREE Delivery to <span class="font-bold">{{ currentLocation() }}</span>
-                </div>
-
-                <div class="mt-auto">
-                    <button (click)="addToCart(product)" class="w-full bg-action hover:bg-action-hover text-white py-1.5 rounded-full text-xs font-medium shadow-sm transition-colors mb-2">
-                      Add to Cart
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" 
-                            [checked]="comparisonService.compareList().includes(product)"
-                            (change)="toggleCompare(product)"
-                            class="rounded border-gray-300 text-action focus:ring-action">
-                        <label class="text-xs text-gray-600 cursor-pointer" (click)="toggleCompare(product)">Compare</label>
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+        </div>
       </div>
 
-      <!-- Floating Comparison Bar -->
-      <div *ngIf="comparisonService.compareList().length > 0" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-2 z-50 animate-slide-up">
-          <div class="container mx-auto max-w-[1500px] flex justify-between items-center">
-              <div class="flex items-center gap-4">
-                  <div *ngFor="let item of comparisonService.compareList()" class="relative group">
-                      <div class="w-12 h-12 border border-gray-200 rounded bg-white flex items-center justify-center overflow-hidden">
-                          <img [src]="item.images[0]" class="max-h-full max-w-full object-contain">
-                      </div>
-                      <button (click)="comparisonService.removeFromCompare(item.id || item._id)" class="absolute -top-2 -right-2 bg-gray-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+      <div class="w-full px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+          
+          <!-- Sidebar Filters (Amazon Style) -->
+          <aside class="w-full lg:w-64 flex-shrink-0 space-y-6">
+            
+            <!-- Department -->
+            <div class="space-y-2">
+              <h3 class="font-bold text-sm text-neutral-charcoal">Delivery Day</h3>
+              <label class="flex items-center gap-2 cursor-pointer">
+                 <input type="checkbox" class="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary">
+                 <span class="text-sm">Get It by Tomorrow</span>
+              </label>
+            </div>
+
+            <!-- Department -->
+            <div class="space-y-2">
+              <h3 class="font-bold text-sm text-neutral-charcoal">{{ ts.t('sidebar.shop_by_dept') }}</h3>
+              <ul class="space-y-1 ml-1">
+                <li 
+                  (click)="filterByCategory('')" 
+                  class="cursor-pointer text-sm hover:text-primary transition-colors"
+                  [class.font-bold]="selectedCategory() === ''"
+                >
+                  Any Department
+                </li>
+                <li 
+                  *ngFor="let cat of categories" 
+                  (click)="filterByCategory(cat)"
+                  class="cursor-pointer text-sm hover:text-primary transition-colors"
+                  [class.font-bold]="selectedCategory() === cat"
+                >
+                  {{ cat }}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Brands -->
+            <div class="space-y-2">
+                <h3 class="font-bold text-sm text-neutral-charcoal">Brands</h3>
+                <div class="space-y-1">
+                    <label *ngFor="let brand of availableBrands()" class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" [checked]="selectedBrands().includes(brand)" (change)="toggleBrand(brand)" class="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary">
+                        <span class="text-sm group-hover:text-primary transition-colors">{{ brand }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Customer Reviews -->
+            <div class="space-y-2">
+                <h3 class="font-bold text-sm text-neutral-charcoal">Avg. Customer Review</h3>
+                <div class="space-y-1">
+                    <div (click)="setRating(4)" class="flex items-center gap-1 cursor-pointer hover:text-primary text-sm group">
+                        <span class="text-amber-400">★★★★☆</span> <span class="text-neutral-600 group-hover:text-primary">& Up</span>
+                    </div>
+                    <div (click)="setRating(3)" class="flex items-center gap-1 cursor-pointer hover:text-primary text-sm group">
+                        <span class="text-amber-400">★★★☆☆</span> <span class="text-neutral-600 group-hover:text-primary">& Up</span>
+                    </div>
+                    <div (click)="setRating(2)" class="flex items-center gap-1 cursor-pointer hover:text-primary text-sm group">
+                        <span class="text-amber-400">★★☆☆☆</span> <span class="text-neutral-600 group-hover:text-primary">& Up</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price -->
+            <div class="space-y-2">
+                <h3 class="font-bold text-sm text-neutral-charcoal">Price</h3>
+                <div class="space-y-1 text-sm ml-1">
+                   <div (click)="setPriceRange(0, 500)" class="cursor-pointer hover:text-primary">Under R500</div>
+                   <div (click)="setPriceRange(500, 1000)" class="cursor-pointer hover:text-primary">R500 - R1,000</div>
+                   <div (click)="setPriceRange(1000, 2000)" class="cursor-pointer hover:text-primary">R1,000 - R2,000</div>
+                   <div (click)="setPriceRange(2000, null)" class="cursor-pointer hover:text-primary">Over R2,000</div>
+                </div>
+                <div class="flex items-center gap-2 mt-2">
+                    <input [(ngModel)]="customMin" type="number" placeholder="Min" class="w-16 px-2 py-1 border border-neutral-300 rounded text-xs">
+                    <input [(ngModel)]="customMax" type="number" placeholder="Max" class="w-16 px-2 py-1 border border-neutral-300 rounded text-xs">
+                    <button (click)="applyCustomPrice()" class="px-3 py-1 bg-white border border-neutral-300 rounded text-xs hover:bg-neutral-50 shadow-sm">Go</button>
+                </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="space-y-2">
+                 <h3 class="font-bold text-sm text-neutral-charcoal">Availability</h3>
+                 <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" [checked]="inStockOnly()" (change)="toggleInStock()" class="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary">
+                    <span class="text-sm">Include Out of Stock</span>
+                 </label>
+            </div>
+            
+            <div class="space-y-2">
+                 <h3 class="font-bold text-sm text-neutral-charcoal">Special Offers</h3>
+                 <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" [checked]="onlyDeals()" (change)="toggleDeals()" class="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary">
+                    <span class="text-sm text-primary font-medium">Lightning Deals</span>
+                 </label>
+            </div>
+          </aside>
+
+          <!-- Main Grid -->
+          <main class="flex-grow">
+            
+            <div *ngIf="loading()" class="py-20 flex justify-center">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" *ngIf="!loading()">
+              <div *ngFor="let product of products()" class="group relative flex flex-col bg-white border border-neutral-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow">
+                
+                <!-- Badge -->
+                <div class="absolute top-2 left-2 z-20 flex flex-col gap-1">
+                   <div *ngIf="product.isLightningDeal" class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-sm uppercase">
+                      Deal
+                   </div>
+                </div>
+
+                <!-- Image -->
+                <div class="relative h-56 p-4 flex items-center justify-center bg-neutral-50 cursor-pointer" [routerLink]="['/products', product.id || product._id]">
+                   <img [src]="product.images[0]" [alt]="product.name" class="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105">
+                </div>
+
+                <!-- Info -->
+                <div class="p-3 flex flex-col flex-grow space-y-2">
+                  <h2 class="text-sm font-medium text-neutral-charcoal line-clamp-2 leading-snug group-hover:text-primary transition-colors cursor-pointer" [routerLink]="['/products', product.id || product._id]">
+                    {{ product.name }}
+                  </h2>
+                  
+                  <div class="flex items-center gap-1 text-xs">
+                       <span class="text-amber-500 font-bold">{{ product.ratings || 0 }}</span>
+                       <div class="flex text-amber-500">
+                         <span *ngFor="let s of [1,2,3,4,5]">{{ s <= Math.round(product.ratings || 0) ? '★' : '☆' }}</span>
+                       </div>
+                       <span class="text-neutral-400">({{ product.numReviews || 0 }})</span>
                   </div>
-                  <span class="text-sm text-gray-700 ml-2">{{ comparisonService.compareList().length }} items selected</span>
+
+                  <div class="mt-1">
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-lg font-bold text-neutral-charcoal">R{{ (product.discountPrice || product.price) | number:'1.0-0' }}</span>
+                        <span *ngIf="product.discountPrice" class="text-xs text-neutral-500 line-through">R{{ product.price | number:'1.0-0' }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="text-[10px] text-neutral-500">
+                    Get it as soon as <span class="font-bold text-neutral-700">Tomorrow, Jan 15</span>
+                  </div>
+
+                  <div class="mt-auto pt-3">
+                      <button (click)="addToCart(product)" class="w-full btn-primary py-1.5 text-xs">{{ ts.t('product.add_to_cart') }}</button>
+                  </div>
+                </div>
               </div>
-              <a routerLink="/compare" class="bg-[#F0C14B] border border-[#a88734] hover:bg-[#F4D078] text-[#111111] px-6 py-1.5 rounded-[20px] text-sm font-bold shadow-sm transition-colors">
-                  Compare
-              </a>
-          </div>
+            </div>
+          </main>
+        </div>
+
+        <!-- Floating Comparison Bar -->
+        <div *ngIf="comparisonService.compareList().length > 0" class="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-300 shadow-2xl p-4 z-50 animate-slide-up">
+            <div class="w-full px-6 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h3 class="font-bold text-sm text-neutral-charcoal">Compare Items ({{ comparisonService.compareList().length }})</h3>
+                    <div class="flex gap-2">
+                        <div *ngFor="let item of comparisonService.compareList().slice(0, 4)" class="w-10 h-10 border border-neutral-200 rounded bg-white p-1">
+                            <img [src]="item.images[0]" class="w-full h-full object-contain">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                   <button (click)="comparisonService.clearComparison()" class="text-sm text-neutral-500 hover:text-neutral-700 hover:underline">Clear</button>
+                   <a routerLink="/compare" class="btn-primary py-2 px-6 text-sm">Compare</a>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
   `
@@ -253,6 +243,7 @@ export class ProductListComponent implements OnInit {
     private productService: ProductService,
     private cartService: CartService,
     public comparisonService: ComparisonService,
+    public ts: TranslationService,
     private route: ActivatedRoute
   ) {
     this.searchSubject.pipe(
@@ -274,6 +265,10 @@ export class ProductListComponent implements OnInit {
       }
       if (params['deals']) {
         this.onlyDeals.set(params['deals'] === 'true');
+      }
+      if (params['filter'] === 'buy-again') {
+          // In a real app, fetch from orderService.getOrders()
+          this.searchQuery = 'Previously Purchased';
       }
       this.applyFilters();
     });

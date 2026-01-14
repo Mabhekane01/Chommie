@@ -1,173 +1,171 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { BnplService } from '../../services/bnpl.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="bg-white border-b border-gray-200 py-4 mb-6">
-        <div class="container mx-auto px-4 max-w-[1150px] flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight text-primary cursor-pointer" routerLink="/">Chommie</h1>
-            <h2 class="text-2xl font-normal">Checkout (<span class="text-amazon-link hover:text-action cursor-pointer" routerLink="/cart">{{ cartService.cartItems().length }} items</span>)</h2>
-            <div class="w-8"></div> <!-- Spacer -->
-        </div>
-    </div>
+    <div class="min-h-screen bg-white text-neutral-charcoal pb-32 pt-6">
+      
+      <!-- Minimal Header -->
+      <div class="border-b border-neutral-200 pb-4 mb-8">
+          <div class="w-full px-6 flex justify-between items-center">
+              <a routerLink="/" class="text-2xl font-header font-bold text-neutral-charcoal">Chommie<span class="text-primary">.za</span></a>
+              <h1 class="text-2xl font-normal text-neutral-600">Checkout</h1>
+              <div class="text-sm text-neutral-500">
+                  <svg class="w-4 h-4 inline-block mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                  Secure Protocol
+              </div>
+          </div>
+      </div>
 
-    <div class="bg-[#EAEDED] min-h-screen pb-12">
-      <div class="container mx-auto px-4 py-4 max-w-[1150px]">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="w-full px-6 animate-fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          <!-- Left: Checkout Steps -->
-          <div class="lg:col-span-3 space-y-4">
+          <!-- Left: Steps -->
+          <div class="lg:col-span-8 space-y-6">
             
-            <!-- Step 1: Shipping Address -->
-            <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
-                <div class="flex gap-4">
-                    <span class="text-lg font-bold text-gray-700">1</span>
-                    <div class="flex-grow">
-                        <div class="flex justify-between items-center mb-4">
-                             <h3 class="text-lg font-bold">Shipping address</h3>
-                             <button *ngIf="savedAddresses().length > 0 && !showNewAddressForm()" (click)="showNewAddressForm.set(true)" class="text-xs text-action hover:underline">
-                                + Add a new address
-                             </button>
-                        </div>
-                        
-                        <!-- Saved Addresses List -->
-                        <div *ngIf="savedAddresses().length > 0 && !showNewAddressForm()" class="space-y-3">
-                            <div *ngFor="let addr of savedAddresses()" 
-                                 (click)="selectAddress(addr.id)"
-                                 class="border rounded-[4px] p-3 cursor-pointer hover:bg-gray-50 flex items-start gap-3"
-                                 [ngClass]="selectedAddressId() === addr.id ? 'border-action bg-[#FCF5EE]' : 'border-gray-300'">
-                                <input type="radio" name="address" [checked]="selectedAddressId() === addr.id" class="mt-1 accent-action">
-                                <div class="text-sm">
-                                    <div class="font-bold">{{ addr.fullName }}</div>
-                                    <div>{{ addr.street }}</div>
-                                    <div>{{ addr.city }}, {{ addr.state }} {{ addr.zip }}</div>
-                                    <div class="text-gray-500 text-xs">Phone: {{ addr.phone }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- New Address Form -->
-                        <div *ngIf="showNewAddressForm() || savedAddresses().length === 0">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl">
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold mb-1">Full Name</label>
-                                    <input type="text" [(ngModel)]="newAddress.fullName" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold mb-1">Street address</label>
-                                    <input type="text" [(ngModel)]="newAddress.street" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner" placeholder="123 Main St">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold mb-1">City</label>
-                                    <input type="text" [(ngModel)]="newAddress.city" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold mb-1">Province/State</label>
-                                    <input type="text" [(ngModel)]="newAddress.state" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold mb-1">Postal Code</label>
-                                    <input type="text" [(ngModel)]="newAddress.zip" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold mb-1">Phone Number</label>
-                                    <input type="text" [(ngModel)]="newAddress.phone" class="w-full border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none shadow-inner">
-                                </div>
-                                <div class="md:col-span-2 flex items-center gap-2 mt-2">
-                                    <input type="checkbox" [(ngModel)]="newAddress.isDefault" class="accent-action">
-                                    <span class="text-sm">Make this my default address</span>
-                                </div>
-                                <div class="md:col-span-2 mt-2 flex gap-3">
-                                    <button (click)="addNewAddress()" class="bg-[#F0C14B] border border-[#a88734] rounded-[3px] py-1 px-3 text-sm shadow-sm">Use this address</button>
-                                    <button *ngIf="savedAddresses().length > 0" (click)="showNewAddressForm.set(false)" class="text-xs text-blue-600 hover:underline self-center">Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+            <!-- Step 1: Address -->
+            <div class="bg-white border border-neutral-300 rounded-md p-0 overflow-hidden">
+                <div class="flex items-center justify-between p-4 bg-neutral-50 border-b border-neutral-200">
+                    <h2 class="text-lg font-bold text-neutral-800 flex items-center gap-4">
+                        <span class="text-neutral-800">1</span>
+                        {{ ts.t('account.addresses') }}
+                    </h2>
+                    <button *ngIf="savedAddresses().length > 0 && !showNewAddressForm()" (click)="showNewAddressForm.set(true)" class="text-sm text-primary hover:underline">Add a new address</button>
                 </div>
-            </div>
+                
+                <div class="p-6">
+                    <div *ngIf="savedAddresses().length > 0 && !showNewAddressForm()" class="space-y-3">
+                        <div *ngFor="let addr of savedAddresses()" 
+                             (click)="selectAddress(addr.id)"
+                             class="flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-neutral-50"
+                             [ngClass]="selectedAddressId() === addr.id ? 'border-primary bg-primary/5' : 'border-neutral-200'">
+                            <input type="radio" [checked]="selectedAddressId() === addr.id" class="mt-1 text-primary focus:ring-primary cursor-pointer">
+                            <div class="text-sm">
+                                <span class="font-bold block">{{ addr.fullName }}</span>
+                                <span class="block text-neutral-600">{{ addr.street }}</span>
+                                <span class="block text-neutral-600">{{ addr.city }}, {{ addr.state }} {{ addr.zip }}</span>
+                                <span class="block text-neutral-600 mt-1">Phone: {{ addr.phone }}</span>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Step 2: Payment Method -->
-            <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
-                <div class="flex gap-4">
-                    <span class="text-lg font-bold text-gray-700">2</span>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold mb-4">Payment method</h3>
-                        
-                        <div class="space-y-3 max-w-xl">
-                            <!-- BNPL Option -->
-                            <div 
-                                (click)="selectPayment('BNPL')"
-                                class="border rounded-[4px] p-3 cursor-pointer transition-all"
-                                [ngClass]="selectedPaymentMethod() === 'BNPL' ? 'border-action bg-[#FCF5EE]' : 'border-gray-300 hover:bg-gray-50'"
-                            >
-                                <div class="flex items-start gap-3">
-                                    <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'BNPL'" class="mt-1 accent-action">
-                                    <div class="flex-grow">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm">Chommie BNPL (0% Interest)</span>
-                                            <span *ngIf="bnplEligible()" class="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded font-bold">ELIGIBLE</span>
-                                        </div>
-                                        <p class="text-xs text-gray-600">Split into 2 bi-weekly payments. No credit checks required.</p>
-                                        <p *ngIf="!bnplEligible() && selectedPaymentMethod() === 'BNPL'" class="text-xs text-red-700 mt-1 font-bold">{{ bnplReason() }}</p>
-                                    </div>
+                    <div *ngIf="showNewAddressForm() || savedAddresses().length === 0" class="max-w-md">
+                        <h3 class="font-bold text-sm mb-4">Add a new address</h3>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold">Full name</label>
+                                <input type="text" [(ngModel)]="newAddress.fullName" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold">Address</label>
+                                <input type="text" [(ngModel)]="newAddress.street" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none" placeholder="Street address">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-sm font-bold">City</label>
+                                    <input type="text" [(ngModel)]="newAddress.city" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-sm font-bold">State/Province</label>
+                                    <input type="text" [(ngModel)]="newAddress.state" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none">
                                 </div>
                             </div>
-
-                            <!-- Card Option -->
-                            <div 
-                                (click)="selectPayment('CARD')"
-                                class="border rounded-[4px] p-3 cursor-pointer transition-all"
-                                [ngClass]="selectedPaymentMethod() === 'CARD' ? 'border-action bg-[#FCF5EE]' : 'border-gray-300 hover:bg-gray-50'"
-                            >
-                                <div class="flex items-start gap-3">
-                                    <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'CARD'" class="mt-1 accent-action">
-                                    <div class="flex-grow text-sm">
-                                        <span class="font-bold">Credit or Debit Card</span>
-                                        <p class="text-xs text-gray-600">Secure payment via PayFast gateway.</p>
-                                    </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-sm font-bold">Zip Code</label>
+                                    <input type="text" [(ngModel)]="newAddress.zip" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none">
                                 </div>
+                                <div class="space-y-1">
+                                    <label class="text-sm font-bold">Phone number</label>
+                                    <input type="text" [(ngModel)]="newAddress.phone" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                </div>
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button (click)="addNewAddress()" class="btn-primary text-sm py-1.5 px-4 rounded-md">Use this address</button>
+                                <button *ngIf="savedAddresses().length > 0" (click)="showNewAddressForm.set(false)" class="btn-secondary text-sm py-1.5 px-4 rounded-md">Cancel</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 3: Review Items -->
-            <div class="bg-white p-6 rounded-sm border border-gray-200 shadow-sm">
-                <div class="flex gap-4">
-                    <span class="text-lg font-bold text-gray-700">3</span>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold mb-4">Review items and shipping</h3>
-                        <div class="border rounded-[4px] overflow-hidden">
-                            <div *ngFor="let item of cartService.cartItems()" class="p-4 flex gap-4 border-b last:border-0 bg-white">
-                                <img [src]="item.images[0]" class="w-16 h-16 object-contain">
-                                <div class="flex-grow text-sm">
-                                    <div class="font-bold">{{ item.name }}</div>
-                                    <div class="text-[#B12704] font-bold">R{{ item.price | number:'1.2-2' }}</div>
-                                    <div class="text-gray-500">Quantity: {{ item.quantity }}</div>
-                                    
-                                    <!-- Selected Variants -->
-                                    <div *ngIf="item.selectedVariants" class="text-[10px] text-gray-600 mt-1 flex gap-x-2">
-                                        <div *ngFor="let v of item.selectedVariants | keyvalue">
-                                            <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="text-xs text-green-700 font-bold self-center">
-                                    Arriving Tomorrow
-                                </div>
+            <!-- Step 2: Payment -->
+            <div class="bg-white border border-neutral-300 rounded-md p-0 overflow-hidden">
+                <div class="flex items-center justify-between p-4 bg-neutral-50 border-b border-neutral-200">
+                    <h2 class="text-lg font-bold text-neutral-800 flex items-center gap-4">
+                        <span class="text-neutral-800">2</span>
+                        Payment method
+                    </h2>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <!-- BNPL -->
+                    <div (click)="selectPayment('BNPL')" class="border rounded-md p-4 cursor-pointer hover:bg-neutral-50 flex items-start gap-3" [class.border-primary]="selectedPaymentMethod() === 'BNPL'" [class.bg-primary-light]="selectedPaymentMethod() === 'BNPL'">
+                        <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'BNPL'" class="mt-1 text-primary focus:ring-primary">
+                        <div>
+                            <div class="font-bold text-sm text-neutral-800">Chommie BNPL (Pay in 2)</div>
+                            <div class="text-xs text-neutral-600 mt-1">2 interest-free payments of R{{ (cartService.totalAmount() / 2) | number:'1.0-0' }}</div>
+                            <div *ngIf="!bnplEligible() && selectedPaymentMethod() === 'BNPL'" class="text-xs text-red-600 font-bold mt-1">
+                                Not eligible: {{ bnplReason() }}
                             </div>
+                        </div>
+                        <span class="ml-auto bg-neutral-100 text-neutral-600 text-[10px] font-bold px-2 py-1 rounded border border-neutral-200">RECOMMENDED</span>
+                    </div>
+
+                    <!-- Card -->
+                    <div (click)="selectPayment('CARD')" class="border rounded-md p-4 cursor-pointer hover:bg-neutral-50 flex items-start gap-3" [class.border-primary]="selectedPaymentMethod() === 'CARD'" [class.bg-primary-light]="selectedPaymentMethod() === 'CARD'">
+                        <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'CARD'" class="mt-1 text-primary focus:ring-primary">
+                        <div>
+                            <div class="font-bold text-sm text-neutral-800">Credit or Debit Card</div>
+                            <div class="flex gap-2 mt-2">
+                                <div class="w-8 h-5 bg-neutral-200 rounded"></div>
+                                <div class="w-8 h-5 bg-neutral-200 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coupon Input -->
+                    <div class="mt-6 pt-4 border-t border-neutral-200">
+                        <label class="text-sm font-bold block mb-2">Gift Cards & Promotional Codes</label>
+                        <div class="flex gap-2">
+                            <input type="text" [(ngModel)]="couponCode" placeholder="Enter Code" class="flex-grow border border-neutral-300 rounded-md px-3 py-1.5 text-sm outline-none focus:ring-primary focus:border-primary uppercase">
+                            <button (click)="applyCoupon()" class="btn-secondary text-sm py-1.5 px-4 rounded-md">Apply</button>
+                        </div>
+                        <div *ngIf="appliedCoupon()" class="text-xs text-emerald-700 font-bold mt-2 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                            Code applied successfully
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div class="bg-white border border-neutral-300 rounded-md p-0 overflow-hidden">
+                <div class="flex items-center justify-between p-4 bg-neutral-50 border-b border-neutral-200">
+                    <h2 class="text-lg font-bold text-neutral-800 flex items-center gap-4">
+                        <span class="text-neutral-800">3</span>
+                        Review items and shipping
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div *ngFor="let item of cartService.cartItems()" class="flex gap-4 mb-4 border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
+                        <div class="w-16 h-16 border border-neutral-200 rounded p-1 flex-shrink-0">
+                            <img [src]="item.images[0]" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex-grow">
+                            <div class="font-bold text-sm text-neutral-800">{{ item.name }}</div>
+                            <div class="text-xs text-neutral-600">Qty: {{ item.quantity }}</div>
+                            <div class="text-xs font-bold text-red-700">R{{ item.price | number:'1.0-0' }}</div>
                         </div>
                     </div>
                 </div>
@@ -175,52 +173,38 @@ import { AuthService } from '../../services/auth.service';
 
           </div>
 
-          <!-- Right: Summary Box (Sticky) -->
-          <div class="lg:col-span-1">
-              <div class="bg-white p-4 rounded-sm border border-gray-300 shadow-sm sticky top-24">
+          <!-- Right: Summary Box -->
+          <div class="lg:col-span-4 lg:sticky lg:top-6">
+              <div class="bg-white border border-neutral-300 rounded-md p-4 shadow-sm space-y-4">
                   <button 
                     (click)="placeOrder()"
                     [disabled]="processing() || (selectedPaymentMethod() === 'BNPL' && !bnplEligible())"
-                    class="w-full bg-action hover:bg-action-hover text-white py-2 rounded-[20px] shadow-sm text-sm font-medium transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="w-full btn-primary py-2 rounded-md text-sm shadow-sm"
                   >
                     {{ processing() ? 'Processing...' : 'Place your order' }}
                   </button>
-                  <p class="text-[10px] text-gray-500 text-center mb-4">
-                    By placing your order, you agree to Chommie's privacy notice and conditions of use.
+                  
+                  <p class="text-xs text-neutral-500 text-center">
+                      By placing your order, you agree to Chommie's <a href="#" class="text-primary hover:underline">privacy notice</a> and <a href="#" class="text-primary hover:underline">conditions of use</a>.
                   </p>
 
-                  <hr class="mb-4">
-
-                  <!-- Coupon Section -->
-                  <div class="mb-4">
-                      <div class="flex gap-2">
-                          <input type="text" [(ngModel)]="couponCode" placeholder="Enter code" class="flex-grow border border-gray-400 rounded-[3px] px-2 py-1 text-sm focus:border-action outline-none">
-                          <button (click)="applyCoupon()" class="bg-white border border-gray-400 hover:bg-gray-50 px-3 py-1 rounded-[3px] text-xs font-medium shadow-sm">Apply</button>
-                      </div>
-                      <div *ngIf="appliedCoupon()" class="text-[10px] text-green-700 font-bold mt-1">
-                          Coupon "{{ appliedCoupon().code }}" applied!
-                      </div>
-                  </div>
-
-                  <h3 class="font-bold text-sm mb-2">Order Summary</h3>
-                  <div class="space-y-1 text-xs text-gray-600 mb-2">
+                  <div class="border-t border-neutral-200 pt-4 space-y-2 text-sm text-neutral-700">
                       <div class="flex justify-between">
                           <span>Items:</span>
-                          <span>R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
+                          <span>R{{ cartService.totalAmount() | number:'1.0-0' }}</span>
                       </div>
                       <div class="flex justify-between">
                           <span>Shipping & handling:</span>
                           <span>R0.00</span>
                       </div>
-                      <div *ngIf="discountAmount() > 0" class="flex justify-between text-[#B12704]">
-                          <span>Coupon Discount:</span>
-                          <span>-R{{ discountAmount() | number:'1.2-2' }}</span>
+                      <div class="flex justify-between" *ngIf="discountAmount() > 0">
+                          <span>Promotion:</span>
+                          <span class="text-red-700">-R{{ discountAmount() | number:'1.0-0' }}</span>
                       </div>
-                  </div>
-                  <hr class="mb-2">
-                  <div class="flex justify-between text-lg font-bold text-[#B12704]">
-                      <span>Order total:</span>
-                      <span>R{{ (cartService.totalAmount() - discountAmount()) | number:'1.2-2' }}</span>
+                      <div class="flex justify-between font-bold text-lg text-red-700 border-t border-neutral-200 pt-2 mt-2">
+                          <span>Order Total:</span>
+                          <span>R{{ (cartService.totalAmount() - discountAmount() - coinDiscount()) | number:'1.0-0' }}</span>
+                      </div>
                   </div>
               </div>
           </div>
@@ -254,11 +238,17 @@ export class CheckoutComponent implements OnInit {
   discountAmount = signal(0);
   userId = '';
 
+  // Chommie Coins
+  coinsBalance = signal(0);
+  appliedCoins = signal(0);
+  coinDiscount = signal(0);
+
   constructor(
     public cartService: CartService,
     private bnplService: BnplService,
     private orderService: OrderService,
     private authService: AuthService,
+    public ts: TranslationService,
     private router: Router
   ) {
     this.userId = localStorage.getItem('user_id') || '';
@@ -271,6 +261,30 @@ export class CheckoutComponent implements OnInit {
     }
     this.loadUserAddresses();
     this.checkBnplEligibility();
+    this.loadCoinsBalance();
+  }
+
+  loadCoinsBalance() {
+    if (this.userId) {
+      this.bnplService.getProfile(this.userId).subscribe(profile => {
+        if (profile) {
+          this.coinsBalance.set(profile.coinsBalance);
+        }
+      });
+    }
+  }
+
+  applyCoins() {
+    const maxUse = Math.min(this.coinsBalance(), Math.floor(this.cartService.totalAmount() - this.discountAmount()));
+    if (maxUse > 0) {
+      this.appliedCoins.set(maxUse);
+      this.coinDiscount.set(maxUse);
+    }
+  }
+
+  removeCoins() {
+    this.appliedCoins.set(0);
+    this.coinDiscount.set(0);
   }
 
   loadUserAddresses() {
@@ -278,7 +292,6 @@ export class CheckoutComponent implements OnInit {
       next: (user) => {
         if (user.addresses && user.addresses.length > 0) {
             this.savedAddresses.set(user.addresses);
-            // Select default or first
             const defaultAddr = user.addresses.find((a: any) => a.isDefault);
             this.selectedAddressId.set(defaultAddr ? defaultAddr.id : user.addresses[0].id);
         } else {
@@ -306,12 +319,9 @@ export class CheckoutComponent implements OnInit {
     this.authService.addAddress(this.userId, this.newAddress).subscribe({
         next: (user) => {
             this.savedAddresses.set(user.addresses);
-            // Find the new one (last added usually, or match props)
-            // Just select the last one
             const newAddr = user.addresses[user.addresses.length - 1];
             this.selectedAddressId.set(newAddr.id);
             this.showNewAddressForm.set(false);
-            // Reset form
             this.newAddress = { fullName: '', street: '', city: '', state: '', zip: '', phone: '', isDefault: false };
         },
         error: (err) => alert('Failed to save address')
@@ -352,11 +362,6 @@ export class CheckoutComponent implements OnInit {
       next: (result) => {
         this.bnplEligible.set(result.eligible);
         this.bnplReason.set(result.reason || '');
-        
-        // Auto-switch to CARD if BNPL is not eligible
-        if (!result.eligible) {
-          // this.selectedPaymentMethod.set('CARD'); // Optional: enforce switch? No, let user see why.
-        }
       },
       error: () => {
         this.bnplEligible.set(false);
@@ -371,10 +376,6 @@ export class CheckoutComponent implements OnInit {
     let fullAddress = '';
     
     if (this.showNewAddressForm()) {
-        // Use new address form data directly if they didn't save it? 
-        // Better to force save, but for UX let's use it if valid.
-        // Actually, let's assume they selected one.
-        // If they are in "New Address" mode, we should valid and use that.
          if (!this.newAddress.street) {
              alert('Please select or enter a shipping address');
              this.processing.set(false);
@@ -411,11 +412,13 @@ export class CheckoutComponent implements OnInit {
 
     this.orderService.createOrder(orderData).subscribe({
       next: (order) => {
-        console.log('Order created:', order);
+        if (this.appliedCoins() > 0) {
+          this.bnplService.useCoins(this.userId, this.appliedCoins()).subscribe();
+        }
+
         this.cartService.clearCart();
-        this.bnplService.triggerRefresh(); // Refresh trust score widget
+        this.bnplService.triggerRefresh(); 
         this.processing.set(false);
-        // Navigate to success page or order history
         this.router.navigate(['/orders']); 
       },
       error: (err) => {

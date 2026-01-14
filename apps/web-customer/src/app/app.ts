@@ -1,29 +1,34 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
-import { RouterOutlet, Router, RouterLink } from '@angular/router';
+import { RouterOutlet, Router, RouterLink, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, filter } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { TrustScoreWidgetComponent } from './components/trust-score-widget/trust-score-widget';
 import { FabCartComponent } from './components/fab-cart/fab-cart.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { NotificationDropdownComponent } from './components/notification-dropdown/notification-dropdown.component';
 import { CartService } from './services/cart.service';
 import { ProductService } from './services/product.service';
 import { TranslationService } from './services/translation.service';
 import { NotificationService } from './services/notification.service';
+import { BnplService } from './services/bnpl.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule, TrustScoreWidgetComponent, FabCartComponent, SidebarComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule, TrustScoreWidgetComponent, FabCartComponent, SidebarComponent, NotificationDropdownComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   isLoggedIn = signal(false);
+  userName = signal<string | null>(null);
   userId = signal<string | null>(null);
   showNotifications = signal(false);
   showSidebar = signal(false);
+  coinsBalance = signal(0);
+  currentUrl = signal('');
   
   // Location & Language
   showLocationModal = signal(false);
@@ -43,13 +48,26 @@ export class App implements OnInit {
     return this.cartService.cartItems().reduce((acc, item) => acc + item.quantity, 0);
   });
 
+  showNav = computed(() => {
+    const url = this.currentUrl();
+    const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+    return !authRoutes.some(route => url.startsWith(route));
+  });
+
   constructor(
     private router: Router, 
     public cartService: CartService,
     private productService: ProductService,
     public notificationService: NotificationService,
-    public ts: TranslationService
+    public ts: TranslationService,
+    private bnplService: BnplService
   ) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentUrl.set(event.urlAfterRedirects || event.url);
+    });
+
     // Setup autocomplete debouncing
     this.searchSubject.pipe(
       debounceTime(300),
@@ -65,6 +83,7 @@ export class App implements OnInit {
   }
 
   ngOnInit() {
+    this.currentUrl.set(window.location.pathname);
     this.checkAuth();
     if (this.userId()) {
       this.notificationService.loadNotifications(this.userId()!);
@@ -79,11 +98,11 @@ export class App implements OnInit {
     this.currentLocation.set(location);
     localStorage.setItem('delivery_location', location);
     this.showLocationModal.set(false);
-    // In a real app, trigger a reload or service update here
   }
 
   updateLanguage(lang: string) {
     this.currentLanguage.set(lang);
+    localStorage.setItem('app_language', lang);
     this.ts.setLanguage(lang);
     this.showLanguageModal.set(false);
   }
@@ -115,18 +134,38 @@ export class App implements OnInit {
     this.router.navigate(['/products'], { queryParams });
   }
 
+  buyAgain() {
+    if (!this.isLoggedIn()) {
+        this.router.navigate(['/login']);
+        return;
+    }
+    this.router.navigate(['/products'], { queryParams: { filter: 'buy-again' } });
+  }
+
   checkAuth() {
     const token = localStorage.getItem('access_token');
     const id = localStorage.getItem('user_id');
+    const name = localStorage.getItem('user_name');
     this.isLoggedIn.set(!!token);
     this.userId.set(id);
+    this.userName.set(name || 'User');
+
+    if (id) {
+      this.bnplService.getProfile(id).subscribe(profile => {
+        if (profile) {
+          this.coinsBalance.set(profile.coinsBalance);
+        }
+      });
+    }
   }
 
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('user_name');
     this.isLoggedIn.set(false);
     this.userId.set(null);
+    this.userName.set(null);
     this.router.navigate(['/login']);
   }
 

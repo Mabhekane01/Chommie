@@ -1,148 +1,180 @@
 import { Component, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { BnplService } from '../../services/bnpl.service';
 import { OrderService } from '../../services/order.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div class="bg-[#EAEDED] min-h-screen pb-12">
-      <div class="container mx-auto px-4 py-8 max-w-[1500px]">
+    <div class="min-h-screen bg-neutral-100 text-neutral-charcoal pb-32 pt-6">
+      <div class="w-full px-4 animate-fade-in">
         
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           <!-- Left: Cart Items -->
-          <div class="lg:col-span-3 bg-white p-6 rounded-sm shadow-sm border border-gray-200">
-             <div class="flex justify-between items-end border-b pb-2 mb-4">
-                 <h1 class="text-3xl font-normal text-[#111111]">Shopping Cart</h1>
-                 <span class="text-sm text-gray-500">Price</span>
+          <div class="lg:col-span-9 space-y-6">
+             
+             <!-- Main Cart Items -->
+             <div class="bg-white border border-neutral-300 p-6 shadow-sm">
+                <div class="flex justify-between items-end border-b border-neutral-200 pb-3 mb-4">
+                   <h1 class="text-2xl font-normal text-neutral-charcoal">{{ ts.t('cart.title') }}</h1>
+                   <span class="text-sm text-neutral-500 hidden md:block">Price</span>
+                </div>
+
+                <div *ngIf="cartService.cartItems().length === 0" class="py-10 space-y-4">
+                   <p class="text-base text-neutral-700">Your Chommie Cart is empty.</p>
+                   <a routerLink="/products" class="text-sm text-primary hover:underline">Shop today's deals</a>
+                   <div class="flex gap-2 mt-4">
+                       <a routerLink="/login" class="btn-primary text-sm py-1.5 px-4 rounded-md">{{ ts.t('nav.signin') }}</a>
+                       <a routerLink="/register" class="btn-secondary text-sm py-1.5 px-4 rounded-md">Sign up now</a>
+                   </div>
+                </div>
+
+                <div class="space-y-6" *ngIf="cartService.cartItems().length > 0">
+                    <div *ngFor="let item of cartService.cartItems()" class="group flex flex-col md:flex-row gap-4 border-b border-neutral-200 pb-6 last:border-0 last:pb-0">
+                        <!-- Checkbox (Mock) -->
+                        <div class="hidden md:flex pt-2">
+                           <input type="checkbox" checked class="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary cursor-pointer">
+                        </div>
+
+                        <!-- Image -->
+                        <div class="w-full md:w-48 h-48 flex-shrink-0 flex items-center justify-center cursor-pointer" [routerLink]="['/products', item.id]">
+                            <img *ngIf="item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-w-full max-h-full object-contain mix-blend-multiply">
+                        </div>
+
+                        <!-- Details -->
+                        <div class="flex-grow space-y-1">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-medium text-primary hover:underline cursor-pointer leading-tight max-w-2xl" [routerLink]="['/products', item.id]">{{ item.name }}</h3>
+                                <div class="text-lg font-bold text-neutral-charcoal md:hidden">R{{ item.price | number:'1.0-0' }}</div>
+                            </div>
+                            
+                            <div class="text-xs text-emerald-700 font-bold">{{ ts.t('product.in_stock') }}</div>
+                            <div class="text-xs text-neutral-500">Eligible for FREE Shipping</div>
+                            <div class="flex items-center gap-2 pt-1">
+                               <input type="checkbox" class="w-3 h-3 text-neutral-400">
+                               <span class="text-xs text-neutral-600">This is a gift <span class="text-primary hover:underline cursor-pointer">Learn more</span></span>
+                            </div>
+
+                            <div *ngIf="item.selectedVariants" class="text-xs text-neutral-600 pt-1">
+                                <span *ngFor="let v of item.selectedVariants | keyvalue" class="mr-3">
+                                    <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-4 pt-2 text-xs">
+                                <!-- Qty Selector -->
+                                <div class="flex items-center border border-neutral-300 rounded-md bg-neutral-50 shadow-sm">
+                                    <span class="px-2 py-1 text-neutral-600 border-r border-neutral-300">Qty:</span>
+                                    <input [ngModel]="item.quantity" disabled class="w-8 bg-transparent text-center font-bold text-neutral-800 outline-none">
+                                    <div class="flex flex-col border-l border-neutral-300">
+                                        <button (click)="increaseQty(item)" class="px-1 hover:bg-neutral-200 text-[8px]">▲</button>
+                                        <button (click)="decreaseQty(item)" class="px-1 hover:bg-neutral-200 text-[8px] border-t border-neutral-300">▼</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="h-4 w-px bg-neutral-300"></div>
+                                <button (click)="removeItem(item)" class="text-primary hover:underline">Delete</button>
+                                <div class="h-4 w-px bg-neutral-300"></div>
+                                <button (click)="saveForLater(item)" class="text-primary hover:underline">Save for later</button>
+                                <div class="h-4 w-px bg-neutral-300"></div>
+                                <button class="text-primary hover:underline">Compare with similar items</button>
+                            </div>
+                        </div>
+
+                        <!-- Price (Desktop) -->
+                        <div class="hidden md:block text-right font-bold text-lg text-neutral-charcoal">
+                            R{{ item.price | number:'1.0-0' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-neutral-200 mt-4" *ngIf="cartService.cartItems().length > 0">
+                    <div class="text-lg">
+                        {{ ts.t('cart.subtotal') }} ({{ cartService.cartItems().length }} items): <span class="font-bold">R{{ cartService.totalAmount() | number:'1.0-0' }}</span>
+                    </div>
+                </div>
              </div>
 
-             <div *ngIf="cartService.cartItems().length === 0" class="py-8">
-                <p class="text-lg mb-4">Your Amazon Cart is empty.</p>
-                <a routerLink="/products" class="text-amazon-link hover:text-action hover:underline">Shop today's deals</a>
-             </div>
-
-             <div class="space-y-6" *ngIf="cartService.cartItems().length > 0">
-                 <div *ngFor="let item of cartService.cartItems()" class="flex gap-4 border-b pb-6 last:border-0">
-                     <!-- Image -->
-                     <div class="w-[180px] h-[180px] flex items-center justify-center bg-gray-50 cursor-pointer" [routerLink]="['/products', item.id]">
-                         <img *ngIf="item.images && item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-w-full max-h-full object-contain">
-                     </div>
-
-                     <!-- Details -->
-                     <div class="flex-grow">
-                         <div class="flex justify-between">
-                             <h3 class="text-xl font-medium text-black hover:text-action hover:underline cursor-pointer" [routerLink]="['/products', item.id]">{{ item.name }}</h3>
-                             <div class="text-xl font-bold text-[#111111]">R{{ item.price | number:'1.2-2' }}</div>
-                         </div>
-                         
-                         <!-- Selected Variants -->
-                         <div *ngIf="item.selectedVariants" class="text-xs text-gray-600 mb-1 flex flex-wrap gap-x-4">
-                             <div *ngFor="let v of item.selectedVariants | keyvalue">
-                                 <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
-                             </div>
-                         </div>
-
-                         <div class="text-sm text-green-700 mb-1">In Stock</div>
-                         <div class="text-xs text-gray-500 mb-2">Sold by Chommie Retail</div>
-                         
-                         <div class="flex items-center gap-4 mt-2">
-                             <div class="flex items-center border border-gray-300 rounded-[4px] shadow-sm bg-[#F0F2F2] hover:bg-[#E3E6E6]">
-                                 <button (click)="decreaseQty(item)" class="px-3 py-1 text-sm font-medium border-r border-gray-300">-</button>
-                                 <span class="px-4 py-1 text-sm bg-white">{{ item.quantity }}</span>
-                                 <button (click)="increaseQty(item)" class="px-3 py-1 text-sm font-medium border-l border-gray-300">+</button>
-                             </div>
-                             <span class="text-gray-300">|</span>
-                             <button (click)="removeItem(item)" class="text-sm text-amazon-link hover:underline hover:text-action">Delete</button>
-                             <span class="text-gray-300">|</span>
-                             <button (click)="saveForLater(item)" class="text-sm text-amazon-link hover:underline hover:text-action">Save for later</button>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-
-             <div class="text-right mt-4" *ngIf="cartService.cartItems().length > 0">
-                 <span class="text-lg">Subtotal ({{ cartService.cartItems().length }} items): </span>
-                 <span class="text-lg font-bold">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
+             <!-- Saved for Later -->
+             <div class="bg-white border border-neutral-300 p-6 shadow-sm mt-6" *ngIf="cartService.savedItems().length > 0">
+                <h2 class="text-xl font-bold text-neutral-charcoal mb-4">Saved for later ({{ cartService.savedItems().length }} items)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div *ngFor="let item of cartService.savedItems()" class="border border-neutral-200 p-4 rounded-sm flex flex-col">
+                        <div class="h-32 flex items-center justify-center mb-2">
+                             <img *ngIf="item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-h-full max-w-full object-contain">
+                        </div>
+                        <a [routerLink]="['/products', item.id]" class="text-sm text-primary hover:underline line-clamp-2 mb-1">{{ item.name }}</a>
+                        <div class="text-sm font-bold text-red-700 mb-1">R{{ item.price | number:'1.0-0' }}</div>
+                        <div class="text-xs text-neutral-500 mb-3">{{ ts.t('product.in_stock') }}</div>
+                        <button (click)="moveToCart(item)" class="btn-secondary text-xs w-full mb-2">Move to Cart</button>
+                        <button (click)="cartService.removeFromSaved(item.id!, item.selectedVariants)" class="text-xs text-primary hover:underline text-center w-full">Delete</button>
+                    </div>
+                </div>
              </div>
           </div>
 
-          <!-- Saved for Later Section -->
-          <div class="lg:col-span-3 bg-white p-6 rounded-sm shadow-sm border border-gray-200 mt-6" *ngIf="cartService.savedItems().length > 0">
-             <div class="border-b pb-2 mb-4">
-                 <h2 class="text-2xl font-normal text-[#111111]">Saved for later ({{ cartService.savedItems().length }} items)</h2>
-             </div>
-
-             <div class="space-y-6">
-                 <div *ngFor="let item of cartService.savedItems()" class="flex gap-4 border-b pb-6 last:border-0">
-                     <!-- Image -->
-                     <div class="w-[120px] h-[120px] flex items-center justify-center bg-gray-50 cursor-pointer" [routerLink]="['/products', item.id]">
-                         <img *ngIf="item.images && item.images.length" [src]="item.images[0]" [alt]="item.name" class="max-w-full max-h-full object-contain">
-                     </div>
-
-                     <!-- Details -->
-                     <div class="flex-grow">
-                         <div class="flex justify-between">
-                             <h3 class="text-lg font-medium text-black hover:text-action hover:underline cursor-pointer" [routerLink]="['/products', item.id]">{{ item.name }}</h3>
-                             <div class="text-lg font-bold text-[#B12704]">R{{ item.price | number:'1.2-2' }}</div>
-                         </div>
-                         
-                         <!-- Selected Variants -->
-                         <div *ngIf="item.selectedVariants" class="text-xs text-gray-600 mb-1 flex flex-wrap gap-x-4">
-                             <div *ngFor="let v of item.selectedVariants | keyvalue">
-                                 <span class="font-bold">{{ v.key }}:</span> {{ v.value }}
-                             </div>
-                         </div>
-
-                         <div class="text-xs text-green-700 mb-1">In Stock</div>
-                         
-                         <div class="flex items-center gap-4 mt-2">
-                             <button (click)="moveToCart(item)" class="bg-white border border-gray-300 rounded shadow-sm py-1 px-3 text-sm hover:bg-gray-50">Move to Cart</button>
-                             <span class="text-gray-300">|</span>
-                             <button (click)="cartService.removeFromSaved(item.id!, item.selectedVariants)" class="text-sm text-amazon-link hover:underline hover:text-action">Delete</button>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-          </div>
-
-          <!-- Right: Summary Box -->
-          <div class="lg:col-span-1" *ngIf="cartService.cartItems().length > 0">
-              <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200">
-                  <!-- BNPL Indicator -->
-                  <div class="mb-4 text-sm" *ngIf="userId">
-                      <div class="flex items-center gap-1 mb-1" [ngClass]="eligible() ? 'text-green-700' : 'text-red-700'">
-                          <svg *ngIf="eligible()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                          <span class="font-bold">{{ eligible() ? 'BNPL Eligible' : 'Credit Limit Exceeded' }}</span>
-                      </div>
-                      <p class="text-xs text-gray-600">{{ eligibilityReason() }}</p>
+          <!-- Right: Summary Box (Sticky) -->
+          <div class="lg:col-span-3 lg:sticky lg:top-6" *ngIf="cartService.cartItems().length > 0">
+              <div class="bg-white border border-neutral-300 p-4 shadow-sm space-y-4">
+                  
+                  <!-- Free Shipping Progress -->
+                  <div class="text-xs text-emerald-700">
+                      <span class="flex items-center gap-1 font-bold">
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg>
+                          Your order qualifies for FREE Shipping.
+                      </span>
+                      <span class="text-neutral-500">Choose this option at checkout.</span>
                   </div>
 
-                  <div class="text-lg mb-4">
-                      Subtotal ({{ cartService.cartItems().length }} items): <span class="font-bold">R{{ cartService.totalAmount() | number:'1.2-2' }}</span>
+                  <div class="text-lg">
+                      {{ ts.t('cart.subtotal') }} ({{ cartService.cartItems().length }} items): <span class="font-bold">R{{ cartService.totalAmount() | number:'1.0-0' }}</span>
                   </div>
 
-                  <div class="text-xs text-gray-600 mb-4">
-                      Shipping to <span class="font-bold">{{ currentLocation() }}</span>
+                  <div class="flex items-center gap-2">
+                      <input type="checkbox" class="w-4 h-4 rounded border-neutral-300">
+                      <span class="text-sm text-neutral-700">This order contains a gift</span>
                   </div>
 
                   <button 
                     (click)="proceedToCheckout()"
-                    class="w-full bg-action hover:bg-action-hover text-white py-2 rounded-[20px] shadow-sm text-sm mb-4 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-action"
+                    class="w-full btn-primary py-2 rounded-md shadow-sm text-sm"
                   >
-                    Proceed to checkout
+                    {{ ts.t('cart.proceed') }}
                   </button>
+
+                  <!-- BNPL Section -->
+                  <div class="border border-neutral-200 rounded p-3 bg-neutral-50 text-xs space-y-2 mt-4" *ngIf="userId">
+                      <div class="font-bold text-neutral-700">Payment Options</div>
+                      <div class="flex items-center justify-between">
+                          <span>BNPL Eligibility:</span>
+                          <span class="font-bold" [class.text-emerald-600]="eligible()" [class.text-red-600]="!eligible()">{{ eligible() ? 'Approved' : 'Pending' }}</span>
+                      </div>
+                      <p class="text-neutral-500">{{ eligibilityReason() }}</p>
+                  </div>
               </div>
-              
-              <!-- Recommendations (Mock) -->
-              <div class="mt-4 bg-white p-4 rounded-sm shadow-sm border border-gray-200 hidden lg:block">
-                  <h4 class="font-bold text-sm mb-2">Sponsored Products</h4>
-                  <div class="h-24 bg-gray-100 flex items-center justify-center text-xs text-gray-400">Ad Space</div>
+
+              <!-- Recommendation Below Checkout -->
+              <div class="bg-white border border-neutral-300 p-4 shadow-sm mt-4">
+                  <h3 class="font-bold text-sm text-neutral-charcoal mb-3">Sponsored Products</h3>
+                  <div class="space-y-3">
+                      <div class="flex gap-2">
+                          <div class="w-16 h-16 bg-neutral-100 flex items-center justify-center border border-neutral-200">
+                             <span class="text-[8px] text-neutral-400">Ad</span>
+                          </div>
+                          <div>
+                              <a href="#" class="text-xs text-primary hover:underline line-clamp-2">High Performance Wireless Headphones</a>
+                              <div class="text-xs font-bold text-red-700">R1,299</div>
+                          </div>
+                      </div>
+                  </div>
               </div>
           </div>
 
@@ -160,6 +192,7 @@ export class CartComponent implements OnInit {
   constructor(
     public cartService: CartService,
     private bnplService: BnplService,
+    public ts: TranslationService,
     private router: Router
   ) {
     this.userId = localStorage.getItem('user_id') || '';

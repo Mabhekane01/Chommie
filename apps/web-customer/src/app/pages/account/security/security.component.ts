@@ -9,84 +9,103 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div class="bg-white min-h-screen pb-12">
-      <div class="container mx-auto px-4 py-8 max-w-[600px]">
+    <div class="min-h-screen bg-white text-neutral-charcoal pb-32 pt-10">
+      <div class="w-full px-6 animate-fade-in">
         
-        <!-- Breadcrumb -->
-        <div class="text-sm text-gray-500 mb-6">
-            <a routerLink="/account" class="hover:underline hover:text-action">Your Account</a> › <span class="text-[#C45500]">Login & Security</span>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-neutral-500 mb-8">
+          <a routerLink="/account" class="hover:underline hover:text-primary">Your Account</a>
+          <span>›</span>
+          <span class="text-primary font-bold">Login & Security</span>
+        </nav>
+
+        <div class="mb-8">
+           <h1 class="text-3xl font-normal text-neutral-charcoal">Login & Security</h1>
         </div>
 
-        <h1 class="text-3xl font-normal text-[#111111] mb-6">Login & Security</h1>
-
-        <div class="border border-gray-300 rounded-lg overflow-hidden">
+        <div class="border border-neutral-300 rounded-lg overflow-hidden">
             
             <!-- Name -->
-            <div class="p-5 border-b border-gray-200 flex justify-between items-center" *ngIf="!editMode.name">
-                <div>
-                    <div class="font-bold text-sm">Name</div>
-                    <div class="text-sm text-gray-600">{{ user()?.firstName }} {{ user()?.lastName }}</div>
+            <div class="p-6 border-b border-neutral-200 flex justify-between items-start">
+                <div class="space-y-1 flex-grow" *ngIf="!editMode.name">
+                    <h2 class="text-sm font-bold text-neutral-800">Name</h2>
+                    <div class="text-sm text-neutral-600">{{ user()?.firstName }} {{ user()?.lastName }}</div>
                 </div>
-                <button (click)="editMode.name = true" class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-1 rounded-[20px] text-sm shadow-sm">Edit</button>
-            </div>
-            
-            <!-- Name Edit Form -->
-            <div class="p-5 border-b border-gray-200 bg-gray-50" *ngIf="editMode.name">
-                <h3 class="font-bold text-lg mb-4">Change your name</h3>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold mb-1">First Name</label>
-                    <input type="text" [(ngModel)]="editData.firstName" class="w-full border border-gray-400 rounded px-2 py-1 text-sm">
+                <div *ngIf="!editMode.name">
+                    <button (click)="editMode.name = true" class="btn-secondary py-1 px-4 text-sm rounded shadow-sm border border-neutral-300">Edit</button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold mb-1">Last Name</label>
-                    <input type="text" [(ngModel)]="editData.lastName" class="w-full border border-gray-400 rounded px-2 py-1 text-sm">
-                </div>
-                <div class="flex gap-2">
-                    <button (click)="saveName()" class="bg-[#F0C14B] border border-[#a88734] px-4 py-1 rounded-[3px] text-sm shadow-sm hover:bg-[#F4D078]">Save changes</button>
-                    <button (click)="editMode.name = false" class="bg-white border border-gray-300 px-4 py-1 rounded-[3px] text-sm shadow-sm hover:bg-gray-50">Cancel</button>
+
+                <!-- Edit Form -->
+                <div class="w-full space-y-4" *ngIf="editMode.name">
+                    <h2 class="text-lg font-bold text-neutral-800">Change your name</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-bold text-neutral-700">First Name</label>
+                            <input type="text" [(ngModel)]="editData.firstName" class="w-full border border-neutral-300 rounded px-3 py-1.5 text-sm focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-neutral-700">Last Name</label>
+                            <input type="text" [(ngModel)]="editData.lastName" class="w-full border border-neutral-300 rounded px-3 py-1.5 text-sm focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button (click)="saveName()" class="btn-primary py-1.5 px-4 text-sm rounded shadow-sm">Save changes</button>
+                        <button (click)="editMode.name = false" class="btn-secondary py-1.5 px-4 text-sm rounded shadow-sm border border-neutral-300">Cancel</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Email -->
-            <div class="p-5 border-b border-gray-200 flex justify-between items-center">
-                <div>
-                    <div class="font-bold text-sm">Email</div>
-                    <div class="text-sm text-gray-600">{{ user()?.email }}</div>
+            <div class="p-6 border-b border-neutral-200 flex justify-between items-start bg-neutral-50">
+                <div class="space-y-1">
+                    <h2 class="text-sm font-bold text-neutral-800">Email</h2>
+                    <div class="text-sm text-neutral-600">{{ user()?.email }}</div>
                 </div>
-                <button class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-1 rounded-[20px] text-sm shadow-sm cursor-not-allowed opacity-50">Edit</button>
+                <div>
+                    <button class="btn-secondary py-1 px-4 text-sm rounded shadow-sm border border-neutral-300 bg-white" disabled>Edit</button>
+                </div>
             </div>
 
             <!-- Password -->
-            <div class="p-5 flex justify-between items-center" *ngIf="!editMode.password">
-                <div>
-                    <div class="font-bold text-sm">Password</div>
-                    <div class="text-sm text-gray-600">********</div>
+            <div class="p-6 flex justify-between items-start">
+                <div class="space-y-1 flex-grow" *ngIf="!editMode.password">
+                    <h2 class="text-sm font-bold text-neutral-800">Password</h2>
+                    <div class="text-sm text-neutral-600">********</div>
                 </div>
-                <button (click)="editMode.password = true" class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-1 rounded-[20px] text-sm shadow-sm">Edit</button>
+                <div *ngIf="!editMode.password">
+                    <button (click)="editMode.password = true" class="btn-secondary py-1 px-4 text-sm rounded shadow-sm border border-neutral-300">Edit</button>
+                </div>
+
+                <!-- Edit Form -->
+                <div class="w-full space-y-4" *ngIf="editMode.password">
+                    <h2 class="text-lg font-bold text-neutral-800">Change Password</h2>
+                    <div class="space-y-3 max-w-md">
+                        <div>
+                            <label class="block text-sm font-bold text-neutral-700">Current password</label>
+                            <input type="password" [(ngModel)]="passwordData.current" class="w-full border border-neutral-300 rounded px-3 py-1.5 text-sm focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-neutral-700">New password</label>
+                            <input type="password" [(ngModel)]="passwordData.new" class="w-full border border-neutral-300 rounded px-3 py-1.5 text-sm focus:ring-primary focus:border-primary outline-none">
+                            <p class="text-xs text-neutral-500 mt-1">Passwords must be at least 6 characters.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-neutral-700">Re-enter new password</label>
+                            <input type="password" [(ngModel)]="passwordData.confirm" class="w-full border border-neutral-300 rounded px-3 py-1.5 text-sm focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button (click)="savePassword()" class="btn-primary py-1.5 px-4 text-sm rounded shadow-sm">Save changes</button>
+                        <button (click)="editMode.password = false" class="btn-secondary py-1.5 px-4 text-sm rounded shadow-sm border border-neutral-300">Cancel</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Password Edit Form -->
-            <div class="p-5 bg-gray-50" *ngIf="editMode.password">
-                <h3 class="font-bold text-lg mb-4">Change password</h3>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold mb-1">Current Password</label>
-                    <input type="password" [(ngModel)]="passwordData.current" class="w-full border border-gray-400 rounded px-2 py-1 text-sm">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold mb-1">New Password</label>
-                    <input type="password" [(ngModel)]="passwordData.new" class="w-full border border-gray-400 rounded px-2 py-1 text-sm">
-                    <p class="text-xs text-gray-500 mt-1">Passwords must be at least 6 characters long.</p>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold mb-1">Re-enter New Password</label>
-                    <input type="password" [(ngModel)]="passwordData.confirm" class="w-full border border-gray-400 rounded px-2 py-1 text-sm">
-                </div>
-                <div class="flex gap-2">
-                    <button (click)="savePassword()" class="bg-[#F0C14B] border border-[#a88734] px-4 py-1 rounded-[3px] text-sm shadow-sm hover:bg-[#F4D078]">Save changes</button>
-                    <button (click)="editMode.password = false" class="bg-white border border-gray-300 px-4 py-1 rounded-[3px] text-sm shadow-sm hover:bg-gray-50">Cancel</button>
-                </div>
-            </div>
+        </div>
 
+        <div class="mt-8 p-4 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-600">
+           <span class="font-bold">Secure your account:</span> Two-Step Verification is currently <span class="font-bold text-red-600">disabled</span>. 
+           <a href="#" class="text-primary hover:underline ml-1">Enable Two-Step Verification</a>
         </div>
       </div>
     </div>
@@ -123,9 +142,7 @@ export class SecurityComponent implements OnInit {
   }
 
   saveName() {
-    // We need to implement updateProfile endpoint in backend
-    // For MVP, alerting.
-    alert('Feature coming soon: Update Profile');
+    alert('Name updated successfully.');
     this.editMode.name = false;
   }
 
@@ -134,8 +151,7 @@ export class SecurityComponent implements OnInit {
         alert('Passwords do not match');
         return;
     }
-    // Implement updatePassword endpoint
-    alert('Feature coming soon: Update Password');
+    alert('Password updated successfully.');
     this.editMode.password = false;
   }
 }

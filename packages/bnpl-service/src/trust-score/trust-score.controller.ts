@@ -26,6 +26,11 @@ export class TrustScoreController {
     return this.trustScoreService.checkEligibility(data.userId, data.amount);
   }
 
+  @MessagePattern({ cmd: 'use_coins' })
+  useCoins(@Payload() data: { userId: string; amount: number }) {
+    return this.trustScoreService.useCoins(data.userId, data.amount);
+  }
+
   @EventPattern('payment_completed')
   async handlePaymentCompleted(@Payload() data: { userId: string }) {
     if (data.userId) {

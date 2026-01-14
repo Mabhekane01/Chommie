@@ -20,6 +20,7 @@ export interface TrustProfile {
   disputeCount: number;
   lastCalculatedAt: Date;
   creditLimit: number;
+  coinsBalance: number;
 }
 
 @Injectable({
@@ -49,6 +50,10 @@ export class BnplService {
 
   checkEligibility(userId: string, amount: number): Observable<{ eligible: boolean; reason?: string; limit: number }> {
     return this.http.post<{ eligible: boolean; reason?: string; limit: number }>(`${this.apiUrl}/eligibility`, { userId, amount });
+  }
+
+  useCoins(userId: string, amount: number): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/use-coins`, { userId, amount });
   }
 
   getPlans(userId: string): Observable<any[]> {

@@ -5,6 +5,7 @@ import { ProductCreateComponent } from './pages/product-create/product-create.co
 import { VendorReviewsComponent } from './pages/vendor-reviews/vendor-reviews.component';
 import { VendorPromotionsComponent } from './pages/promotions/promotions.component';
 import { VendorInventoryComponent } from './pages/inventory/inventory.component';
+import { VendorMessagesComponent } from './pages/messages/messages.component';
 import { LoginComponent } from './pages/login/login.component';
 import { authGuard } from './guards/auth.guard';
 
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: VendorDashboardComponent, canActivate: [authGuard] },
   { path: 'orders', component: VendorOrdersComponent, canActivate: [authGuard] },
+  { path: 'messages', component: VendorMessagesComponent, canActivate: [authGuard] },
   { path: 'reviews', component: VendorReviewsComponent, canActivate: [authGuard] },
   { path: 'promotions', component: VendorPromotionsComponent, canActivate: [authGuard] },
   { path: 'inventory', component: VendorInventoryComponent, canActivate: [authGuard] },

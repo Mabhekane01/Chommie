@@ -1,10 +1,13 @@
 import { Controller, Get, Post, Body, Param, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { EventsGateway } from '../events.gateway';
+import { tap } from 'rxjs/operators';
 
 @Controller('orders')
 export class OrderController {
   constructor(
     @Inject('ORDER_SERVICE') private readonly orderClient: ClientProxy,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   @Post()
@@ -29,7 +32,14 @@ export class OrderController {
 
   @Post(':id/status')
   updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
-    return this.orderClient.send({ cmd: 'update_order_status' }, { id, status: body.status });
+    return this.orderClient.send({ cmd: 'update_order_status' }, { id, status: body.status })
+      .pipe(
+        tap(updatedOrder => {
+          if (updatedOrder && updatedOrder.userId) {
+            this.eventsGateway.emitOrderUpdate(updatedOrder.userId, updatedOrder);
+          }
+        })
+      );
   }
 
   @Post('return')

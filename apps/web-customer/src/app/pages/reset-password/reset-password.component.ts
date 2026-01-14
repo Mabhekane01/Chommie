@@ -9,65 +9,79 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen flex flex-col items-center bg-white py-12 px-4 sm:px-6 lg:px-8 font-sans text-[#0F1111]">
+    <div class="min-h-screen bg-[#FAF3E1] flex flex-col items-center pt-12 px-4">
       
-      <div class="mb-4">
-        <h1 class="text-3xl font-bold tracking-tight text-[#0F1111]">Chommie</h1>
+      <!-- Logo -->
+      <div class="mb-8">
+        <a routerLink="/" class="font-header font-black text-3xl tracking-tighter text-[#222222]">
+          Chommie<span class="text-primary">.za</span>
+        </a>
       </div>
 
-      <div class="w-full max-w-[350px] border border-[#D5D9D9] rounded-lg p-6 bg-white shadow-[0_2px_5px_rgba(0,0,0,0.05)]">
-        <h1 class="text-3xl font-normal mb-4">Create new password</h1>
-        <p class="text-sm text-[#565959] mb-4">
+      <!-- Reset Card -->
+      <div class="w-full max-w-[350px] bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+        <h1 class="text-2xl font-medium text-[#222222] mb-4">Create new password</h1>
+        <p class="text-sm text-neutral-700 mb-6 leading-relaxed">
             We'll ask for this password whenever you sign in.
         </p>
 
         <form *ngIf="!success()" (ngSubmit)="onSubmit()" class="space-y-4">
-          <div>
-            <label for="password" class="block text-sm font-bold text-[#0F1111] mb-1">New password</label>
-            <input 
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <label for="password" class="block text-xs font-bold text-[#222222]">New password</label>
+              <input 
                 id="password" 
                 name="password" 
                 type="password" 
                 [(ngModel)]="password" 
                 required
                 minlength="6"
-                placeholder="At least 6 characters"
-                class="block w-full rounded-[3px] border-[#a6a6a6] border px-2 py-1 text-sm shadow-[0_1px_0_rgba(255,255,255,0.5),0_1px_0_rgba(0,0,0,0.07)_inset] focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] focus:outline-none transition-all"
-            >
-             <p class="text-xs text-[#565959] mt-1">Passwords must be at least 6 characters.</p>
-          </div>
+                class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
+              >
+              <p class="text-[11px] text-neutral-500 italic">Passwords must be at least 6 characters.</p>
+            </div>
 
-          <div>
-            <label for="confirmPassword" class="block text-sm font-bold text-[#0F1111] mb-1">Re-enter password</label>
-            <input 
+            <div class="space-y-1">
+              <label for="confirmPassword" class="block text-xs font-bold text-[#222222]">Password again</label>
+              <input 
                 id="confirmPassword" 
                 name="confirmPassword" 
                 type="password" 
                 [(ngModel)]="confirmPassword" 
                 required
-                class="block w-full rounded-[3px] border-[#a6a6a6] border px-2 py-1 text-sm shadow-[0_1px_0_rgba(255,255,255,0.5),0_1px_0_rgba(0,0,0,0.07)_inset] focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] focus:outline-none transition-all"
-            >
+                class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
+              >
+            </div>
           </div>
 
-          <div *ngIf="error()" class="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-50 border border-red-300 rounded-[3px]">
+          <div *ngIf="error()" class="p-3 text-xs text-red-700 bg-red-50 border border-red-200 rounded-sm">
              {{ error() }}
           </div>
 
-          <button 
-            type="submit" 
-            [disabled]="loading()"
-            class="w-full bg-[#F0C14B] hover:bg-[#F4D078] border border-[#a88734] rounded-[3px] py-[6px] text-sm shadow-[0_1px_0_rgba(255,255,255,0.4)_inset] focus:ring-2 focus:ring-[#e77600] focus:outline-none transition-all"
-          >
-            {{ loading() ? 'Saving changes...' : 'Save changes and sign in' }}
-          </button>
+          <div class="pt-2">
+            <button 
+              type="submit" 
+              [disabled]="loading()"
+              class="w-full btn-primary py-1.5 rounded-[3px] text-xs font-normal"
+            >
+              {{ loading() ? 'Saving changes...' : 'Save changes and sign in' }}
+            </button>
+          </div>
         </form>
 
-        <div *ngIf="success()" class="text-center">
-            <div class="text-green-600 mb-4 text-lg font-bold">Success!</div>
-            <p class="text-sm mb-4">Your password has been changed.</p>
-            <a routerLink="/login" class="inline-block bg-[#F0C14B] hover:bg-[#F4D078] border border-[#a88734] rounded-[3px] py-[6px] px-4 text-sm shadow-[0_1px_0_rgba(255,255,255,0.4)_inset] text-[#0F1111]">
-                Sign In
-            </a>
+        <div *ngIf="success()" class="text-center space-y-6 py-6 animate-fade-in">
+            <div class="w-16 h-16 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center mx-auto text-emerald-600 shadow-sm">
+               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <div class="space-y-2">
+               <h2 class="text-xl font-bold text-[#222222]">Password changed</h2>
+               <p class="text-xs text-neutral-600">Your password has been reset successfully.</p>
+            </div>
+            <div class="pt-2">
+               <a routerLink="/login" class="btn-primary py-1.5 px-8 rounded-[3px] text-xs inline-block font-normal">
+                   Sign in now
+               </a>
+            </div>
         </div>
 
       </div>

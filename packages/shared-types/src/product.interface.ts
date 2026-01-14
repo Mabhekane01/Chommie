@@ -19,6 +19,7 @@ export interface IProduct {
   lightningDealSold?: number;
   variants?: IProductVariant[];
   badges?: string[]; // e.g., ["AMAZON_CHOICE", "BEST_SELLER"]
+  specifications?: Record<string, string>; // e.g., {"Brand": "Sony", "Color": "Black"}
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -48,6 +49,7 @@ export class CreateProductDto {
   isLightningDeal?: boolean;
   lightningDealStock?: number;
   variants?: IProductVariant[];
+  specifications?: Record<string, string>;
   vendorId!: string;
 }
 
@@ -64,5 +66,6 @@ export class UpdateProductDto implements Partial<CreateProductDto> {
   isLightningDeal?: boolean;
   lightningDealStock?: number;
   variants?: IProductVariant[];
+  specifications?: Record<string, string>;
   vendorId?: string;
 }

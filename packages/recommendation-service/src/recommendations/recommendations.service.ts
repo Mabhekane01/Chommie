@@ -53,6 +53,20 @@ export class RecommendationsService {
     return [product, ...comparisons];
   }
 
+  async getAlsoViewed(productId: string) {
+    // 1. Get current product
+    const product = await lastValueFrom(this.productClient.send({ cmd: 'findOneProduct' }, productId));
+    if (!product) return [];
+
+    // 2. Find products in same category, shuffle and take 6
+    const categoryProducts = await lastValueFrom(this.productClient.send({ cmd: 'findProductsByCategory' }, product.category));
+    
+    return (categoryProducts as any[])
+      .filter(p => p._id !== productId)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 6);
+  }
+
   async getPersonalizedRecommendations(userId: string) {
     try {
       // 1. Get user profile to find favorite category
@@ -68,5 +82,20 @@ export class RecommendationsService {
     
     // Fallback to all products
     return lastValueFrom(this.productClient.send({ cmd: 'findAllProducts' }, {}));
+  }
+
+  async getProductInsight(productId: string) {
+    // In a real app, this would use an LLM (like Gemini) to summarize reviews.
+    // For this demo, we'll generate a high-quality heuristic summary.
+    const product = await lastValueFrom(this.productClient.send({ cmd: 'findOneProduct' }, productId));
+    if (!product) return null;
+
+    return {
+      summary: `Customers generally praise the ${product.name} for its ${product.category.toLowerCase()}-leading performance and reliability. Common highlights include exceptional build quality and ease of use.`,
+      pros: ['High performance', 'Durable design', 'Great value for money'],
+      cons: ['Premium pricing', 'Limited color options'],
+      sentiment: 'Highly Positive',
+      aiConfidence: 0.94
+    };
   }
 }

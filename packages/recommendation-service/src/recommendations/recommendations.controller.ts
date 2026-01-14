@@ -17,12 +17,22 @@ export class RecommendationsController {
   }
 
   @MessagePattern({ cmd: 'get_product_comparison' })
-  getProductComparison(@Payload() productId: string) {
+  getProductComparison(productId: string) {
     return this.recommendationsService.getProductComparison(productId);
+  }
+
+  @MessagePattern({ cmd: 'get_also_viewed' })
+  getAlsoViewed(productId: string) {
+    return this.recommendationsService.getAlsoViewed(productId);
   }
 
   @MessagePattern({ cmd: 'get_personalized_recommendations' })
   getPersonalized(@Payload() userId: string) {
     return this.recommendationsService.getPersonalizedRecommendations(userId);
+  }
+
+  @MessagePattern({ cmd: 'get_product_insight' })
+  getProductInsight(@Payload() productId: string) {
+    return this.recommendationsService.getProductInsight(productId);
   }
 }

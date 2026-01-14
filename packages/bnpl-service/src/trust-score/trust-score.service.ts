@@ -76,11 +76,23 @@ export class TrustScoreService {
     if (!profile) return;
 
     profile.totalPayments += 1;
-    profile.onTimePayments += 1; // Assuming immediate payment is on-time
+    profile.onTimePayments += 1; 
+    
+    // Reward Logic: 10 coins per successful payment
+    profile.coinsBalance = Number(profile.coinsBalance || 0) + 10;
+    
     await this.trustProfileRepository.save(profile);
     
-    // Recalculate score to reflect new payment history
     await this.calculateScore(userId);
+  }
+
+  async useCoins(userId: string, amount: number): Promise<boolean> {
+    const profile = await this.getProfile(userId);
+    if (!profile || profile.coinsBalance < amount) return false;
+
+    profile.coinsBalance -= amount;
+    await this.trustProfileRepository.save(profile);
+    return true;
   }
 
   private calculateTier(score: number): TrustTier {

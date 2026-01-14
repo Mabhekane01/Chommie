@@ -1,233 +1,221 @@
-<!-- Header -->
-<header class="glass-header text-white sticky top-0 z-50 transition-all duration-300">
-  <!-- Top Bar -->
-  <div class="flex items-center justify-between px-6 py-3 h-[72px] gap-4">
-    
-    <!-- Logo: Chommie.za -->
-    <a routerLink="/" class="text-2xl font-extrabold tracking-tighter hover:opacity-80 px-1 rounded cursor-pointer whitespace-nowrap transition-all flex items-center">
-      Chommie<span class="text-action">.za</span>
-    </a>
-
-    <!-- Delivery Location -->
-    <div (click)="showLocationModal.set(true)" class="hidden lg:flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
-      <span class="text-white/60 font-medium">Deliver to</span>
-      <div class="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          </svg>
-          <span class="font-bold text-sm tracking-tight">{{ currentLocation() }}</span>
+<!-- Header: High-Efficiency Triple-Tier Navigation -->
+<header *ngIf="showNav()" class="fixed top-0 left-0 right-0 z-50 flex flex-col shadow-sm border-b border-neutral-200 bg-white">
+  
+  <!-- Tier 1: Utility Bar -->
+  <div class="h-9 bg-[#F5E7C6] flex items-center justify-between px-4 text-[11px] font-bold text-[#222222] border-b border-neutral-200">
+    <!-- Left: Location -->
+    <div (click)="showLocationModal.set(true)" class="flex items-center gap-2 cursor-pointer border border-transparent hover:border-neutral-300 rounded-sm px-2 py-0.5 transition-all group">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+      </svg>
+      <div class="flex flex-col leading-none">
+        <span class="text-[9px] text-neutral-500 font-medium">Deliver to</span>
+        <span class="uppercase tracking-wider font-black">{{ currentLocation() }}</span>
       </div>
     </div>
 
-    <!-- Seamless Search Bar -->
-    <div class="flex-grow max-w-2xl h-11 seamless-search group/search">
-      <select 
-        [(ngModel)]="selectedCategory"
-        class="h-full px-4 bg-white/5 text-white text-xs cursor-pointer hover:bg-white/10 outline-none appearance-none font-semibold border-r border-white/10"
-      >
-        <option *ngFor="let cat of categories()" [value]="cat" class="text-black">{{ cat }}</option>
-      </select>
-      <input 
-        type="text" 
-        [(ngModel)]="searchQuery"
-        (input)="onSearchInput()"
-        (keyup.enter)="performSearch()"
-        (focus)="onSearchInput()"
-        class="search-input" 
-        [placeholder]="ts.t('search.placeholder')"
-      >
-      <button 
-        (click)="performSearch()"
-        class="h-full px-5 bg-action hover:bg-action-hover text-white transition-all flex items-center justify-center"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </button>
+    <!-- Center: Rotating Highlights -->
+    <div class="text-[#222222]/80 font-medium italic">
+        Free Delivery on orders over R500 • Support Local Vendors
+    </div>
 
-      <!-- Autocomplete Dropdown (Glass Panel) -->
-      <div *ngIf="showSuggestions()" 
-           class="absolute top-full left-0 right-0 mt-2 glass-panel z-[100] p-2 shadow-2xl border border-white/20">
-        <ul class="space-y-1">
-          <li *ngFor="let suggestion of suggestions()" 
-              (click)="selectSuggestion(suggestion)"
-              class="px-4 py-2.5 hover:bg-primary/5 rounded-xl cursor-pointer text-black text-sm flex items-center gap-3 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+    <!-- Right: Quick Utilities -->
+    <div class="flex items-center h-full">
+      <div (click)="showLanguageModal.set(true)" class="cursor-pointer border border-transparent hover:border-neutral-300 rounded-sm px-2 py-1 flex items-center gap-1.5 transition-all">
+        <span class="text-sm">🇿🇦</span>
+        <span class="uppercase tracking-widest font-black">{{ currentLanguage() }}</span>
+        <svg class="w-2.5 h-2.5 opacity-40" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg>
+      </div>
+      <div class="h-4 w-px bg-neutral-200 mx-2"></div>
+      <a routerLink="/help" class="border border-transparent hover:border-neutral-300 rounded-sm px-2 py-1 transition-all uppercase tracking-widest font-black">{{ ts.t('nav.help') }}</a>
+      <div class="h-4 w-px bg-neutral-200 mx-2"></div>
+      <a routerLink="/wishlist" class="border border-transparent hover:border-neutral-300 rounded-sm px-2 py-1 transition-all uppercase tracking-widest font-black">{{ ts.t('nav.wishlist') }}</a>
+      <div class="h-4 w-px bg-neutral-200 mx-2"></div>
+      <a routerLink="/sell" class="text-primary border border-primary rounded-sm px-3 py-1 transition-all font-black uppercase tracking-widest ml-2 hover:bg-primary hover:text-white">{{ ts.t('nav.sell') }}</a>
+    </div>
+  </div>
+
+  <!-- Tier 2: Main Navigation Bar -->
+  <div class="h-16 lg:h-20 bg-[#FAF3E1] px-4 flex items-center gap-10 justify-between relative border-b border-neutral-200">
+    <!-- Logo -->
+    <a routerLink="/" class="flex-shrink-0 group flex items-end">
+      <span class="font-header font-black text-2xl lg:text-3xl tracking-tighter text-[#222222] group-hover:text-primary transition-all duration-300">
+        Chommie<span class="text-primary">.za</span>
+      </span>
+    </a>
+
+    <!-- Scoped Search Bar -->
+    <div class="flex flex-grow relative h-10 group/search mx-4">
+      <div class="relative flex w-full h-full bg-white rounded-md items-center overflow-hidden border-2 border-neutral-200 focus-within:border-primary shadow-sm transition-all">
+        <select [(ngModel)]="selectedCategory" class="h-full bg-neutral-100 text-[11px] font-bold uppercase tracking-wider text-neutral-600 px-3 border-r border-neutral-200 outline-none cursor-pointer hover:bg-neutral-200 transition-all appearance-none min-w-[60px]">
+          <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
+        </select>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()" (keyup.enter)="performSearch()" class="flex-grow h-full bg-transparent px-4 text-sm text-[#222222] placeholder-neutral-400 outline-none font-medium" [placeholder]="ts.t('search.placeholder')">
+        <button (click)="performSearch()" class="h-full px-5 bg-primary hover:bg-primary-dark transition-all text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"></path></svg>
+        </button>
+      </div>
+      <!-- Autocomplete Suggestions -->
+      <div *ngIf="showSuggestions()" class="absolute top-full left-0 right-0 mt-1 bg-white rounded-b-md overflow-hidden z-[60] shadow-2xl border border-neutral-200">
+        <ul class="py-1 text-left">
+           <li *ngFor="let suggestion of suggestions()" (click)="selectSuggestion(suggestion)" class="px-4 py-2 hover:bg-neutral-100 cursor-pointer text-[#222222] text-sm font-medium flex items-center gap-3">
+            <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"></path></svg>
             {{ suggestion }}
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- Navigation Links -->
-    <nav class="flex items-center gap-2 md:gap-4">
-      
-      <!-- Language -->
-      <div (click)="showLanguageModal.set(true)" class="hidden md:flex items-center gap-1.5 text-xs hover:bg-white/10 px-3 py-2.5 rounded-xl cursor-pointer transition-all font-bold">
-         <span class="text-base leading-none">🇿🇦</span>
-         <span>{{ currentLanguage() }}</span>
-         <span class="text-white/40">▼</span>
+    <!-- Action blocks -->
+    <div class="flex items-center gap-1 text-[#222222]">
+      <!-- Trust Coins -->
+      <div *ngIf="isLoggedIn()" routerLink="/bnpl" class="flex flex-col items-start leading-none px-3 py-2 rounded-sm border border-transparent hover:border-neutral-200 transition-all cursor-pointer group">
+         <span class="text-[9px] text-neutral-500 font-bold uppercase tracking-widest">Trust Coins</span>
+         <span class="text-sm font-black text-primary">{{ coinsBalance() }}</span>
       </div>
 
       <!-- Account & Lists -->
-      <div *ngIf="!isLoggedIn()" routerLink="/login" class="flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
-        <span class="text-white/60 font-medium">Hello, sign in</span>
-        <span class="font-bold text-sm tracking-tight">Account & Lists</span>
-      </div>
-      
-      <div *ngIf="isLoggedIn()" class="group relative flex flex-col text-[11px] hover:bg-white/10 px-3 py-1.5 rounded-xl cursor-pointer leading-tight transition-all">
-        <span class="text-white/60 font-medium">Hello, User</span>
-        <span class="font-bold text-sm tracking-tight">Account & Lists</span>
-        
-        <!-- Dropdown (Glass Panel) -->
-        <div class="hidden group-hover:block absolute top-full right-0 w-56 glass-panel text-black shadow-2xl mt-2 z-50 p-2 border border-white/20">
-            <div class="p-2 space-y-1">
-              <a routerLink="/account" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors font-bold">Your Account</a>
-              <a routerLink="/orders" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Your Orders</a>
-              <a routerLink="/wishlist" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Your Wishlist</a>
-              <a routerLink="/bnpl" class="block py-2 hover:bg-primary/5 rounded-xl px-3 transition-colors">Trust Score</a>
-              <hr class="my-2 border-gray-100">
-              <button (click)="logout()" class="text-left w-full py-2 hover:bg-red-50 hover:text-red-600 rounded-xl px-3 transition-colors">Sign Out</button>
+      <div class="relative group cursor-pointer">
+        <div class="flex flex-col items-start leading-none px-3 py-2 rounded-sm border border-transparent hover:border-neutral-200 transition-all">
+          <span class="text-[10px] text-neutral-500 font-bold">{{ ts.t('nav.hello') }}, {{ userName() || ts.t('nav.signin') }}</span>
+          <span class="font-bold text-sm flex items-center gap-1">{{ ts.t('nav.account') }} <svg class="w-2.5 h-2.5 mt-0.5 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg></span>
+        </div>
+        <div class="absolute top-full right-0 w-64 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 transform translate-y-1 group-hover:translate-y-0 z-[100]">
+          <div class="bg-white rounded-sm shadow-2xl border border-neutral-200 overflow-hidden text-[#222222]">
+            <div class="p-4 border-b border-neutral-100 flex flex-col items-center" *ngIf="!isLoggedIn()">
+                <button routerLink="/login" class="w-full btn-primary font-bold py-2 rounded-md shadow-sm mb-2 text-sm">{{ ts.t('nav.signin') }}</button>
+                <span class="text-[10px] text-neutral-500">New customer? <a routerLink="/register" class="text-primary hover:underline">Start here.</a></span>
             </div>
+            <div class="grid grid-cols-2 p-4 gap-6 text-left">
+                <div>
+                    <h3 class="text-sm font-black text-neutral-800 mb-2 uppercase tracking-tighter">{{ ts.t('nav.wishlist') }}</h3>
+                    <ul class="space-y-2 text-xs text-neutral-600 font-medium">
+                        <li><a routerLink="/wishlist" class="hover:text-primary hover:underline">Create a List</a></li>
+                        <li><a routerLink="/wishlist" class="hover:text-primary hover:underline">Find a Registry</a></li>
+                    </ul>
+                </div>
+                <div class="border-l border-neutral-100 pl-4">
+                    <h3 class="text-sm font-black text-neutral-800 mb-2 uppercase tracking-tighter">{{ ts.t('nav.account') }}</h3>
+                    <ul class="space-y-2 text-xs text-neutral-600 font-medium">
+                        <li><a routerLink="/account" class="hover:text-accent hover:underline">Your Account</a></li>
+                        <li><a routerLink="/orders" class="hover:text-accent hover:underline">Your Orders</a></li>
+                        <li><a routerLink="/bnpl" class="hover:text-accent hover:underline">Trust Profile</a></li>
+                        <li *ngIf="isLoggedIn()" (click)="logout()" class="pt-2 text-red-600 cursor-pointer hover:underline border-t border-neutral-100">{{ ts.t('nav.signout') }}</li>
+                    </ul>
+                </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Cart -->
-      <a routerLink="/cart" class="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-xl cursor-pointer relative transition-all group">
-        <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            <span class="absolute -top-2 -right-2 bg-action text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg shadow-action/30 border-2 border-primary-dark">
-                {{ cartItemCount() }}
-            </span>
-        </div>
-        <span class="font-bold text-sm hidden md:inline">Cart</span>
+      <!-- Returns & Orders -->
+      <a routerLink="/orders" class="flex flex-col items-start leading-none px-3 py-2 rounded-sm border border-transparent hover:border-neutral-200 transition-all cursor-pointer">
+        <span class="text-[10px] text-neutral-500 font-bold">Returns</span>
+        <span class="font-bold text-sm">& Orders</span>
       </a>
-    </nav>
+
+      <!-- Universal Cart -->
+      <a routerLink="/cart" class="flex items-end gap-1 px-3 py-2 rounded-sm border border-transparent hover:border-neutral-200 transition-all cursor-pointer relative">
+        <div class="relative mb-0.5">
+          <svg class="w-9 h-9 text-[#222222]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+          <span class="absolute top-2.5 left-1/2 -translate-x-1/2 text-primary text-sm font-black">{{ cartItemCount() }}</span>
+        </div>
+        <span class="font-bold text-sm mb-1">{{ ts.t('nav.cart') }}</span>
+      </a>
+    </div>
   </div>
 
-  <!-- Sub-Header -->
-  <div class="glass-subnav text-sm px-6 py-1.5 flex items-center gap-8 overflow-x-auto scrollbar-hide font-medium tracking-tight">
-    <div (click)="showSidebar.set(true)" class="flex items-center gap-2 font-bold cursor-pointer hover:bg-white/10 px-3 py-1 rounded-lg transition-all">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-      </svg>
+  <!-- Tier 3: Category Sub-Nav Bar -->
+  <div class="h-10 bg-[#F5E7C6] flex items-center px-4 gap-6 overflow-x-auto scrollbar-hide text-[#222222]/90 border-b border-neutral-200">
+    <div (click)="showSidebar.set(true)" class="flex items-center gap-1.5 cursor-pointer font-bold text-xs hover:text-primary transition-all whitespace-nowrap px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
       All
     </div>
-    <a routerLink="/products" [queryParams]="{deals: true}" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.deals') }}</a>
-    <a routerLink="/help" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.help') }}</a>
-    <a routerLink="/wishlist" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.wishlist') }}</a>
-    <a routerLink="/gift-cards" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.giftcards') }}</a>
-    <a routerLink="/sell" class="hover:text-action-light transition-colors whitespace-nowrap">{{ ts.t('nav.sell') }}</a>
+    <div class="flex items-center gap-1 text-xs font-medium">
+        <a routerLink="/products" [queryParams]="{deals: true}" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">{{ ts.t('nav.deals') }}</a>
+        <a routerLink="/help" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">{{ ts.t('nav.help') }}</a>
+        <a routerLink="/wishlist" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">{{ ts.t('nav.wishlist') }}</a>
+        <a routerLink="/gift-cards" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">{{ ts.t('nav.giftcards') }}</a>
+        <a routerLink="/sell" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">{{ ts.t('nav.sell') }}</a>
+        <a (click)="buyAgain()" class="px-2 py-1.5 border border-transparent hover:border-neutral-300 rounded-sm transition-all whitespace-nowrap cursor-pointer">Buy Again</a>
+    </div>
+    <div class="ml-auto text-xs font-bold hover:text-primary cursor-pointer flex items-center gap-2">
+        Shop Luxury Electronics <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </div>
   </div>
 </header>
 
 <app-sidebar *ngIf="showSidebar()" (close)="showSidebar.set(false)"></app-sidebar>
 
-<!-- Main Content -->
-<main class="min-h-screen bg-amazon-bg pb-12">
+<!-- Main Content (Static Desktop Padding) -->
+<main [ngClass]="{'pt-[145px]': showNav(), 'pt-0': !showNav()}" class="min-h-screen bg-neutral-100">
   <router-outlet></router-outlet>
 </main>
 
 <!-- Footer -->
-<footer class="bg-primary-dark text-white text-center py-8">
-  <div class="bg-primary hover:bg-opacity-90 py-4 mb-8 cursor-pointer text-sm" (click)="scrollToTop()">
-    Back to top
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto text-left px-4 text-sm text-gray-300">
-    <div>
-      <h5 class="font-bold text-white mb-2">Get to Know Us</h5>
-      <ul class="space-y-1">
-        <li><a href="#" class="hover:underline">Careers</a></li>
-        <li><a href="#" class="hover:underline">About Chommie</a></li>
-        <li><a href="#" class="hover:underline">Investor Relations</a></li>
-      </ul>
+<footer *ngIf="showNav()" class="bg-[#FAF3E1] text-[#222222] border-t border-neutral-300 mt-20">
+  <div (click)="scrollToTop()" class="bg-[#F5E7C6] py-3 text-center text-xs font-bold cursor-pointer hover:bg-[#ebd9af] transition-colors">Back to top</div>
+  <div class="w-full px-4 py-10 flex flex-row justify-between items-start gap-12 border-b border-neutral-200">
+    <div class="flex flex-col gap-4 min-w-[240px]">
+        <span class="font-header font-black text-2xl tracking-tighter text-[#222222]">Chommie<span class="text-primary">.za</span></span>
+        <p class="text-xs leading-relaxed text-neutral-500 font-medium max-w-xs">Empowering local communities through vibrant energy and professional polish. Your trusted marketplace for everything local.</p>
     </div>
-    <div>
-      <h5 class="font-bold text-white mb-2">Make Money with Us</h5>
-      <ul class="space-y-1">
-        <li><a href="#" class="hover:underline">Sell products on Chommie</a></li>
-        <li><a href="#" class="hover:underline">Become an Affiliate</a></li>
-        <li><a href="#" class="hover:underline">Advertise Your Products</a></li>
-      </ul>
-    </div>
-    <div>
-      <h5 class="font-bold text-white mb-2">Chommie Payment Products</h5>
-      <ul class="space-y-1">
-        <li><a href="#" class="hover:underline">Chommie BNPL</a></li>
-        <li><a href="#" class="hover:underline">Shop with Points</a></li>
-        <li><a href="#" class="hover:underline">Reload Your Balance</a></li>
-      </ul>
-    </div>
-    <div>
-      <h5 class="font-bold text-white mb-2">Let Us Help You</h5>
-      <ul class="space-y-1">
-        <li><a routerLink="/account" class="hover:underline cursor-pointer">Your Account</a></li>
-        <li><a routerLink="/orders" class="hover:underline cursor-pointer">Your Orders</a></li>
-        <li><a routerLink="/help" class="hover:underline cursor-pointer">Shipping Rates & Policies</a></li>
-        <li><a href="#" class="hover:underline">Help</a></li>
-      </ul>
+    <div class="flex flex-wrap gap-x-16 gap-y-8 flex-grow">
+        <div class="space-y-4"><h5 class="font-black text-[11px] uppercase tracking-[0.15em] text-neutral-400">Company</h5><ul class="flex flex-col gap-2 text-xs font-bold text-neutral-700 uppercase tracking-tighter"><li><a href="#" class="hover:text-primary transition-all">About Chommie</a></li><li><a href="#" class="hover:text-primary transition-all">Careers</a></li><li><a href="#" class="hover:text-primary transition-all">Press</a></li></ul></div>
+        <div class="space-y-4"><h5 class="font-black text-[11px] uppercase tracking-[0.15em] text-neutral-400">Partner</h5><ul class="flex flex-col gap-2 text-xs font-bold text-neutral-700 uppercase tracking-tighter"><li><a routerLink="/sell" class="hover:text-primary transition-all">Sell with Us</a></li><li><a href="#" class="hover:text-primary transition-all">Vendor Portal</a></li><li><a href="#" class="hover:text-primary transition-all">Affiliates</a></li></ul></div>
+        <div class="space-y-4"><h5 class="font-black text-[11px] uppercase tracking-[0.15em] text-neutral-400">Support</h5><ul class="flex flex-col gap-2 text-xs font-bold text-neutral-700 uppercase tracking-tighter"><li><a routerLink="/help" class="hover:text-primary transition-all">Help Center</a></li><li><a routerLink="/orders" class="hover:text-primary transition-all">Your Orders</a></li><li><a routerLink="/account" class="hover:text-primary transition-all">Your Account</a></li></ul></div>
+        <div class="space-y-4"><h5 class="font-black text-[11px] uppercase tracking-[0.15em] text-neutral-400">Financial</h5><ul class="flex flex-col gap-2 text-xs font-bold text-neutral-700 uppercase tracking-tighter"><li><a routerLink="/bnpl" class="hover:text-primary transition-all">BNPL Service</a></li><li><a routerLink="/bnpl" class="hover:text-primary transition-all">Trust Score</a></li><li><a href="#" class="hover:text-primary transition-all">Trust Coins</a></li></ul></div>
     </div>
   </div>
-  <div class="mt-8 pt-8 border-t border-gray-700 text-xs text-gray-400">
-    &copy; 2024-2026, Chommie, Inc. or its affiliates
+  <div class="w-full px-4 py-6 flex flex-row justify-between items-center gap-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+    <div class="flex flex-wrap justify-center gap-x-8 gap-y-2"><a href="#" class="hover:text-primary transition-colors tracking-tighter">Conditions of Use</a><a href="#" class="hover:text-primary transition-colors tracking-tighter">Privacy Notice</a><a href="#" class="hover:text-primary transition-colors tracking-tighter">Interest-Based Ads</a></div>
+    <p>&copy; 2026 CHOMMIE INC. All rights reserved.</p>
   </div>
 </footer>
 
 <!-- Modals -->
-<!-- Location Modal -->
-<div *ngIf="showLocationModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-scale-up">
-        <div class="bg-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="font-bold text-lg text-[#111111]">Choose your location</h3>
-            <button (click)="showLocationModal.set(false)" class="text-gray-500 hover:text-gray-700 font-bold text-xl">×</button>
+<div *ngIf="showLocationModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-fade-in">
+    <div class="w-full max-w-[375px] bg-white rounded-lg shadow-2xl overflow-hidden animate-scale-up border border-neutral-300">
+        <div class="bg-neutral-100 px-6 py-4 border-b border-neutral-200 flex justify-between items-center">
+            <h3 class="text-base font-bold text-[#222222]">Choose your location</h3>
+            <button (click)="showLocationModal.set(false)" class="text-neutral-500 hover:text-[#222222] text-2xl leading-none">&times;</button>
         </div>
-        <div class="p-6">
-            <p class="text-sm text-gray-600 mb-4">Delivery options and speeds may vary for different locations.</p>
+        <div class="p-6 space-y-4 text-left">
+            <p class="text-xs text-neutral-600 leading-relaxed">Delivery options and speeds may vary for different locations.</p>
             <div class="space-y-2">
-                <button (click)="updateLocation('South Africa')" class="w-full text-left p-3 rounded border hover:border-action hover:bg-orange-50 transition-colors flex justify-between items-center" [class.border-action]="currentLocation() === 'South Africa'" [class.bg-orange-50]="currentLocation() === 'South Africa'">
-                    <span>South Africa (Default)</span>
-                    <span *ngIf="currentLocation() === 'South Africa'" class="text-green-600 font-bold">✓</span>
+                <button (click)="updateLocation('South Africa')" [ngClass]="currentLocation() === 'South Africa' ? 'border-primary bg-orange-50' : 'border-neutral-200 hover:bg-neutral-50'" class="w-full text-left p-3 rounded-[3px] border flex justify-between items-center transition-all group">
+                    <span class="text-sm font-medium text-[#222222]">South Africa</span>
+                    <span *ngIf="currentLocation() === 'South Africa'" class="w-2 h-2 rounded-full bg-primary"></span>
                 </button>
-                <button (click)="updateLocation('United States')" class="w-full text-left p-3 rounded border border-gray-300 hover:border-action hover:bg-orange-50 transition-colors">United States</button>
-                <button (click)="updateLocation('United Kingdom')" class="w-full text-left p-3 rounded border border-gray-300 hover:border-action hover:bg-orange-50 transition-colors">United Kingdom</button>
+                <button (click)="updateLocation('United States')" [ngClass]="currentLocation() === 'United States' ? 'border-primary bg-orange-50' : 'border-neutral-200 hover:bg-neutral-50'" class="w-full text-left p-3 rounded-[3px] border flex justify-between items-center transition-all group opacity-60">
+                    <span class="text-sm font-medium text-[#222222]">United States</span>
+                    <span *ngIf="currentLocation() === 'United States'" class="w-2 h-2 rounded-full bg-primary"></span>
+                </button>
             </div>
-            <div class="mt-6 flex justify-end">
-                <button (click)="showLocationModal.set(false)" class="bg-[#F0C14B] border border-[#a88734] rounded-[8px] py-1.5 px-6 text-sm shadow-sm font-medium hover:bg-[#F4D078]">Done</button>
-            </div>
+        </div>
+        <div class="px-6 py-4 bg-neutral-50 border-t border-neutral-200 flex justify-end">
+            <button (click)="showLocationModal.set(false)" class="btn-primary py-1.5 px-6 rounded-[3px] text-xs font-normal">Done</button>
         </div>
     </div>
 </div>
 
-<!-- Language Modal -->
-<div *ngIf="showLanguageModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-scale-up">
-        <div class="bg-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="font-bold text-lg text-[#111111]">Language Settings</h3>
-            <button (click)="showLanguageModal.set(false)" class="text-gray-500 hover:text-gray-700 font-bold text-xl">×</button>
+<div *ngIf="showLanguageModal()" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-fade-in">
+    <div class="w-full max-w-[375px] bg-white rounded-lg shadow-2xl overflow-hidden animate-scale-up border border-neutral-300">
+        <div class="bg-neutral-100 px-6 py-4 border-b border-neutral-200 flex justify-between items-center">
+            <h3 class="text-base font-bold text-[#222222]">Language Settings</h3>
+            <button (click)="showLanguageModal.set(false)" class="text-neutral-500 hover:text-[#222222] text-2xl leading-none">&times;</button>
         </div>
-        <div class="p-6">
-            <p class="text-sm text-gray-600 mb-4">Select the language you prefer for browsing, shopping, and communications.</p>
+        <div class="p-6 space-y-4 text-left">
+            <p class="text-xs text-neutral-600 mb-4">Select the language you prefer for browsing and communications.</p>
             <div class="space-y-3">
-                <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="radio" name="lang" [checked]="currentLanguage() === 'EN'" (change)="updateLanguage('EN')" class="accent-action w-5 h-5">
-                    <span class="group-hover:text-action">English - EN</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="radio" name="lang" [checked]="currentLanguage() === 'ZU'" (change)="updateLanguage('ZU')" class="accent-action w-5 h-5">
-                    <span class="group-hover:text-action">isiZulu - ZU</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="radio" name="lang" [checked]="currentLanguage() === 'AF'" (change)="updateLanguage('AF')" class="accent-action w-5 h-5">
-                    <span class="group-hover:text-action">Afrikaans - AF</span>
+                <label *ngFor="let l of [{c:'EN', n:'English'}, {c:'ZU', n:'isiZulu'}, {c:'AF', n:'Afrikaans'}]" class="flex items-center justify-between p-3 rounded-[3px] border border-neutral-200 hover:bg-neutral-50 cursor-pointer transition-all group" [class.bg-orange-50]="currentLanguage() === l.c" [class.border-primary]="currentLanguage() === l.c">
+                    <span class="text-sm font-medium text-[#222222]">{{ l.n }}</span>
+                    <input type="radio" name="lang" [checked]="currentLanguage() === l.c" (change)="updateLanguage(l.c)" class="accent-primary w-4 h-4">
                 </label>
             </div>
-            <div class="mt-6 flex justify-end">
-                <button (click)="showLanguageModal.set(false)" class="bg-[#F0C14B] border border-[#a88734] rounded-[8px] py-1.5 px-6 text-sm shadow-sm font-medium hover:bg-[#F4D078]">Save Changes</button>
-            </div>
+        </div>
+        <div class="px-6 py-4 bg-neutral-50 border-t border-neutral-200 flex justify-end">
+            <button (click)="showLanguageModal.set(false)" class="btn-primary py-1.5 px-6 rounded-[3px] text-xs font-normal">Save Changes</button>
         </div>
     </div>
 </div>

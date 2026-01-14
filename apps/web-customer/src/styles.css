@@ -1,88 +1,134 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1B4332;
-  --color-primary-dark: #0D2219;
-  --color-primary-light: #2D6A4F;
-  
-  --color-action: #A0522D;
-  --color-action-hover: #8B4513;
-  --color-action-light: #CD853F;
-  
-  --color-amazon-bg: #F4F7F6;
-  --color-amazon-link: #1B4332;
-  --color-amazon-link-hover: #A0522D;
+  /* Typography - Amazon Style */
+  --font-header: "Amazon Ember", "Open Sans", Arial, sans-serif;
+  --font-body: "Amazon Ember", "Open Sans", Arial, sans-serif;
+  --font-accent: "Amazon Ember", "Open Sans", Arial, sans-serif;
 
-  --font-inter: "Inter", sans-serif;
+  /* New Color Scheme */
+  --color-primary: #FF6D1F; /* Vibrant Orange */
+  --color-primary-hover: #E55C15;
+  --color-primary-light: #FF8F50;
+  --color-primary-dark: #CC5517;
+
+  --color-accent: #FF6D1F; /* Mapping Accent to Primary for consistency */
+  --color-accent-hover: #E55C15;
+  --color-accent-light: #FF8F50;
+
+  --color-cyber-teal: #222222; /* Re-mapped to Dark Text for contrast */
+  --color-cyber-lime: #FF6D1F; /* Re-mapped to Orange */
+
+  --color-deep-indigo: #F5E7C6; /* Darker Beige/Gold */
+  --color-deep-ocean: #FAF3E1; /* Light Beige/Cream Background */
+  --color-deep-purple: #F5E7C6; /* Secondary Background */
+
+  /* Neutrals */
+  --color-neutral-charcoal: #222222;
+  --color-neutral-silver: #222222; /* Text is now dark */
+  --color-neutral-white: #FFFFFF;
+
+  /* Legacy / Functional Colors */
+  --color-amazon-bg: #FAF3E1;
+  --color-action: #FF6D1F;
+  --color-action-hover: #E55C15;
+  --color-action-light: #FF8F50;
+  
+  /* Gradients - Subtle Warmth */
+  --image-gradient-main: linear-gradient(to bottom, #FAF3E1, #F5E7C6);
 }
 
 @layer base {
   body {
-    @apply font-inter bg-amazon-bg text-[#1A1A1A] antialiased;
+    @apply font-body bg-deep-ocean text-neutral-charcoal antialiased selection:bg-primary selection:text-white;
+    background-color: var(--color-deep-ocean);
+    color: #222222;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-header font-bold text-neutral-charcoal;
+    color: #222222;
   }
 }
 
 @layer components {
-  /* Premium Liquid Glass Header */
+  /* Glass Morphism / Card Style - Amazon Flat Style */
+  .glass-panel {
+    @apply bg-white border border-neutral-300 shadow-sm rounded-lg;
+    /* Removed backdrop-blur and high transparency */
+  }
+  
   .glass-header {
-    background-color: color-mix(in srgb, var(--color-primary) 90%, transparent);
-    backdrop-filter: blur(24px);
-    @apply border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+    background: #FAF3E1; /* Solid Cream Background */
+    @apply border-b border-neutral-300 z-50;
   }
 
   .glass-subnav {
-    background-color: color-mix(in srgb, #143628 95%, transparent);
-    backdrop-filter: blur(16px);
-    @apply border-b border-white/5 text-white/90;
+    background-color: #FAF3E1;
+    @apply border-b border-neutral-300 text-neutral-charcoal/90;
   }
 
   /* Seamless Search Bar */
   .seamless-search {
-    @apply flex items-center bg-white/10 hover:bg-white/15 focus-within:bg-white focus-within:ring-2 focus-within:ring-action/50 transition-all duration-300 rounded-xl overflow-hidden;
+    @apply flex items-center bg-white hover:bg-white focus-within:ring-2 focus-within:ring-primary/50 transition-all duration-300 rounded-lg overflow-hidden border border-neutral-300 shadow-inner;
   }
 
-  .search-input {
-    @apply bg-transparent text-white placeholder-white/50 px-4 py-2 w-full outline-none text-sm;
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white font-normal py-2 px-4 rounded-md tracking-normal text-sm
+           shadow-sm hover:shadow active:scale-95 transition-all duration-200 cursor-pointer border border-transparent;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-neutral-300 text-neutral-charcoal font-normal py-2 px-4 rounded-md tracking-normal text-sm
+           hover:bg-neutral-50 shadow-sm transition-all duration-200 cursor-pointer;
+  }
+
+  /* Animations */
+  @keyframes slide-right {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes scale-up {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
   }
   
-  .seamless-search:focus-within .search-input {
-    @apply text-black placeholder-gray-400;
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
-  /* Unique Card Design: Amazon Pattern + Modern Polish */
-  .product-card {
-    @apply bg-white border border-gray-100 rounded-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] transition-all duration-500 hover:-translate-y-1 overflow-hidden;
+  .animate-slide-right { animation: slide-right 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-scale-up { animation: scale-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-fade-in { animation: fade-in 0.2s ease-out; }
+
+  /* Utilities */
+  .text-neon {
+    /* Subtle shadow for light mode instead of neon glow */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    color: var(--color-primary);
   }
 
-  .glass-btn {
-    @apply bg-action hover:bg-action-hover text-white font-bold py-2 px-6 rounded-xl shadow-lg shadow-action/20 active:scale-95 transition-all duration-200;
-  }
-
-  /* Glass Panels for Dropdowns/Modals */
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-2xl border border-white/40 rounded-2xl shadow-2xl;
-  }
-
-  /* Custom Scrollbar for seamless look */
+  /* Scrollbar */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-deep-ocean;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/50 rounded-full hover:bg-primary;
+  }
 }
-
-@keyframes slide-right {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
-}
-
-@keyframes slide-up {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes scale-up {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.animate-slide-right { animation: slide-right 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-scale-up { animation: scale-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }

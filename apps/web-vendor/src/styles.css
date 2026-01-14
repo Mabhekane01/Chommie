@@ -1,63 +1,96 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1B4332;
-  --color-primary-dark: #0D2219;
-  --color-primary-light: #2D6A4F;
+  /* Typography - Amazon Style */
+  --font-header: "Amazon Ember", "Open Sans", Arial, sans-serif;
+  --font-body: "Amazon Ember", "Open Sans", Arial, sans-serif;
+  --font-accent: "Amazon Ember", "Open Sans", Arial, sans-serif;
+
+  /* New Color Scheme */
+  --color-primary: #FF6D1F; /* Vibrant Orange */
+  --color-primary-hover: #E55C15;
+  --color-primary-light: #FF8F50;
+  --color-primary-dark: #CC5517;
+
+  --color-accent: #FF6D1F;
+  --color-accent-hover: #E55C15;
+  --color-accent-light: #FF8F50;
+
+  --color-cyber-teal: #222222;
+  --color-cyber-lime: #FF6D1F;
+
+  --color-deep-indigo: #F5E7C6;
+  --color-deep-ocean: #FAF3E1;
+  --color-deep-purple: #F5E7C6;
+
+  /* Neutrals */
+  --color-neutral-charcoal: #222222;
+  --color-neutral-silver: #222222;
+  --color-neutral-white: #FFFFFF;
+
+  /* Legacy / Functional Colors */
+  --color-amazon-bg: #FAF3E1;
+  --color-action: #FF6D1F;
+  --color-action-hover: #E55C15;
+  --color-action-light: #FF8F50;
   
-  --color-action: #A0522D;
-  --color-action-hover: #8B4513;
-  --color-action-light: #CD853F;
-
-  /* Glass Colors */
-  --color-glass-light: rgba(255, 255, 255, 0.4);
-  --color-glass-dark: rgba(20, 20, 20, 0.6);
-  --color-glass-green: rgba(27, 67, 50, 0.75);
-  --color-glass-border: rgba(255, 255, 255, 0.5);
-
-  --color-amazon-bg: #Eef2f3;
-  --color-amazon-link: #1B4332;
-  --color-amazon-link-hover: #A0522D;
-
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Gradients */
+  --image-gradient-main: linear-gradient(to bottom, #FAF3E1, #F5E7C6);
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-glass-light backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)];
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+@layer base {
+  body {
+    @apply font-body bg-deep-ocean text-neutral-charcoal antialiased selection:bg-primary selection:text-white;
+    background-color: var(--color-deep-ocean);
+    color: #222222;
+    min-height: 100vh;
   }
   
-  .glass-dark {
-    @apply bg-glass-dark backdrop-blur-xl border border-white/10 shadow-lg text-white;
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.8));
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-header font-bold text-neutral-charcoal;
+    color: #222222;
   }
+}
 
-  .glass-green {
-    @apply backdrop-blur-xl border-b border-white/20 shadow-lg text-white;
-    background: linear-gradient(135deg, rgba(27, 67, 50, 0.85), rgba(13, 34, 25, 0.9));
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  }
-
+@layer components {
+  /* Glass Morphism / Card Style - Amazon Flat Style */
   .glass-panel {
-    @apply backdrop-blur-2xl border border-white/60 shadow-lg rounded-xl;
-    background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
-    box-shadow: 
-      0 4px 24px -1px rgba(0, 0, 0, 0.1),
-      inset 0 0 20px rgba(255, 255, 255, 0.5);
+    @apply bg-white border border-neutral-300 shadow-sm rounded-lg;
   }
   
-  .glass-btn {
-    @apply bg-action text-white shadow-lg backdrop-blur-md hover:bg-action-hover active:scale-95 transition-all duration-200 border border-white/20;
-    background-image: linear-gradient(to bottom right, rgba(255,255,255,0.2), rgba(0,0,0,0.1));
-    box-shadow: 0 4px 15px rgba(160, 82, 45, 0.4);
+  .glass-header {
+    background: #FAF3E1;
+    @apply border-b border-neutral-300 z-50;
   }
-}
 
-body {
-  @apply bg-amazon-bg text-gray-900;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(27, 67, 50, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(160, 82, 45, 0.05) 0px, transparent 50%);
-  background-attachment: fixed;
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white font-normal py-2 px-4 rounded-md tracking-normal text-sm
+           shadow-sm hover:shadow active:scale-95 transition-all duration-200 cursor-pointer border border-transparent;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-neutral-300 text-neutral-charcoal font-normal py-2 px-4 rounded-md tracking-normal text-sm
+           hover:bg-neutral-50 shadow-sm transition-all duration-200 cursor-pointer;
+  }
+
+  /* Utilities */
+  .text-neon {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    color: var(--color-primary);
+  }
+
+  /* Scrollbar */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-deep-ocean;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/50 rounded-full hover:bg-primary;
+  }
 }

@@ -22,8 +22,18 @@ export class RecommendationController {
     return this.recommendationClient.send({ cmd: 'get_product_comparison' }, productId);
   }
 
+  @Get('also-viewed/:productId')
+  getAlsoViewed(@Param('productId') productId: string) {
+    return this.recommendationClient.send({ cmd: 'get_also_viewed' }, productId);
+  }
+
   @Get('user/:userId')
   getPersonalized(@Param('userId') userId: string) {
     return this.recommendationClient.send({ cmd: 'get_personalized_recommendations' }, userId);
+  }
+
+  @Get('insight/:productId')
+  getProductInsight(@Param('productId') productId: string) {
+    return this.recommendationClient.send({ cmd: 'get_product_insight' }, productId);
   }
 }

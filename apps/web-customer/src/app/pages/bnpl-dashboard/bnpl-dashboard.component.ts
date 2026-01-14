@@ -7,101 +7,116 @@ import { BnplService, TrustProfile } from '../../services/bnpl.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8">My BNPL Dashboard</h1>
-
-      <!-- Trust Score Card -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-l-4" 
-           [ngClass]="getScoreColor(profile()?.currentScore || 0)">
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-bold text-gray-800">Trust Score</h2>
-            <p class="text-sm text-gray-500">Based on your payment history</p>
-          </div>
-          <div class="text-right">
-            <div class="text-4xl font-bold">{{ profile()?.currentScore || 0 }}</div>
-            <div class="text-sm font-semibold uppercase tracking-wide" [ngClass]="getTierColor(profile()?.tier || 'BRONZE')">
-              {{ profile()?.tier || 'BRONZE' }}
-            </div>
-          </div>
-        </div>
+    <div class="min-h-screen bg-white text-neutral-charcoal pb-32 pt-10">
+      <div class="w-full px-6 animate-fade-in">
         
-        <div class="mt-4 pt-4 border-t flex justify-between text-sm">
-          <div>
-            <span class="block text-gray-500">Credit Limit</span>
-            <span class="font-bold text-lg">R{{ profile()?.creditLimit || 500 }}</span>
-          </div>
-          <div class="text-right">
-            <span class="block text-gray-500">On-Time Payments</span>
-            <span class="font-bold text-lg">{{ profile()?.onTimePayments || 0 }}</span>
-          </div>
+        <!-- Header -->
+        <div class="mb-12 border-b border-neutral-200 pb-6 flex flex-col md:flex-row justify-between items-end gap-4">
+           <div>
+               <h1 class="text-3xl font-normal text-neutral-charcoal mb-2">
+                  Chommie BNPL
+               </h1>
+               <p class="text-sm text-neutral-600">
+                  Manage your credit, installments, and trust score.
+               </p>
+           </div>
+           <button class="text-sm text-primary hover:underline">How it works</button>
         </div>
-      </div>
 
-      <!-- Active Plans -->
-      <h2 class="text-2xl font-bold mb-4">Active Payment Plans</h2>
-      
-      <div *ngIf="loading()" class="text-center py-8">Loading plans...</div>
+        <!-- Score & Limit Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+           <!-- Credit Limit -->
+           <div class="border border-neutral-300 rounded-lg p-6 bg-white shadow-sm">
+               <h2 class="text-lg font-bold text-neutral-800 mb-4">Available Credit</h2>
+               <div class="flex items-baseline gap-2 mb-4">
+                   <span class="text-4xl font-normal text-neutral-800">R{{ profile()?.creditLimit || 500 | number:'1.0-0' }}</span>
+                   <span class="text-sm text-neutral-500">limit</span>
+               </div>
+               
+               <div class="w-full bg-neutral-200 rounded-full h-2.5 mb-2">
+                   <div class="bg-emerald-600 h-2.5 rounded-full transition-all duration-1000" [style.width]="((profile()?.currentScore || 0) / 1000 * 100) + '%'"></div>
+               </div>
+               <p class="text-xs text-neutral-500">Based on your payment history and trust score.</p>
+           </div>
 
-      <div *ngIf="!loading() && plans().length === 0" class="text-center py-8 bg-white rounded shadow">
-        <p class="text-gray-500">You have no active payment plans.</p>
-      </div>
-
-      <div class="space-y-6">
-        <div *ngFor="let plan of plans()" class="bg-white rounded-lg shadow overflow-hidden">
-          <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
-            <div>
-              <span class="font-bold text-gray-700">Order #{{ plan.orderId.substring(0, 8) }}</span>
-              <span class="ml-2 text-xs text-gray-500">{{ plan.createdAt | date }}</span>
-            </div>
-            <div class="px-2 py-1 rounded text-xs font-bold" 
-                 [ngClass]="plan.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-              {{ plan.status }}
-            </div>
-          </div>
-
-          <div class="p-4">
-            <div class="flex justify-between mb-4">
-              <div>
-                <p class="text-sm text-gray-500">Total Amount</p>
-                <p class="font-bold">R{{ plan.totalAmount | number:'1.2-2' }}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-sm text-gray-500">Remaining Balance</p>
-                <p class="font-bold text-green-700">R{{ plan.remainingBalance | number:'1.2-2' }}</p>
-              </div>
-            </div>
-
-            <!-- Installments -->
-            <div class="mt-4">
-              <h4 class="font-semibold text-sm mb-2 text-gray-600">Installments</h4>
-              <div class="space-y-2">
-                <div *ngFor="let inst of plan.installments; let i = index" 
-                     class="flex justify-between items-center text-sm p-2 rounded"
-                     [ngClass]="inst.status === 'PAID' ? 'bg-green-50' : 'bg-gray-50'">
-                  <div class="flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                          [ngClass]="inst.status === 'PAID' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'">
-                      {{ i + 1 }}
-                    </span>
-                    <span [ngClass]="inst.status === 'PAID' ? 'text-gray-400 line-through' : ''">
-                      Due {{ inst.dueDate | date:'MMM d' }}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium">R{{ inst.amount | number:'1.2-2' }}</span>
-                    <span *ngIf="inst.status === 'PAID'" class="text-green-600">✓ Paid</span>
-                    <button *ngIf="inst.status !== 'PAID'" 
-                            (click)="payInstallment(plan.id, i)"
-                            class="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
-                      Pay Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+           <!-- Trust Score -->
+           <div class="border border-neutral-300 rounded-lg p-6 bg-white shadow-sm flex items-center justify-between">
+               <div>
+                   <h2 class="text-lg font-bold text-neutral-800 mb-2">Trust Score</h2>
+                   <p class="text-sm text-neutral-600 mb-4">{{ profile()?.tier || 'BRONZE' }} TIER</p>
+                   <p class="text-xs text-neutral-500">On-time payments: <span class="font-bold text-emerald-700">{{ profile()?.onTimePayments || 0 }}</span></p>
+               </div>
+               <div class="relative w-32 h-32 flex items-center justify-center rounded-full border-4" [ngClass]="getScoreColor(profile()?.currentScore || 0)">
+                   <div class="text-center">
+                       <div class="text-2xl font-bold text-neutral-800">{{ profile()?.currentScore || 0 }}</div>
+                       <div class="text-xs text-neutral-500">/ 1000</div>
+                   </div>
+               </div>
+           </div>
         </div>
+
+        <!-- Active Installments -->
+        <div>
+           <h2 class="text-xl font-bold text-neutral-800 mb-6">Active Payment Plans</h2>
+           
+           <div *ngIf="loading()" class="py-20 flex justify-center">
+               <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+           </div>
+
+           <div *ngIf="!loading() && plans().length === 0" class="border border-neutral-300 rounded-lg p-10 text-center bg-neutral-50">
+               <p class="text-neutral-700 mb-2">You have no active payment plans.</p>
+               <button class="btn-primary text-sm py-1.5 px-4 rounded-md shadow-sm">Shop Now</button>
+           </div>
+
+           <div class="space-y-6">
+               <div *ngFor="let plan of plans()" class="border border-neutral-300 rounded-lg overflow-hidden bg-white shadow-sm">
+                   <div class="bg-neutral-50 border-b border-neutral-200 px-6 py-3 flex justify-between items-center text-sm">
+                       <div>
+                           <span class="font-bold text-neutral-700 block">Plan #{{ plan.orderId.substring(0, 8).toUpperCase() }}</span>
+                           <span class="text-xs text-neutral-500">Created {{ plan.createdAt | date:'mediumDate' }}</span>
+                       </div>
+                       <span class="px-2 py-1 rounded text-xs font-bold border" 
+                             [ngClass]="plan.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-neutral-100 text-neutral-600 border-neutral-200'">
+                           {{ plan.status }}
+                       </span>
+                   </div>
+
+                   <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <!-- Summary -->
+                       <div>
+                           <div class="flex justify-between text-sm mb-2">
+                               <span class="text-neutral-600">Total Amount</span>
+                               <span class="font-bold">R{{ plan.totalAmount | number:'1.0-0' }}</span>
+                           </div>
+                           <div class="flex justify-between text-sm mb-4">
+                               <span class="text-neutral-600">Remaining Balance</span>
+                               <span class="font-bold text-primary">R{{ plan.remainingBalance | number:'1.0-0' }}</span>
+                           </div>
+                           <div class="w-full bg-neutral-200 rounded-full h-2">
+                               <div class="bg-primary h-2 rounded-full" [style.width]="((plan.totalAmount - plan.remainingBalance) / plan.totalAmount * 100) + '%'"></div>
+                           </div>
+                       </div>
+
+                       <!-- Installments -->
+                       <div class="space-y-3">
+                           <h3 class="text-sm font-bold text-neutral-800 mb-2">Payment Schedule</h3>
+                           <div *ngFor="let inst of plan.installments; let i = index" class="flex justify-between items-center text-sm border-b border-neutral-100 pb-2 last:border-0">
+                               <div>
+                                   <div class="font-medium text-neutral-800">Installment {{ i + 1 }}</div>
+                                   <div class="text-xs text-neutral-500">Due {{ inst.dueDate | date:'mediumDate' }}</div>
+                               </div>
+                               <div class="flex items-center gap-4">
+                                   <span class="font-bold">R{{ inst.amount | number:'1.0-0' }}</span>
+                                   <button *ngIf="inst.status !== 'PAID'" (click)="payInstallment(plan.id, i)" class="btn-primary text-xs py-1 px-3 rounded shadow-sm">Pay</button>
+                                   <span *ngIf="inst.status === 'PAID'" class="text-emerald-700 font-bold text-xs bg-emerald-50 px-2 py-1 rounded">PAID</span>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+        </div>
+
       </div>
     </div>
   `
@@ -122,7 +137,6 @@ export class BnplDashboardComponent implements OnInit {
 
   loadData() {
     this.loading.set(true);
-    // ForkJoin would be better, but doing sequential for simplicity
     this.bnplService.getProfile(this.userId).subscribe(profile => {
       this.profile.set(profile);
     });
@@ -134,33 +148,23 @@ export class BnplDashboardComponent implements OnInit {
   }
 
   payInstallment(planId: string, index: number) {
-    if (!confirm('Are you sure you want to pay this installment now?')) return;
+    if (!confirm('Proceed with payment?')) return;
 
     this.bnplService.payInstallment(planId, index).subscribe({
       next: () => {
-        alert('Payment successful! Your Trust Score will be updated.');
-        this.loadData(); // Refresh data
+        alert('Payment successful');
+        this.loadData();
       },
       error: (err) => {
-        alert('Payment failed. Please try again.');
+        alert('Payment failed');
         console.error(err);
       }
     });
   }
 
   getScoreColor(score: number): string {
-    if (score >= 800) return 'border-l-purple-600';
-    if (score >= 600) return 'border-l-yellow-500';
-    if (score >= 300) return 'border-l-gray-400';
-    return 'border-l-orange-700';
-  }
-
-  getTierColor(tier: string): string {
-    switch (tier) {
-      case 'PLATINUM': return 'text-purple-600';
-      case 'GOLD': return 'text-yellow-600';
-      case 'SILVER': return 'text-gray-500';
-      default: return 'text-orange-700';
-    }
+    if (score >= 800) return 'border-emerald-500 text-emerald-700';
+    if (score >= 600) return 'border-amber-400 text-amber-700';
+    return 'border-red-500 text-red-700';
   }
 }
