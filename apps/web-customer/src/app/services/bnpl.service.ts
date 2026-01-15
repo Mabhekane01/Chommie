@@ -4,7 +4,28 @@ import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export enum TrustTier {
-...
+  BRONZE = 'BRONZE',
+  SILVER = 'SILVER',
+  GOLD = 'GOLD',
+  PLATINUM = 'PLATINUM',
+}
+
+export interface TrustProfile {
+  userId: string;
+  currentScore: number;
+  tier: TrustTier;
+  totalPayments: number;
+  onTimePayments: number;
+  totalOrders: number;
+  averagePaymentDelayDays: number;
+  disputeCount: number;
+  lastCalculatedAt: Date;
+  creditLimit: number;
+  coinsBalance: number;
+}
+
+@Injectable({
+  providedIn: 'root'
 })
 export class BnplService {
   private apiUrl = `${environment.apiUrl}/bnpl`;
