@@ -204,21 +204,25 @@ export class OrdersService {
     const vendorOrdersMap = new Map<string, any>();
 
     for (const item of items) {
+        if (!item.order) continue; // Skip items without associated orders
+        
         if (!vendorOrdersMap.has(item.order.id)) {
             vendorOrdersMap.set(item.order.id, {
-                orderId: item.order.id,
+                id: item.order.id,
                 createdAt: item.order.createdAt,
                 status: item.order.status,
                 customerUserId: item.order.userId,
-                shippingAddress: item.order.shippingAddress,
-                totalAmount: 0, // Calculated for this vendor only
+                shippingAddress: item.order.shippingAddress || 'No Address Provided',
+                totalAmount: 0,
                 items: []
             });
         }
         
         const vendorOrder = vendorOrdersMap.get(item.order.id);
         vendorOrder.items.push({
-            productName: item.productName,
+            productId: item.productId,
+            productName: item.productName || 'Unknown Product',
+            productImage: item.productImage || '', 
             quantity: item.quantity,
             price: item.price
         });

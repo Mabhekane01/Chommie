@@ -8,11 +8,21 @@ export class AuthController {
 
   @MessagePattern({ cmd: 'login' })
   async login(@Payload() data: any) {
-    const user = await this.authService.validateUser(data.email, data.password);
-    if (!user) {
-      return { status: 'error', message: 'Invalid credentials' };
+    try {
+        const user = await this.authService.validateUser(data.email, data.password);
+        if (!user) {
+            return { status: 'error', message: 'Invalid credentials' };
+        }
+        return await this.authService.login(user);
+    } catch (e: any) {
+        console.error('Login Error:', e);
+        return { status: 'error', message: e.message };
     }
-    return this.authService.login(user);
+  }
+
+  @MessagePattern({ cmd: 'request_email_verification' })
+  async requestEmailVerification(@Payload() data: { email: string }) {
+    return this.authService.requestEmailVerification(data.email);
   }
 
   @MessagePattern({ cmd: 'register' })
@@ -22,6 +32,29 @@ export class AuthController {
     } catch (e: any) {
       return { status: 'error', message: e.message };
     }
+  }
+
+  @MessagePattern({ cmd: 'verify_otp' })
+  async verifyOtp(@Payload() data: { email: string, otp: string }) {
+    try {
+        return await this.authService.verifyOtp(data);
+    } catch (e: any) {
+        return { status: 'error', message: e.message };
+    }
+  }
+
+  @MessagePattern({ cmd: 'verify_2fa' })
+  async verify2FA(@Payload() data: { email: string, otp: string }) {
+    try {
+        return await this.authService.verify2FA(data);
+    } catch (e: any) {
+        return { status: 'error', message: e.message };
+    }
+  }
+
+  @MessagePattern({ cmd: 'toggle_2fa' })
+  async toggle2FA(@Payload() data: { userId: string, enabled: boolean }) {
+    return this.authService.toggle2FA(data.userId, data.enabled);
   }
 
   @MessagePattern({ cmd: 'validate_token' })
@@ -35,9 +68,9 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'reset_password' })
-  async resetPassword(@Payload() data: { token: string; password: string }) {
+  async resetPassword(@Payload() data: any) {
     try {
-        return await this.authService.resetPassword(data.token, data.password);
+        return await this.authService.resetPassword(data);
     } catch (e: any) {
         return { status: 'error', message: e.message };
     }
@@ -56,6 +89,11 @@ export class AuthController {
   @MessagePattern({ cmd: 'get_profile' })
   async getProfile(@Payload() data: { userId: string }) {
     return this.authService.getProfile(data.userId);
+  }
+
+  @MessagePattern({ cmd: 'update_profile' })
+  async updateProfile(@Payload() data: any) {
+    return this.authService.updateProfile(data);
   }
 
   @MessagePattern({ cmd: 'update_favorite_category' })

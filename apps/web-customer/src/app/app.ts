@@ -13,6 +13,7 @@ import { ProductService } from './services/product.service';
 import { TranslationService } from './services/translation.service';
 import { NotificationService } from './services/notification.service';
 import { BnplService } from './services/bnpl.service';
+import { DeviceService } from './services/device.service';
 
 @Component({
   selector: 'app-root',
@@ -60,7 +61,8 @@ export class App implements OnInit {
     private productService: ProductService,
     public notificationService: NotificationService,
     public ts: TranslationService,
-    private bnplService: BnplService
+    private bnplService: BnplService,
+    public deviceService: DeviceService
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

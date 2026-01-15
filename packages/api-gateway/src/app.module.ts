@@ -11,6 +11,7 @@ import { ReviewController } from './product/review.controller';
 import { WishlistController } from './product/wishlist.controller';
 import { RecommendationController } from './recommendation/recommendation.controller';
 import { NotificationController } from './notifications/notifications.controller';
+import { VendorsController } from './vendors/vendors.controller';
 import { EventsGateway } from './events.gateway';
 
 @Module({
@@ -20,56 +21,56 @@ import { EventsGateway } from './events.gateway';
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3001,
+          host: process.env.AUTH_SERVICE_HOST || 'localhost',
+          port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
         },
       },
       {
         name: 'PRODUCT_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3002,
+          host: process.env.PRODUCT_SERVICE_HOST || 'localhost',
+          port: Number(process.env.PRODUCT_SERVICE_PORT) || 3002,
         },
       },
       {
         name: 'BNPL_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3003,
+          host: process.env.BNPL_SERVICE_HOST || 'localhost',
+          port: Number(process.env.BNPL_SERVICE_PORT) || 3003,
         },
       },
       {
         name: 'ORDER_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3004,
+          host: process.env.ORDER_SERVICE_HOST || 'localhost',
+          port: Number(process.env.ORDER_SERVICE_PORT) || 3004,
         },
       },
       {
         name: 'NOTIFICATION_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3005,
+          host: process.env.NOTIFICATION_SERVICE_HOST || 'localhost',
+          port: Number(process.env.NOTIFICATION_SERVICE_PORT) || 3005,
         },
       },
       {
         name: 'PAYMENT_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3006,
+          host: process.env.PAYMENT_SERVICE_HOST || 'localhost',
+          port: Number(process.env.PAYMENT_SERVICE_PORT) || 3006,
         },
       },
       {
         name: 'RECOMMENDATION_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3007,
+          host: process.env.RECOMMENDATION_SERVICE_HOST || 'localhost',
+          port: Number(process.env.RECOMMENDATION_SERVICE_PORT) || 3007,
         },
       },
     ]),
@@ -84,7 +85,8 @@ import { EventsGateway } from './events.gateway';
     ReviewController, 
     WishlistController, 
     RecommendationController,
-    NotificationController
+    NotificationController,
+    VendorsController
   ],
   providers: [AppService, EventsGateway],
 })

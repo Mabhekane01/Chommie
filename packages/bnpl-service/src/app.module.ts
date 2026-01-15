@@ -12,12 +12,12 @@ import { PaymentPlan } from './payment-plan/entities/payment-plan.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST || 'localhost',
-      port: 5432,
+      port: Number(process.env.POSTGRES_PORT) || 5432,
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'Ntando@postgresql!!522',
       database: process.env.POSTGRES_DB || 'chommie_db',
       entities: [TrustProfile, PaymentPlan],
-      synchronize: true, // Auto-create tables (Dev only)
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     TrustScoreModule,
     PaymentPlanModule,

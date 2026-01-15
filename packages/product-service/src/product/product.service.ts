@@ -2,29 +2,46 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument } from './product.schema';
+import { InboundShipment, InboundShipmentDocument } from './inbound-shipment.schema';
 import { CreateProductDto, UpdateProductDto } from '@chommie/shared-types';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(InboundShipment.name) private shipmentModel: Model<InboundShipmentDocument>,
   ) {}
 
+  async createInboundShipment(data: { vendorId: string, items: any[] }) {
+    const shipment = new this.shipmentModel({
+        ...data,
+        status: 'CREATED'
+    });
+    return shipment.save();
+  }
+
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const createdProduct = new this.productModel(createProductDto);
+    const productData = {
+        ...createProductDto,
+        approvalStatus: 'PENDING_REVIEW', // Force review
+        stock: 0, // Force 0 stock until inbound shipment received (FBC model)
+        fulfillmentType: 'FBC'
+    };
+    const createdProduct = new this.productModel(productData);
     return createdProduct.save();
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productModel.find().exec();
+    return this.productModel.find({ approvalStatus: 'APPROVED' }).exec();
   }
 
   async findOne(id: string): Promise<Product> {
-    return this.productModel.findById(id).exec();
+    // Customers can only see Approved products. Admin/Vendor logic might need bypass, but for now strict.
+    return this.productModel.findOne({ _id: id, approvalStatus: 'APPROVED' }).exec();
   }
 
   async findByIds(ids: string[]): Promise<Product[]> {
-    return this.productModel.find({ _id: { $in: ids } }).exec();
+    return this.productModel.find({ _id: { $in: ids }, approvalStatus: 'APPROVED' }).exec();
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
@@ -38,7 +55,7 @@ export class ProductService {
   }
 
   async findByCategory(category: string): Promise<Product[]> {
-    return this.productModel.find({ category }).exec();
+    return this.productModel.find({ category, approvalStatus: 'APPROVED' }).exec();
   }
 
   async findFiltered(filters: {
@@ -52,7 +69,7 @@ export class ProductService {
     sortOrder?: 'asc' | 'desc';
     query?: string;
   }): Promise<Product[]> {
-    const query: any = {};
+    const query: any = { approvalStatus: 'APPROVED' };
 
     if (filters.category) {
       query.category = filters.category;
@@ -95,7 +112,8 @@ export class ProductService {
   async getDailyDeals(): Promise<Product[]> {
     return this.productModel.find({
       discountPrice: { $exists: true, $gt: 0 },
-      dealEndsAt: { $gt: new Date() }
+      dealEndsAt: { $gt: new Date() },
+      approvalStatus: 'APPROVED'
     }).limit(10).exec();
   }
 
@@ -110,6 +128,7 @@ export class ProductService {
         { description: { $regex: query, $options: 'i' } },
         { category: { $regex: query, $options: 'i' } },
       ],
+      approvalStatus: 'APPROVED'
     }).exec();
   }
 
@@ -120,7 +139,8 @@ export class ProductService {
       $or: [
         { name: { $regex: query, $options: 'i' } },
         { category: { $regex: query, $options: 'i' } }
-      ]
+      ],
+      approvalStatus: 'APPROVED'
     }).limit(10).select('name category').exec();
 
     const suggestions = new Set<string>();

@@ -12,6 +12,21 @@ export class NotificationsController {
     await this.notificationsService.sendOrderConfirmation(email, orderId, totalAmount, userId);
   }
 
+  @EventPattern('send_verification_otp')
+  async handleSendVerificationOtp(@Payload() data: { email: string; otp: string }) {
+    await this.notificationsService.sendVerificationOtp(data.email, data.otp);
+  }
+
+  @EventPattern('send_password_reset_otp')
+  async handleSendPasswordResetOtp(@Payload() data: { email: string; otp: string }) {
+    await this.notificationsService.sendPasswordResetOtp(data.email, data.otp);
+  }
+
+  @EventPattern('send_2fa_otp')
+  async handleSend2FAOtp(@Payload() data: { email: string; otp: string }) {
+    await this.notificationsService.send2FAOtp(data.email, data.otp);
+  }
+
   @MessagePattern({ cmd: 'get_user_notifications' })
   async getUserNotifications(@Payload() data: { userId: string }) {
     return this.notificationsService.getUserNotifications(data.userId);

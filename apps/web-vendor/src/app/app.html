@@ -1,1 +1,115 @@
-<router-outlet></router-outlet>
+<!-- Header: Amazon Seller Central Style -->
+@if (showNav()) {
+  @if (deviceService.isMobile()) {
+    <header class="fixed top-0 left-0 right-0 z-50 flex flex-col shadow-sm bg-[#131921] border-b border-white/10">
+      <!-- Mobile Top Row -->
+      <div class="h-14 px-4 flex items-center justify-between text-white">
+        <div class="flex items-center gap-3">
+          <button (click)="showSidebar.set(true)" class="p-1 hover:bg-white/10 rounded-md transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </button>
+          <a routerLink="/" class="flex items-end">
+            <span class="font-header font-black text-xl tracking-tighter">Chommie<span class="text-primary">.central</span></span>
+          </a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a routerLink="/messages" class="p-2 hover:bg-white/10 rounded-md relative">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </a>
+          <button (click)="logout()" class="p-2 hover:bg-white/10 rounded-md">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </button>
+        </div>
+      </div>
+      <!-- Mobile Sub-Nav (Horizontal Scroll) -->
+      <div class="h-10 px-4 flex items-center gap-6 overflow-x-auto scrollbar-hide text-[11px] font-black uppercase tracking-widest text-white/70 bg-[#232f3e]">
+          <a routerLink="/dashboard" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Home</a>
+          <a routerLink="/inventory" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Inventory</a>
+          <a routerLink="/orders" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Orders</a>
+          <a routerLink="/settings" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Settings</a>
+          <a routerLink="/promotions" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Advertising</a>
+          <a routerLink="/vendor-reviews" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Reviews</a>
+      </div>
+    </header>
+  } @else {
+    <header class="fixed top-0 left-0 right-0 z-50 flex flex-col shadow-md bg-[#131921] border-b border-white/10">
+      <!-- Desktop Top Bar -->
+      <div class="h-16 px-8 flex items-center justify-between text-white">
+        <div class="flex items-center gap-10">
+          <a routerLink="/" class="flex items-end">
+            <span class="font-header font-black text-2xl tracking-tighter">Chommie<span class="text-primary">.central</span></span>
+          </a>
+          
+          <nav class="flex items-center h-full gap-8 text-xs font-black uppercase tracking-[0.15em] text-white/80">
+            <a routerLink="/dashboard" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Dashboard</a>
+            <a routerLink="/inventory" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Inventory</a>
+            <a routerLink="/orders" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Orders</a>
+            <a routerLink="/settings" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Settings</a>
+            <a routerLink="/promotions" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Advertising</a>
+            <a routerLink="/vendor-reviews" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Feedback</a>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-6">
+          <div class="flex flex-col text-right">
+            <span class="text-[10px] text-white/40 uppercase font-black">Vendor Account</span>
+            <span class="text-sm font-bold">{{ vendorName() }}</span>
+          </div>
+          <div class="h-8 w-px bg-white/10"></div>
+          <div class="flex items-center gap-4">
+            <a routerLink="/messages" class="p-2 hover:bg-white/10 rounded-full transition-all relative">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            </a>
+            <button (click)="logout()" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+  }
+}
+
+<!-- Mobile Sidebar Overlay -->
+@if (showSidebar()) {
+  <div class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm animate-fade-in" (click)="showSidebar.set(false)">
+    <div class="w-72 h-full bg-white shadow-2xl animate-slide-right flex flex-col" (click)="$event.stopPropagation()">
+      <div class="p-6 bg-[#131921] text-white flex justify-between items-center">
+        <h3 class="font-black uppercase tracking-widest text-sm">Menu</h3>
+        <button (click)="showSidebar.set(false)" class="text-white/60 hover:text-white text-2xl">&times;</button>
+      </div>
+      <nav class="flex-grow p-4 space-y-2">
+        <a routerLink="/dashboard" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Home</a>
+        <a routerLink="/inventory" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Inventory</a>
+        <a routerLink="/orders" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Orders</a>
+        <a routerLink="/settings" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Settings</a>
+        <a routerLink="/promotions" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Advertising</a>
+        <a routerLink="/vendor-reviews" (click)="showSidebar.set(false)" class="block px-4 py-3 rounded-lg hover:bg-neutral-100 font-bold text-neutral-700 cursor-pointer">Feedback</a>
+      </nav>
+      <div class="p-6 border-t border-neutral-100">
+        <button (click)="logout()" class="w-full py-3 bg-neutral-100 rounded-xl text-xs font-black uppercase tracking-widest text-red-600">Sign Out</button>
+      </div>
+    </div>
+  </div>
+}
+
+<main [ngClass]="{
+  'pt-24': showNav() && deviceService.isMobile(), 
+  'pt-16': showNav() && !deviceService.isMobile(),
+  'pt-0': !showNav()
+}" class="min-h-screen bg-neutral-100">
+  <router-outlet></router-outlet>
+</main>
+
+<footer *ngIf="showNav()" class="bg-white border-t border-neutral-200 py-10 mt-20">
+  <div class="max-w-[1600px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex items-center gap-4">
+      <span class="font-header font-black text-xl tracking-tighter text-neutral-800">Chommie<span class="text-primary">.central</span></span>
+      <span class="text-xs text-neutral-400">© 2026 Nexus Marketplace</span>
+    </div>
+    <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+      <a href="#" class="hover:text-primary transition-colors">Privacy Notice</a>
+      <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+      <a href="#" class="hover:text-primary transition-colors">Developer Portal</a>
+    </div>
+  </div>
+</footer>

@@ -20,13 +20,21 @@ export class VendorService {
   constructor(private http: HttpClient) {}
 
   getOrders(): Observable<VendorOrder[]> {
-    const vendorId = localStorage.getItem('vendor_id') || 'vendor-1'; // Fallback for dev
-    return this.http.get<VendorOrder[]>(`${environment.apiUrl}/orders/vendor/${vendorId}`);
+    const vendorId = localStorage.getItem('vendor_id') || 'vendor-1';
+    return this.http.get<VendorOrder[]>(`${this.apiUrl}/${vendorId}/orders`);
+  }
+
+  updateOrderStatus(orderId: string, status: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/orders/${orderId}/status`, { status });
   }
 
   getProducts(): Observable<any[]> {
     const vendorId = localStorage.getItem('vendor_id') || 'vendor-1';
-    return this.http.get<any[]>(`${environment.apiUrl}/products/vendor/${vendorId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/${vendorId}/products`);
+  }
+
+  getProduct(id: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/products/${id}`);
   }
 
   createProduct(product: any): Observable<any> {
@@ -40,7 +48,15 @@ export class VendorService {
 
   getReviews(): Observable<any[]> {
     const vendorId = localStorage.getItem('vendor_id') || 'vendor-1';
-    return this.http.get<any[]>(`${environment.apiUrl}/reviews/vendor/${vendorId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/${vendorId}/reviews`);
+  }
+
+  getVendorProfile(vendorId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${vendorId}/profile`);
+  }
+
+  respondToReview(reviewId: string, response: string): Observable<any> {
+    return this.http.patch(`${environment.apiUrl}/reviews/${reviewId}/response`, { response });
   }
 
   createCoupon(coupon: any): Observable<any> {
@@ -50,6 +66,14 @@ export class VendorService {
 
   getCoupons(): Observable<any[]> {
     const vendorId = localStorage.getItem('vendor_id') || 'vendor-1';
-    return this.http.get<any[]>(`${environment.apiUrl}/orders/coupons/vendor/${vendorId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/${vendorId}/coupons`);
+  }
+
+  getStoreSettings(vendorId: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/vendors/${vendorId}/settings`);
+  }
+
+  updateStoreSettings(vendorId: string, settings: any): Observable<any> {
+    return this.http.patch(`${environment.apiUrl}/vendors/${vendorId}/settings`, settings);
   }
 }

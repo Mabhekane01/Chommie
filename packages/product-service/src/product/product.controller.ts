@@ -56,8 +56,8 @@ export class ProductController {
   }
 
   @MessagePattern({ cmd: 'get_vendor_products' })
-  findByVendor(@Payload() vendorId: string) {
-    return this.productService.findByVendor(vendorId);
+  findByVendor(@Payload() data: { vendorId: string }) {
+    return this.productService.findByVendor(data.vendorId);
   }
 
   // Q&A
@@ -74,5 +74,10 @@ export class ProductController {
   @MessagePattern({ cmd: 'get_product_questions' })
   getQuestions(@Payload() productId: string) {
     return this.questionService.findByProduct(productId);
+  }
+
+  @MessagePattern({ cmd: 'create_inbound_shipment' })
+  createShipment(@Payload() data: any) {
+    return this.productService.createInboundShipment(data);
   }
 }

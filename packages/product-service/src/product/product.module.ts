@@ -6,11 +6,14 @@ import { Product, ProductSchema } from './product.schema';
 import { Question, QuestionSchema } from './question.schema';
 import { QuestionService } from './question.service';
 
+import { InboundShipment, InboundShipmentSchema } from './inbound-shipment.schema';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
-      { name: Question.name, schema: QuestionSchema }
+      { name: Question.name, schema: QuestionSchema },
+      { name: InboundShipment.name, schema: InboundShipmentSchema }
     ]),
   ],
   controllers: [ProductController],

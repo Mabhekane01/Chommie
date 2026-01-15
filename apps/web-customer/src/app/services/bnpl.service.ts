@@ -1,33 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export enum TrustTier {
-  BRONZE = 'BRONZE',
-  SILVER = 'SILVER',
-  GOLD = 'GOLD',
-  PLATINUM = 'PLATINUM',
-}
-
-export interface TrustProfile {
-  userId: string;
-  currentScore: number;
-  tier: TrustTier;
-  totalPayments: number;
-  onTimePayments: number;
-  totalOrders: number;
-  averagePaymentDelayDays: number;
-  disputeCount: number;
-  lastCalculatedAt: Date;
-  creditLimit: number;
-  coinsBalance: number;
-}
-
-@Injectable({
-  providedIn: 'root'
+...
 })
 export class BnplService {
-  private apiUrl = 'http://localhost:3000/bnpl'; // Assuming API Gateway is on 3000
+  private apiUrl = `${environment.apiUrl}/bnpl`;
   refreshProfile$ = new Subject<void>();
 
   constructor(private http: HttpClient) {}

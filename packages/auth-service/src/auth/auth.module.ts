@@ -18,6 +18,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           port: 3003,
         },
       },
+      {
+        name: 'NOTIFICATION_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3005,
+        },
+      },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

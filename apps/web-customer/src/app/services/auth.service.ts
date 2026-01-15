@@ -2,12 +2,13 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   
   // Track current user state
   currentUser = signal<any | null>(this.getUserFromStorage());
@@ -22,12 +23,32 @@ export class AuthService {
 
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credentials);
-    // Component handles session storage to avoid double tap logic issues shown in current file
   }
 
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
+
+  requestEmailVerification(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/request-email-verification`, { email });
+  }
+
+  verifyOtp(email: string, otp: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify-otp`, { email, otp });
+  }
+
+  verify2FA(email: string, otp: string) {
+    return this.http.post(`${this.apiUrl}/verify-2fa`, { email, otp });
+  }
+
+  resendVerification(email: string) {
+    return this.http.post(`${this.apiUrl}/resend-verification`, { email });
+  }
+
+  toggle2FA(userId: string, enabled: boolean) {
+    return this.http.post(`${this.apiUrl}/toggle-2fa`, { userId, enabled });
+  }
+
 
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/forgot-password`, { email });
@@ -62,11 +83,5 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.currentUser();
-  }
-
-  private setSession(userId: string, token: string) {
-    localStorage.setItem('user_id', userId);
-    localStorage.setItem('access_token', token);
-    this.currentUser.set({ id: userId, token });
   }
 }

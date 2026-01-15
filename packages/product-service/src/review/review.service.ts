@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { Review, ReviewDocument } from './review.schema';
@@ -49,7 +49,7 @@ export class ReviewService {
     return this.sellerReviewModel.find({ vendorId }).sort({ createdAt: -1 }).exec();
   }
 
-  async create(data: { productId: string; userId: string; userName: string; rating: number; comment: string }) {
+  async create(data: { productId: string; userId: string; userName: string; rating: number; title: string; comment: string; images?: string[] }) {
     // Check Verified Purchase
     let verified = false;
     try {
@@ -62,7 +62,7 @@ export class ReviewService {
 
     const review = new this.reviewModel({
       ...data,
-      verified
+      verified: !!verified
     });
     
     await review.save();
@@ -74,6 +74,17 @@ export class ReviewService {
     return this.reviewModel.findByIdAndUpdate(
       reviewId,
       { $inc: { helpfulVotes: 1 } },
+      { new: true }
+    ).exec();
+  }
+
+  async addResponse(reviewId: string, response: string) {
+    return this.reviewModel.findByIdAndUpdate(
+      reviewId,
+      { 
+        vendorResponse: response,
+        respondedAt: new Date()
+      },
       { new: true }
     ).exec();
   }
@@ -101,7 +112,7 @@ export class ReviewService {
 
   private async updateProductRating(productId: string) {
     const stats = await this.reviewModel.aggregate([
-      { $match: { productId: new Object(productId) } }, // Ensure ObjectId casting if needed, but string might work with mongoose automagic
+      { $match: { productId: new Types.ObjectId(productId) } }, 
       {
         $group: {
           _id: '$productId',

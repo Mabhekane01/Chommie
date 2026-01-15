@@ -3,115 +3,117 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ComparisonService } from '../../services/comparison.service';
 import { CartService } from '../../services/cart.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-comparison',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-deep-ocean text-white pb-32 pt-10">
-      <div class="w-full px-10 animate-fade-in">
+    <div class="min-h-screen bg-white text-neutral-charcoal pb-32 pt-10">
+      <div class="w-full px-6 animate-fade-in">
         
-        <!-- Header -->
-        <div class="mb-16">
-           <h1 class="text-4xl md:text-6xl font-header font-black tracking-tighter mb-2 uppercase">
-              Logic <span class="text-cyber-teal text-neon">Matrix</span>
-           </h1>
-           <p class="text-neutral-silver/40 text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-              Synchronized Asset Comparison
-           </p>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-neutral-500 mb-8">
+          <a routerLink="/" class="hover:underline hover:text-primary">Registry</a>
+          <span>›</span>
+          <span class="text-primary font-bold">Compare Items</span>
+        </nav>
+
+        <h1 class="text-3xl font-normal text-neutral-charcoal mb-10">Compare with similar items</h1>
+
+        <div *ngIf="comparisonService.compareList().length === 0" class="py-20 text-center bg-neutral-50 rounded-2xl border-2 border-dashed border-neutral-200">
+            <p class="text-neutral-500 font-bold mb-6">No items selected for comparison.</p>
+            <a routerLink="/products" class="btn-primary inline-block py-2 px-8 rounded-md shadow-sm">Start Shopping</a>
         </div>
 
-        <div *ngIf="comparisonService.compareList().length === 0" class="glass-panel rounded-[3rem] py-32 text-center border-dashed border-white/10">
-            <p class="text-neutral-silver/40 font-black uppercase tracking-widest mb-8">No assets selected for analysis.</p>
-            <a routerLink="/products" class="btn-primary inline-block py-3 px-10">Access Marketplace</a>
-        </div>
+        <div *ngIf="comparisonService.compareList().length > 0" class="overflow-x-auto rounded-xl border border-neutral-200 shadow-sm bg-white">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr class="bg-neutral-50 border-b border-neutral-200">
+                        <th class="w-64 p-6 align-top">
+                            <button (click)="comparisonService.clearComparison()" class="text-xs font-bold text-primary hover:underline uppercase tracking-widest">Clear all</button>
+                        </th>
+                        <th *ngFor="let product of comparisonService.compareList()" class="w-80 p-6 align-top relative group border-l border-neutral-100">
+                            <button (click)="comparisonService.removeFromCompare(product.id || product._id)" class="absolute top-2 right-2 text-neutral-300 hover:text-red-600 transition-colors text-xl">&times;</button>
+                            
+                            <div class="h-48 flex items-center justify-center mb-6 bg-white p-4">
+                                <img [src]="product.images[0]" class="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105">
+                            </div>
 
-        <div *ngIf="comparisonService.compareList().length > 0" class="glass-panel rounded-[3rem] overflow-hidden border-white/5 shadow-2xl">
-            <div class="overflow-x-auto scrollbar-hide">
-                <table class="w-full text-sm border-collapse min-w-[800px]">
-                    <thead>
-                        <tr class="bg-white/[0.03]">
-                            <th class="w-64 p-10 border-b border-white/5 text-left align-middle">
-                                <button (click)="comparisonService.clearComparison()" class="text-[10px] font-black text-accent hover:text-white transition-colors uppercase tracking-widest">Abort All</button>
-                            </th>
-                            <th *ngFor="let product of comparisonService.compareList()" class="w-80 p-10 border-b border-white/5 align-top relative group">
-                                <button (click)="comparisonService.removeFromCompare(product.id || product._id)" class="absolute top-6 right-6 text-neutral-silver/20 hover:text-accent transition-colors text-2xl font-bold">×</button>
-                                
-                                <div class="h-48 glass-panel rounded-2xl mb-8 p-6 flex items-center justify-center relative overflow-hidden group-hover:border-cyber-teal/30 transition-all duration-700 shadow-xl bg-white/5">
-                                    <div class="absolute inset-0 bg-gradient-to-tr from-cyber-teal/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <img [src]="product.images[0]" class="max-h-full max-w-full object-contain filter drop-shadow-2xl group-hover:scale-110 transition-all duration-700">
-                                </div>
-
-                                <div class="space-y-4">
-                                   <div class="text-white font-bold hover:text-cyber-teal transition-colors cursor-pointer line-clamp-2 h-12 uppercase tracking-tight leading-tight text-sm" [routerLink]="['/products', product.id || product._id]">
-                                       {{ product.name }}
-                                   </div>
-                                   <div class="text-3xl font-black text-white tracking-tighter text-neon">
-                                       R{{ product.price | number:'1.0-0' }}
-                                   </div>
-                                   <button (click)="addToCart(product)" class="w-full btn-primary py-3 rounded-xl text-[9px] font-black tracking-widest uppercase shadow-lg">
-                                       ADD TO VAULT
-                                   </button>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        <tr class="hover:bg-white/[0.01] transition-colors">
-                            <td class="p-10 text-[10px] font-black text-neutral-silver/40 uppercase tracking-[0.3em]">User Rank</td>
-                            <td *ngFor="let product of comparisonService.compareList()" class="p-10 text-center">
-                                <div class="flex justify-center text-cyber-teal text-base mb-2">
-                                    <span *ngFor="let s of [1,2,3,4,5]">{{ s <= Math.round(product.ratings || 0) ? '★' : '☆' }}</span>
-                                </div>
-                                <div class="text-[9px] font-black text-neutral-silver/20 uppercase tracking-widest">({{ product.numReviews || 0 }} Echoes)</div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-white/[0.01] transition-colors">
-                            <td class="p-10 text-[10px] font-black text-neutral-silver/40 uppercase tracking-[0.3em]">Logic Sector</td>
-                            <td *ngFor="let product of comparisonService.compareList()" class="p-10 text-center text-white font-bold uppercase tracking-widest text-xs">
-                                {{ product.category }}
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-white/[0.01] transition-colors">
-                            <td class="p-10 text-[10px] font-black text-neutral-silver/40 uppercase tracking-[0.3em]">Logistics</td>
-                            <td *ngFor="let product of comparisonService.compareList()" class="p-10 text-center">
-                                <div *ngIf="product.price >= 500" class="text-[10px] font-black text-cyber-lime uppercase tracking-widest">
-                                    Zero Latency Ship
-                                </div>
-                                <div *ngIf="product.price < 500" class="text-[10px] font-black text-neutral-silver/40 uppercase tracking-widest">
-                                    + Standard Relay
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-white/[0.01] transition-colors">
-                            <td class="p-10 text-[10px] font-black text-neutral-silver/40 uppercase tracking-[0.3em]">Nexus Source</td>
-                            <td *ngFor="let product of comparisonService.compareList()" class="p-10 text-center text-cyber-teal font-black uppercase tracking-widest text-[10px]">
-                                CHOMMIE_RETAIL_NODE
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-white/[0.01] transition-colors">
-                            <td class="p-10 text-[10px] font-black text-neutral-silver/40 uppercase tracking-[0.3em]">Manifest Data</td>
-                            <td *ngFor="let product of comparisonService.compareList()" class="p-10 text-xs text-neutral-silver/60 font-medium leading-relaxed text-left uppercase tracking-tight">
+                            <div class="space-y-3">
+                               <a [routerLink]="['/products', product.id || product._id]" class="text-sm font-bold text-primary hover:text-action hover:underline line-clamp-2 h-10 leading-tight">
+                                   {{ product.name }}
+                               </a>
+                               <div class="text-2xl font-bold text-neutral-charcoal">
+                                   <span class="text-xs align-top relative top-1">R</span>{{ product.price | number:'1.0-0' }}
+                               </div>
+                               <button (click)="addToCart(product)" class="w-full btn-primary py-2 rounded-full text-xs font-bold shadow-sm transition-transform active:scale-95">
+                                   Add to Cart
+                               </button>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-100">
+                    <!-- Customer Rating -->
+                    <tr>
+                        <td class="p-6 font-bold text-sm text-neutral-600 bg-neutral-50/50">Customer Rating</td>
+                        <td *ngFor="let product of comparisonService.compareList()" class="p-6 border-l border-neutral-100">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-amber-500 font-bold">★ {{ product.ratings || 0 }}</span>
+                                <span class="text-neutral-400 text-xs">({{ product.numReviews || 0 }})</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- BNPL Eligibility -->
+                    <tr>
+                        <td class="p-6 font-bold text-sm text-neutral-600 bg-neutral-50/50">BNPL Ready</td>
+                        <td *ngFor="let product of comparisonService.compareList()" class="p-6 border-l border-neutral-100">
+                            <div *ngIf="product.bnplEligible" class="flex items-center gap-2 text-emerald-600 font-bold text-xs">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                YES
+                            </div>
+                            <div *ngIf="!product.bnplEligible" class="text-neutral-400 text-xs font-bold">NO</div>
+                        </td>
+                    </tr>
+                    <!-- Shipping -->
+                    <tr>
+                        <td class="p-6 font-bold text-sm text-neutral-600 bg-neutral-50/50">Shipping</td>
+                        <td *ngFor="let product of comparisonService.compareList()" class="p-6 border-l border-neutral-100">
+                            <div class="text-xs text-neutral-700 leading-relaxed">
+                                <span class="font-bold text-emerald-700 block">FREE One-Day Delivery</span>
+                                <span class="text-neutral-500">Ships from Chommie.za</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Description -->
+                    <tr>
+                        <td class="p-6 font-bold text-sm text-neutral-600 bg-neutral-50/50">Details</td>
+                        <td *ngFor="let product of comparisonService.compareList()" class="p-6 border-l border-neutral-100">
+                            <p class="text-xs text-neutral-600 leading-relaxed line-clamp-6">
                                 {{ product.description }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                            </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    :host { display: block; }
+  `]
 })
 export class ComparisonComponent {
   Math = Math;
 
   constructor(
     public comparisonService: ComparisonService,
-    private cartService: CartService
+    private cartService: CartService,
+    public ts: TranslationService
   ) {}
 
   addToCart(product: any) {

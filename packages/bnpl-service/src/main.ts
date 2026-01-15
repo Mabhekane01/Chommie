@@ -9,11 +9,11 @@ async function bootstrap() {
       transport: Transport.TCP,
       options: {
         host: '0.0.0.0',
-        port: 3003,
+        port: Number(process.env.PORT) || 3003,
       },
     },
   );
   await app.listen();
-  console.log('BNPL Microservice is listening on port 3003');
+  console.log(`BNPL Microservice is listening on port ${process.env.PORT || 3003}`);
 }
 bootstrap();

@@ -3,8 +3,8 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { lastValueFrom } from 'rxjs';
+import { AuditEventType } from '../user/audit-log.entity';
+import { VerificationType } from '../user/verification-code.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,48 +12,49 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     @Inject('BNPL_SERVICE') private readonly bnplClient: ClientProxy,
+    @Inject('NOTIFICATION_SERVICE') private readonly notificationClient: ClientProxy,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.findOneByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.passwordHash))) {
+    if (!user) {
+      await this.userService.createAuditLog({ email, eventType: AuditEventType.LOGIN_FAILED, metadata: { reason: 'User not found' } });
+      return null;
+    }
+
+    if (!user.isVerified && !user.isTwoFactorEnabled) {
+        await this.userService.createAuditLog({ email, userId: user.id, eventType: AuditEventType.LOGIN_FAILED, metadata: { reason: 'Account not verified' } });
+        throw new BadRequestException('Please verify your email address before signing in.');
+    }
+
+    if (await bcrypt.compare(pass, user.passwordHash)) {
       const { passwordHash, ...result } = user;
+      await this.userService.createAuditLog({ email, userId: user.id, eventType: AuditEventType.LOGIN_SUCCESS });
       return result;
     }
+
+    await this.userService.createAuditLog({ email, userId: user.id, eventType: AuditEventType.LOGIN_FAILED, metadata: { reason: 'Invalid password' } });
     return null;
   }
 
   async login(user: any) {
+    // If 2FA is enabled, don't return tokens yet
+    if (user.isTwoFactorEnabled) {
+        const otp = await this.userService.generateOTP(user.email, VerificationType.TWO_FACTOR_AUTH);
+        this.notificationClient.emit('send_2fa_otp', { email: user.email, otp });
+        
+        return {
+            status: '2fa_required',
+            email: user.email,
+            message: 'Two-Step Verification is enabled. A code has been sent to your email.'
+        };
+    }
+
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       accessToken: this.jwtService.sign(payload),
       user,
     };
-  }
-
-  async register(registerDto: any) {
-    const existingUser = await this.userService.findOneByEmail(registerDto.email);
-    if (existingUser) {
-      throw new Error('User already exists');
-    }
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(registerDto.password, salt);
-    
-    const newUser = await this.userService.create({
-      ...registerDto,
-      passwordHash,
-    });
-    
-    // Automatically create Trust Profile in BNPL Service
-    try {
-      this.bnplClient.emit({ cmd: 'create_profile' }, { userId: newUser.id });
-    } catch (error) {
-      console.error('Failed to create trust profile:', error);
-      // We don't fail registration if this fails, but we should log it
-    }
-    
-    const { passwordHash: _, ...result } = newUser;
-    return this.login(result);
   }
 
   async validateToken(token: string) {
@@ -64,58 +65,154 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string): Promise<{ message: string }> {
-    const user = await this.userService.findOneByEmail(email);
-    if (!user) {
-        // We do not reveal if user exists for security
-        return { message: 'If this email exists, a reset link has been sent.' };
+  // --- REGISTRATION FLOW ---
+
+  async requestEmailVerification(email: string): Promise<{ message: string }> {
+    const existingUser = await this.userService.findOneByEmail(email);
+    
+    // If user exists but is NOT verified, we should resend the OTP so they can complete registration
+    if (existingUser && !existingUser.isVerified) {
+        const otp = await this.userService.generateOTP(email, VerificationType.EMAIL_VERIFICATION);
+        this.notificationClient.emit('send_verification_otp', { email, otp });
+        return { message: 'Verification code sent.' };
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    if (existingUser) {
+      return { message: 'Verification code sent if account does not exist.' };
+    }
 
-    await this.userService.update(user.id, {
-        resetPasswordToken: resetToken,
-        resetPasswordExpires
+    const otp = await this.userService.generateOTP(email, VerificationType.EMAIL_VERIFICATION);
+
+    await this.userService.createAuditLog({
+      email,
+      eventType: AuditEventType.REGISTER_INITIATED,
+      metadata: { action: 'OTP_GENERATED' }
     });
 
-    // TODO: Send email via Notification Service
-    console.log(`[MOCK EMAIL] Password Reset Link: http://localhost:4200/reset-password?token=${resetToken}`);
+    this.notificationClient.emit('send_verification_otp', { email, otp });
 
-    return { message: 'If this email exists, a reset link has been sent.' };
+    return { message: 'Verification code sent if account does not exist.' };
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    // Find user with this token and not expired
-    // Since findOneByToken isn't in UserService, we might need to add it or fetch raw. 
-    // Wait, TypeORM findOneBy accepts partial. 
-    // BUT we also need to check expiry > now.
-    // UserService.update logic is simple, but finding is specific.
-    // Let's assume we fetch by token (needs UserService update) or just query roughly.
-    // Actually, UserService doesn't expose findOneByToken. 
-    
-    // QUICK FIX: Add findOneByToken to UserService or do raw query.
-    // I'll skip adding it to interface for speed and do it inefficiently? No.
-    // I will add findOneByResetToken to UserService next.
-    
-    // Assuming it exists for this step:
-    const user = await this.userService.findOneByResetToken(token);
-    
-    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-        throw new BadRequestException('Invalid or expired password reset token');
+  async register(registerDto: any) {
+    const { email, password, otp, ...otherData } = registerDto;
+
+    const isValid = await this.userService.validateOTP(email, otp, VerificationType.EMAIL_VERIFICATION);
+    if (!isValid) {
+      await this.userService.createAuditLog({ email, eventType: AuditEventType.VERIFICATION_FAILED, metadata: { reason: 'Invalid or expired OTP' } });
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    const existingUser = await this.userService.findOneByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException('User already exists');
     }
 
     const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(newPassword, salt);
+    const passwordHash = await bcrypt.hash(password, salt);
+    
+    const newUser = await this.userService.create({
+      ...otherData,
+      email,
+      passwordHash,
+      isVerified: true,
+      role: otherData.role || 'CUSTOMER',
+      vendorStatus: otherData.role === 'VENDOR' ? 'PENDING' : undefined
+    });
+    
+    try {
+      this.bnplClient.emit({ cmd: 'create_profile' }, { userId: newUser.id });
+    } catch (error) {
+      console.error('Failed to create trust profile:', error);
+    }
 
-    await this.userService.update(user.id, {
-        passwordHash,
-        resetPasswordToken: null,
-        resetPasswordExpires: null
+    await this.userService.createAuditLog({ email, userId: newUser.id, eventType: AuditEventType.VERIFICATION_SUCCESS });
+    
+    const { passwordHash: _, ...result } = newUser;
+    return this.login(result);
+  }
+
+  async verifyOtp(data: { email: string, otp: string }) {
+    // Check if OTP is valid but do NOT consume it yet (consume on register)
+    const isValid = await this.userService.isValidOTP(data.email, data.otp, VerificationType.EMAIL_VERIFICATION);
+    if (!isValid) {
+        throw new BadRequestException('Invalid or expired verification code');
+    }
+    return { success: true, message: 'Verification code is valid.' };
+  }
+
+  // --- 2FA FLOW ---
+
+  async verify2FA(data: { email: string, otp: string }) {
+    const isValid = await this.userService.validateOTP(data.email, data.otp, VerificationType.TWO_FACTOR_AUTH);
+    if (!isValid) {
+        throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    const user = await this.userService.findOneByEmail(data.email);
+    if (!user) throw new NotFoundException('User not found');
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    const { passwordHash: _, ...result } = user;
+    
+    return {
+        accessToken: this.jwtService.sign(payload),
+        user: result,
+    };
+  }
+
+  async toggle2FA(userId: string, enabled: boolean) {
+    await this.userService.update(userId, { isTwoFactorEnabled: enabled });
+    return { success: true, isTwoFactorEnabled: enabled };
+  }
+
+  // --- PASSWORD RESET FLOW ---
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+        return { message: 'If this email exists, a verification code has been sent.' };
+    }
+
+    const otp = await this.userService.generateOTP(email, VerificationType.PASSWORD_RESET);
+
+    await this.userService.createAuditLog({
+      email,
+      userId: user.id,
+      eventType: AuditEventType.PASSWORD_RESET_REQUESTED
+    });
+
+    this.notificationClient.emit('send_password_reset_otp', { email, otp });
+
+    return { message: 'If this email exists, a verification code has been sent.' };
+  }
+
+  async resetPassword(data: { email: string, otp: string, password: any }): Promise<{ message: string }> {
+    const { email, otp, password } = data;
+
+    const isValid = await this.userService.validateOTP(email, otp, VerificationType.PASSWORD_RESET);
+    if (!isValid) {
+        throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) throw new NotFoundException('User not found');
+
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    await this.userService.update(user.id, { passwordHash });
+
+    await this.userService.createAuditLog({
+      email,
+      userId: user.id,
+      eventType: AuditEventType.PASSWORD_RESET_SUCCESS
     });
 
     return { message: 'Password has been reset successfully.' };
   }
+
+  // --- USER PROFILE & ADDRESSES ---
 
   async addAddress(userId: string, address: any) {
     const updatedUser = await this.userService.addAddress(userId, address);
@@ -134,6 +231,12 @@ export class AuthService {
     if (!user) throw new NotFoundException('User not found');
     const { passwordHash: _, ...result } = user;
     return result;
+  }
+
+  async updateProfile(data: any) {
+    const { userId, ...updateData } = data;
+    await this.userService.update(userId, updateData);
+    return this.getProfile(userId);
   }
 
   async updateFavoriteCategory(userId: string, category: string) {

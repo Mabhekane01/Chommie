@@ -4,6 +4,7 @@ import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { Notification } from './entities/notification.entity';
 
+// Force rebuild
 @Module({
   imports: [TypeOrmModule.forFeature([Notification])],
   providers: [NotificationsService],

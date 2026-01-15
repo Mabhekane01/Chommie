@@ -1,0 +1,139 @@
+services:
+  # API Gateway (Web Service)
+  - type: web
+    name: chommie-api-gateway
+    env: node
+    plan: free
+    rootDir: packages/api-gateway
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: AUTH_SERVICE_HOST
+        value: chommie-auth-service
+      - key: AUTH_SERVICE_PORT
+        value: 3001
+      - key: PRODUCT_SERVICE_HOST
+        value: chommie-product-service
+      - key: PRODUCT_SERVICE_PORT
+        value: 3002
+      - key: BNPL_SERVICE_HOST
+        value: chommie-bnpl-service
+      - key: BNPL_SERVICE_PORT
+        value: 3003
+      - key: ORDER_SERVICE_HOST
+        value: chommie-order-service
+      - key: ORDER_SERVICE_PORT
+        value: 3004
+      - key: NOTIFICATION_SERVICE_HOST
+        value: chommie-notification-service
+      - key: NOTIFICATION_SERVICE_PORT
+        value: 3005
+      - key: PAYMENT_SERVICE_HOST
+        value: chommie-payment-service
+      - key: PAYMENT_SERVICE_PORT
+        value: 3006
+      - key: RECOMMENDATION_SERVICE_HOST
+        value: chommie-recommendation-service
+      - key: RECOMMENDATION_SERVICE_PORT
+        value: 3007
+
+  # Auth Service (Private Service)
+  - type: pweb
+    name: chommie-auth-service
+    env: node
+    plan: free
+    rootDir: packages/auth-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: POSTGRES_HOST
+        value: chommie-db
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: chommie-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: chommie-db
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: chommie-db
+          property: database
+
+  # Product Service (Private Service)
+  - type: pweb
+    name: chommie-product-service
+    env: node
+    plan: free
+    rootDir: packages/product-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 3002
+      - key: MONGODB_URI
+        fromDatabase:
+          name: chommie-mongo
+          property: connectionString
+
+  # Order Service (Private Service)
+  - type: pweb
+    name: chommie-order-service
+    env: node
+    plan: free
+    rootDir: packages/order-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 3004
+
+  # BNPL Service (Private Service)
+  - type: pweb
+    name: chommie-bnpl-service
+    env: node
+    plan: free
+    rootDir: packages/bnpl-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 3003
+
+  # Web Customer (Static Site)
+  - type: static
+    name: chommie-web-customer
+    env: static
+    plan: free
+    rootDir: apps/web-customer
+    buildCommand: npm install && npm run build
+    publishDir: dist/web-customer/browser
+    envVars:
+      - key: API_URL
+        value: https://chommie-api-gateway.onrender.com
+
+  # Web Vendor (Static Site)
+  - type: static
+    name: chommie-web-vendor
+    env: static
+    plan: free
+    rootDir: apps/web-vendor
+    buildCommand: npm install && npm run build
+    publishDir: dist/web-vendor/browser
+    envVars:
+      - key: API_URL
+        value: https://chommie-api-gateway.onrender.com
+
+databases:
+  - name: chommie-db
+    type: postgres
+    plan: free
+
+  - name: chommie-mongo
+    type: mongodb
+    plan: free

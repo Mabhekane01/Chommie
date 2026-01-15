@@ -12,6 +12,9 @@ export class OrderItem {
   @Column()
   productName: string;
 
+  @Column({ nullable: true })
+  productImage: string;
+
   @Column({ type: 'int' })
   quantity: number;
 

@@ -20,6 +20,12 @@ export class Product {
   @Prop({ default: 0 })
   stock: number;
 
+  @Prop({ default: 'PENDING_REVIEW' })
+  approvalStatus: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
+
+  @Prop({ default: 'FBC' })
+  fulfillmentType: 'FBC' | 'FBM'; // FBC = Fulfilled by Chommie (Warehouse), FBM = Merchant
+
   @Prop([String])
   images: string[];
 

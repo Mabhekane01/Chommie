@@ -11,8 +11,8 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
         name: 'PRODUCT_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3002,
+          host: process.env.PRODUCT_SERVICE_HOST || 'localhost',
+          port: Number(process.env.PRODUCT_SERVICE_PORT) || 3002,
         },
       },
     ]),

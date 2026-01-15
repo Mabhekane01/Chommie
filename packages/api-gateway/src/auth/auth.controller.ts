@@ -17,7 +17,9 @@ export class AuthController {
       }
       return response;
     } catch (e) {
-      throw new HttpException(e.message || 'Login failed', HttpStatus.UNAUTHORIZED);
+      console.error('Login Gateway Error:', e);
+      if (e instanceof HttpException) throw e;
+      throw new HttpException(e.message || 'Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -34,13 +36,54 @@ export class AuthController {
     }
   }
 
+  @Post('verify-otp')
+  async verifyOtp(@Body() body: { email: string, otp: string }) {
+    try {
+      const response = await firstValueFrom(this.client.send({ cmd: 'verify_otp' }, body));
+      if (response && response.status === 'error') {
+        throw new HttpException(response.message, HttpStatus.BAD_REQUEST);
+      }
+      return response;
+    } catch (e) {
+        throw new HttpException(e.message || 'Verification failed', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('verify-2fa')
+  async verify2FA(@Body() body: { email: string, otp: string }) {
+    try {
+      const response = await firstValueFrom(this.client.send({ cmd: 'verify_2fa' }, body));
+      if (response && response.status === 'error') {
+        throw new HttpException(response.message, HttpStatus.BAD_REQUEST);
+      }
+      return response;
+    } catch (e) {
+        throw new HttpException(e.message || '2FA Verification failed', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('resend-verification')
+  async resendVerification(@Body() body: { email: string }) {
+    return this.client.send({ cmd: 'request_email_verification' }, body);
+  }
+
+  @Post('request-email-verification')
+  async requestEmailVerification(@Body() body: { email: string }) {
+    return this.client.send({ cmd: 'request_email_verification' }, body);
+  }
+
+  @Post('toggle-2fa')
+  async toggle2FA(@Body() body: { userId: string, enabled: boolean }) {
+    return this.client.send({ cmd: 'toggle_2fa' }, body);
+  }
+
   @Post('forgot-password')
   async forgotPassword(@Body() body: { email: string }) {
     return this.client.send({ cmd: 'forgot_password' }, body);
   }
 
   @Post('reset-password')
-  async resetPassword(@Body() body: { token: string; password: string }) {
+  async resetPassword(@Body() body: { email: string; otp: string; password: any }) {
     const response = await firstValueFrom(this.client.send({ cmd: 'reset_password' }, body));
     if (response && response.status === 'error') {
         throw new HttpException(response.message, HttpStatus.BAD_REQUEST);

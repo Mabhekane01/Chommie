@@ -12,20 +12,20 @@
   --color-primary-light: #FF8F50;
   --color-primary-dark: #CC5517;
 
-  --color-accent: #FF6D1F;
+  --color-accent: #FF6D1F; /* Mapping Accent to Primary for consistency */
   --color-accent-hover: #E55C15;
   --color-accent-light: #FF8F50;
 
-  --color-cyber-teal: #222222;
-  --color-cyber-lime: #FF6D1F;
+  --color-cyber-teal: #222222; /* Re-mapped to Dark Text for contrast */
+  --color-cyber-lime: #FF6D1F; /* Re-mapped to Orange */
 
-  --color-deep-indigo: #F5E7C6;
-  --color-deep-ocean: #FAF3E1;
-  --color-deep-purple: #F5E7C6;
+  --color-deep-indigo: #F5E7C6; /* Darker Beige/Gold */
+  --color-deep-ocean: #FAF3E1; /* Light Beige/Cream Background */
+  --color-deep-purple: #F5E7C6; /* Secondary Background */
 
   /* Neutrals */
   --color-neutral-charcoal: #222222;
-  --color-neutral-silver: #222222;
+  --color-neutral-silver: #222222; /* Text is now dark */
   --color-neutral-white: #FFFFFF;
 
   /* Legacy / Functional Colors */
@@ -34,7 +34,7 @@
   --color-action-hover: #E55C15;
   --color-action-light: #FF8F50;
   
-  /* Gradients */
+  /* Gradients - Subtle Warmth */
   --image-gradient-main: linear-gradient(to bottom, #FAF3E1, #F5E7C6);
 }
 
@@ -56,11 +56,22 @@
   /* Glass Morphism / Card Style - Amazon Flat Style */
   .glass-panel {
     @apply bg-white border border-neutral-300 shadow-sm rounded-lg;
+    /* Removed backdrop-blur and high transparency */
   }
   
   .glass-header {
-    background: #FAF3E1;
+    background: #FAF3E1; /* Solid Cream Background */
     @apply border-b border-neutral-300 z-50;
+  }
+
+  .glass-subnav {
+    background-color: #FAF3E1;
+    @apply border-b border-neutral-300 text-neutral-charcoal/90;
+  }
+
+  /* Seamless Search Bar */
+  .seamless-search {
+    @apply flex items-center bg-white hover:bg-white focus-within:ring-2 focus-within:ring-primary/50 transition-all duration-300 rounded-lg overflow-hidden border border-neutral-300 shadow-inner;
   }
 
   /* Buttons */
@@ -74,8 +85,35 @@
            hover:bg-neutral-50 shadow-sm transition-all duration-200 cursor-pointer;
   }
 
+  /* Animations */
+  @keyframes slide-right {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes scale-up {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-slide-right { animation: slide-right 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-scale-up { animation: scale-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-fade-in { animation: fade-in 0.2s ease-out; }
+
   /* Utilities */
   .text-neon {
+    /* Subtle shadow for light mode instead of neon glow */
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     color: var(--color-primary);
   }

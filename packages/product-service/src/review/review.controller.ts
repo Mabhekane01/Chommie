@@ -26,6 +26,11 @@ export class ReviewController {
     return this.reviewService.voteHelpful(reviewId);
   }
 
+  @MessagePattern({ cmd: 'add_review_response' })
+  addResponse(@Payload() data: { reviewId: string; response: string }) {
+    return this.reviewService.addResponse(data.reviewId, data.response);
+  }
+
   @MessagePattern({ cmd: 'create_seller_review' })
   createSellerReview(@Payload() data: any) {
     return this.reviewService.createSellerReview(data);

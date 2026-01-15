@@ -1,125 +1,213 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-main py-12 px-6 relative overflow-hidden">
-      <!-- Background Decorations -->
-      <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full"></div>
-      <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full"></div>
-
+    <div class="min-h-screen bg-[#FAF3E1] flex flex-col items-center pt-12 px-4 text-neutral-charcoal font-body">
+      
       <!-- Logo -->
-      <div class="mb-12 animate-slide-up relative z-10 text-center">
-        <span class="font-header font-black text-4xl tracking-tighter text-white uppercase">
-          Chommie<span class="text-accent text-neon">.nexus</span>
-        </span>
-        <p class="text-[9px] font-black text-neutral-silver/20 uppercase tracking-[0.4em] mt-2">Provisioner Console</p>
+      <div class="mb-8">
+        <a routerLink="/" class="font-header font-black text-3xl tracking-tighter text-[#222222]">
+          Chommie<span class="text-primary">.central</span>
+        </a>
       </div>
 
-      <!-- Access Card -->
-      <div class="w-full max-w-[450px] glass-panel p-10 md:p-12 rounded-[3rem] shadow-2xl relative z-10 border-white/10 animate-scale-up">
-        <h1 class="text-3xl font-header font-black text-white mb-4 tracking-tight uppercase">Nexus <span class="text-cyber-teal">Access</span></h1>
-        <p class="text-neutral-silver/40 text-[10px] font-black uppercase tracking-widest mb-10 leading-relaxed">
-            Initialize provisioner synchronization.
-        </p>
+      <!-- Auth Card -->
+      <div class="w-full max-w-[350px] bg-white border border-neutral-300 rounded-lg p-6 shadow-sm">
+        
+        <ng-container *ngIf="!show2FA()">
+            <h1 class="text-2xl font-medium text-[#222222] mb-4">Seller Sign-In</h1>
 
-        <form (ngSubmit)="onSubmit()" class="space-y-8">
-          <div class="space-y-6">
-            <div class="space-y-2">
-              <label for="email" class="block text-xs font-black uppercase tracking-widest text-neutral-silver/40 ml-1">Identity Marker</label>
-              <div class="relative group">
-                 <div class="absolute -inset-0.5 bg-gradient-to-r from-cyber-teal to-accent rounded-xl opacity-0 group-focus-within:opacity-100 blur transition duration-300"></div>
-                 <input 
+            <form (ngSubmit)="onSubmit()" class="space-y-4">
+            
+            <div class="space-y-1">
+                <label for="email" class="block text-xs font-bold text-[#222222]">{{ ts.t('auth.email') }}</label>
+                <input 
                     id="email" 
                     name="email" 
                     type="email" 
                     [(ngModel)]="email" 
                     required
-                    placeholder="provisioner@nexus.com"
-                    class="relative block w-full bg-deep-ocean rounded-xl border border-white/10 px-4 py-4 text-sm text-white focus:outline-none transition-all"
-                 >
-              </div>
+                    class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
+                >
             </div>
 
-            <div class="space-y-2">
-              <label for="password" class="block text-xs font-black uppercase tracking-widest text-neutral-silver/40 ml-1">Secret Key</label>
-              <div class="relative group">
-                 <div class="absolute -inset-0.5 bg-gradient-to-r from-accent to-primary rounded-xl opacity-0 group-focus-within:opacity-100 blur transition duration-300"></div>
-                 <input 
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="password" class="block text-xs font-bold text-[#222222]">{{ ts.t('auth.password') }}</label>
+                    <a routerLink="/forgot-password" class="text-xs text-primary hover:underline hover:text-primary-dark font-medium">
+                        Forgot Password?
+                    </a>
+                </div>
+                <input 
                     id="password" 
                     name="password" 
                     type="password" 
                     [(ngModel)]="password" 
                     required
-                    placeholder="••••••••"
-                    class="relative block w-full bg-deep-ocean rounded-xl border border-white/10 px-4 py-4 text-sm text-white focus:outline-none transition-all font-mono"
-                 >
-              </div>
+                    class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all"
+                >
             </div>
-          </div>
 
-          <div *ngIf="error()" class="flex items-center gap-3 p-4 text-[10px] font-black uppercase tracking-widest text-accent bg-accent/5 border border-accent/20 rounded-xl">
-            <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            {{ error() }}
-          </div>
+            <div *ngIf="error()" class="flex flex-col gap-2 p-3 text-xs text-red-700 bg-red-50 border border-red-200 rounded-sm">
+                <div class="flex items-start gap-2">
+                    <svg class="w-4 h-4 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    {{ error() }}
+                </div>
+                <button *ngIf="error().includes('verify')" (click)="resendVerification()" class="text-left text-xs text-primary hover:underline font-bold ml-6">
+                    Resend Verification Email
+                </button>
+            </div>
 
-          <div class="pt-4">
-            <button 
-              type="submit" 
-              [disabled]="loading()"
-              class="w-full btn-primary py-5 rounded-2xl text-[10px] font-black tracking-[0.2em] shadow-[0_15px_30px_rgba(107,45,158,0.4)]"
-            >
-              {{ loading() ? 'AUTHENTICATING...' : 'INITIALIZE SYNC' }}
-            </button>
-          </div>
-        </form>
+            <div class="pt-2">
+                <button 
+                type="submit" 
+                [disabled]="loading()"
+                class="w-full btn-primary py-1.5 rounded-[3px] text-xs font-normal shadow-sm"
+                >
+                {{ loading() ? 'Please wait...' : 'Sign In' }}
+                </button>
+            </div>
 
-        <div class="mt-10 pt-8 border-t border-white/5 text-center">
-             <span class="text-[10px] font-black uppercase tracking-widest text-neutral-silver/20 block mb-4">Unregistered Node?</span>
-             <a href="#" class="text-sm font-bold text-cyber-teal hover:text-white transition-colors">
-                Apply for Provisioner Access ->
-             </a>
-        </div>
+            <div class="text-[11px] text-neutral-600 leading-tight py-2">
+                By continuing, you agree to Chommie's <a href="#" class="text-primary hover:underline">Seller Terms of Service</a> and <a href="#" class="text-primary hover:underline">Privacy Notice</a>.
+            </div>
+
+            <!-- Divider -->
+            <div class="relative py-2">
+                <div class="absolute inset-0 flex items-center">
+                <span class="w-full border-t border-neutral-200"></span>
+                </div>
+                <div class="relative flex justify-center text-[10px] text-neutral-500 uppercase">
+                <span class="bg-white px-2 text-neutral-400">New to Chommie Central?</span>
+                </div>
+            </div>
+
+            <a routerLink="/register" class="w-full btn-secondary py-1.5 rounded-[3px] text-xs text-center block font-medium shadow-sm">
+                Register as a Vendor
+            </a>
+            </form>
+        </ng-container>
+
+        <!-- 2FA OTP Step -->
+        <ng-container *ngIf="show2FA()">
+            <h1 class="text-2xl font-medium text-[#222222] mb-2">Two-Step Verification</h1>
+            <p class="text-sm text-neutral-700 mb-6 leading-relaxed">
+                To secure your seller account, we've sent a code to <span class="font-bold">{{ email }}</span>.
+            </p>
+
+            <form (ngSubmit)="onVerify2FA()" class="space-y-4">
+                <div class="space-y-1">
+                    <label for="otp" class="block text-xs font-bold text-[#222222]">Enter Code</label>
+                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6"
+                        class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-[0.5em] text-center focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
+                </div>
+
+                <div *ngIf="error()" class="p-3 text-xs text-red-700 bg-red-50 border border-red-200 rounded-sm">
+                    {{ error() }}
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" [disabled]="loading()" class="w-full btn-primary py-1.5 rounded-[3px] text-xs font-normal shadow-sm">
+                        {{ loading() ? 'Authenticating...' : 'Sign In' }}
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <button type="button" (click)="onSubmit()" class="text-xs text-primary hover:underline font-bold">Resend OTP</button>
+                </div>
+            </form>
+        </ng-container>
 
       </div>
 
-      <div class="mt-12 text-[10px] font-black uppercase tracking-[0.2em] text-center text-neutral-silver/20 space-y-4 relative z-10">
-        <div class="flex gap-8 justify-center">
-            <a href="#" class="hover:text-white transition-colors">Nexus Protocol</a>
-            <a href="#" class="hover:text-white transition-colors">Digital Shield</a>
+      <footer class="mt-8 text-[11px] text-neutral-500 space-y-4 max-w-[350px] w-full border-t border-neutral-200 pt-6 text-center">
+        <div class="flex gap-6 justify-center text-primary font-medium">
+            <a href="#" class="hover:underline">Conditions of Use</a>
+            <a href="#" class="hover:underline">Privacy Notice</a>
+            <a href="#" class="hover:underline">Help</a>
         </div>
-        <p>&copy; 2026 CHOMMIE NEXUS. v4.0.0-PROVISIONER</p>
-      </div>
+        <p>&copy; 2026, Chommie.za, Inc. or its affiliates</p>
+      </footer>
     </div>
   `
 })
 export class LoginComponent {
+  public ts = inject(TranslationService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   email = '';
   password = '';
+  otp = '';
+  show2FA = signal(false);
   loading = signal(false);
   error = signal('');
-
-  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
     this.loading.set(true);
     this.error.set('');
     
     this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        if (res.status === '2fa_required') {
+            this.show2FA.set(true);
+        } else if (res.accessToken) {
+            localStorage.setItem('access_token', res.accessToken);
+            localStorage.setItem('user_id', res.user.id);
+            localStorage.setItem('vendor_id', res.user.id);
+            this.router.navigate(['/dashboard']);
+        }
       },
-      error: () => {
+      error: (err: any) => {
         this.loading.set(false);
-        this.error.set('Invalid credentials');
+        this.error.set(err.error?.message || 'Invalid email or password');
       }
+    });
+  }
+
+  onVerify2FA() {
+    if (!this.otp) return;
+    this.loading.set(true);
+    this.error.set('');
+
+    this.authService.verify2FA(this.email, this.otp).subscribe({
+        next: (res: any) => {
+            if (res.accessToken) {
+                localStorage.setItem('access_token', res.accessToken);
+                localStorage.setItem('user_id', res.user.id);
+                localStorage.setItem('vendor_id', res.user.id);
+                this.router.navigate(['/dashboard']);
+            }
+            this.loading.set(false);
+        },
+        error: (err: any) => {
+            this.loading.set(false);
+            this.error.set(err.error?.message || 'Invalid or expired code');
+        }
+    });
+  }
+
+  resendVerification() {
+    this.loading.set(true);
+    this.authService.resendVerification(this.email).subscribe({
+        next: (res: any) => {
+            this.loading.set(false);
+            alert(res.message || 'Verification code sent.');
+            this.router.navigate(['/register'], { queryParams: { email: this.email, step: 'verify' } });
+        },
+        error: (err: any) => {
+            this.loading.set(false);
+            alert('Failed to send verification code.');
+        }
     });
   }
 }

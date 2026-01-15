@@ -20,14 +20,26 @@ export class User {
   @Column({ default: 'CUSTOMER' })
   role: string;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ default: false })
+  isTwoFactorEnabled: boolean;
+
+  @Column({ type: 'varchar', default: 'PENDING', nullable: true })
+  vendorStatus: 'PENDING' | 'APPROVED' | 'SUSPENDED' | 'REJECTED'; // Vendor Vetting Status
+
+  @Column({ type: 'text', nullable: true })
+  verificationToken: string;
+
   @Column({ default: 0 })
   trustScore: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  resetPasswordToken: string | null;
+  @Column({ type: 'text', nullable: true })
+  resetPasswordToken: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  resetPasswordExpires: Date | null;
+  resetPasswordExpires: Date;
 
   @Column({ nullable: true })
   storeName: string;

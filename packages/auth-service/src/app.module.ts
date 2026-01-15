@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
+import { AuditLog } from './user/audit-log.entity';
+import { VerificationCode } from './user/verification-code.entity';
 
 @Module({
   imports: [
@@ -11,12 +13,12 @@ import { User } from './user/user.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST || 'localhost',
-      port: 5432,
+      port: Number(process.env.POSTGRES_PORT) || 5432,
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'Ntando@postgresql!!522',
       database: process.env.POSTGRES_DB || 'chommie_db',
-      entities: [User],
-      synchronize: true, // Auto-create tables (Dev only)
+      entities: [User, AuditLog, VerificationCode],
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     AuthModule,
     UserModule,

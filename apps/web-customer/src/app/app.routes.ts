@@ -10,7 +10,6 @@ import { WishlistComponent } from './pages/wishlist/wishlist.component';
 import { CheckoutComponent } from './pages/checkout/checkout.component';
 import { BnplDashboardComponent } from './pages/bnpl-dashboard/bnpl-dashboard.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { ReturnRequestComponent } from './pages/return-request/return-request.component';
 import { SellerProfileComponent } from './pages/seller-profile/seller-profile.component';
 import { ComparisonComponent } from './pages/comparison/comparison.component';
@@ -46,6 +45,5 @@ export const routes: Routes = [
   { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent }
+  { path: 'forgot-password', component: ForgotPasswordComponent }
 ];

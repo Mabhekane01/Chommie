@@ -9,11 +9,11 @@ async function bootstrap() {
       transport: Transport.TCP,
       options: {
         host: '0.0.0.0',
-        port: 3004,
+        port: Number(process.env.PORT) || 3004,
       },
     },
   );
   await app.listen();
-  console.log('Order Microservice is listening on port 3004');
+  console.log(`Order Microservice is listening on port ${process.env.PORT || 3004}`);
 }
 bootstrap();

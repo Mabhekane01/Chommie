@@ -17,6 +17,9 @@ export class Review {
   @Prop({ required: true, min: 1, max: 5 })
   rating: number;
 
+  @Prop()
+  title: string;
+
   @Prop({ required: true })
   comment: string;
 
@@ -28,6 +31,12 @@ export class Review {
 
   @Prop([String])
   images: string[];
+
+  @Prop()
+  vendorResponse: string;
+
+  @Prop()
+  respondedAt: Date;
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review);

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Inject } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('reviews')
@@ -8,7 +8,7 @@ export class ReviewController {
   ) {}
 
   @Post()
-  create(@Body() data: { productId: string; userId: string; userName: string; rating: number; comment: string }) {
+  create(@Body() data: { productId: string; userId: string; userName: string; rating: number; title: string; comment: string; images?: string[] }) {
     return this.productClient.send({ cmd: 'create_review' }, data);
   }
 
@@ -35,5 +35,10 @@ export class ReviewController {
   @Post(':id/helpful')
   voteHelpful(@Param('id') id: string) {
     return this.productClient.send({ cmd: 'vote_helpful' }, id);
+  }
+
+  @Patch(':id/response')
+  addResponse(@Param('id') id: string, @Body('response') response: string) {
+    return this.productClient.send({ cmd: 'add_review_response' }, { reviewId: id, response });
   }
 }

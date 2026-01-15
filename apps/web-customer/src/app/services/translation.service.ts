@@ -71,7 +71,7 @@ export class TranslationService {
       'returns.comments': 'Comments (optional)',
       'returns.submit': 'Submit Return Request',
       'gift.title': 'Chommie Gift Cards',
-      'gift.subtitle': 'The perfect gift for every occasion. Give them the freedom to choose from millions of items from local vendors.',
+      'gift.subtitle': 'The perfect gift for every occasion. Give them the freedom to choose from millions of items from local sellers.',
       'gift.shop': 'Shop gift cards',
       'gift.redeem': 'Redeem a card',
       'sell.title': 'Become a Chommie Seller',
