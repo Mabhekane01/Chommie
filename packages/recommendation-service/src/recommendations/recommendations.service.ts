@@ -81,12 +81,11 @@ export class RecommendationsService {
     }
     
     // Fallback to all products
-    return lastValueFrom(this.productClient.send({ cmd: 'findAllProducts' }, {}));
+    return lastValueFrom(this.productClient.send({ cmd: 'findAllProducts' }, { bypassApproval: false }));
   }
 
   async getProductInsight(productId: string) {
-    // In a real app, this would use an LLM (like Gemini) to summarize reviews.
-    // For this demo, we'll generate a high-quality heuristic summary.
+    // ... same as before
     const product = await lastValueFrom(this.productClient.send({ cmd: 'findOneProduct' }, productId));
     if (!product) return null;
 
@@ -96,6 +95,38 @@ export class RecommendationsService {
       cons: ['Premium pricing', 'Limited color options'],
       sentiment: 'Highly Positive',
       aiConfidence: 0.94
+    };
+  }
+
+  async chat(data: { userId?: string; query: string }) {
+    const query = data.query.toLowerCase();
+    
+    // 1. Simple heuristic logic for the demo (to be replaced by Gemini)
+    if (query.includes('order') || query.includes('track')) {
+        return {
+            text: "I can help you with your orders! You can view your latest transmissions in the 'Orders' section. Would you like me to take you there?",
+            action: 'NAVIGATE_ORDERS'
+        };
+    }
+
+    if (query.includes('trust') || query.includes('coins') || query.includes('score')) {
+        return {
+            text: "Your Chommie Trust Score determines your eligibility for BNPL and exclusive discounts. You can earn more Trust Coins by completing payments on time!",
+            action: 'NAVIGATE_BNPL'
+        };
+    }
+
+    if (query.includes('deals') || query.includes('discount')) {
+        return {
+            text: "We have some fresh Lightning Deals active right now! Would you like to see the top offers?",
+            action: 'NAVIGATE_DEALS'
+        };
+    }
+
+    // 2. Default intelligent-sounding response
+    return {
+        text: "I'm your Chommie AI Concierge. I can help you find products, track orders, or explain how to boost your Trust Score. What's on your mind?",
+        action: 'NONE'
     };
   }
 }

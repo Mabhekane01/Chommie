@@ -25,6 +25,7 @@
       <!-- Mobile Sub-Nav (Horizontal Scroll) -->
       <div class="h-10 px-4 flex items-center gap-6 overflow-x-auto scrollbar-hide text-[11px] font-black uppercase tracking-widest text-white/70 bg-[#232f3e]">
           <a routerLink="/dashboard" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Home</a>
+          <a *ngIf="userRole() === 'ADMIN'" routerLink="/approvals" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Approvals</a>
           <a routerLink="/inventory" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Inventory</a>
           <a routerLink="/orders" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Orders</a>
           <a routerLink="/settings" routerLinkActive="text-primary border-b-2 border-primary" class="whitespace-nowrap h-full flex items-center px-1 cursor-pointer">Settings</a>
@@ -43,6 +44,7 @@
           
           <nav class="flex items-center h-full gap-8 text-xs font-black uppercase tracking-[0.15em] text-white/80">
             <a routerLink="/dashboard" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Dashboard</a>
+            <a *ngIf="userRole() === 'ADMIN'" routerLink="/approvals" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer text-primary">Approvals</a>
             <a routerLink="/inventory" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Inventory</a>
             <a routerLink="/orders" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Orders</a>
             <a routerLink="/settings" routerLinkActive="text-white border-b-2 border-primary" class="hover:text-white transition-all h-16 flex items-center border-b-2 border-transparent cursor-pointer">Settings</a>
@@ -93,23 +95,51 @@
 }
 
 <main [ngClass]="{
-  'pt-24': showNav() && deviceService.isMobile(), 
-  'pt-16': showNav() && !deviceService.isMobile(),
+  'pt-[100px]': showNav() && deviceService.isMobile(), 
+  'pt-20': showNav() && !deviceService.isMobile(),
   'pt-0': !showNav()
 }" class="min-h-screen bg-neutral-100">
   <router-outlet></router-outlet>
 </main>
 
-<footer *ngIf="showNav()" class="bg-white border-t border-neutral-200 py-10 mt-20">
-  <div class="max-w-[1600px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-    <div class="flex items-center gap-4">
-      <span class="font-header font-black text-xl tracking-tighter text-neutral-800">Chommie<span class="text-primary">.central</span></span>
-      <span class="text-xs text-neutral-400">© 2026 Nexus Marketplace</span>
+<footer *ngIf="showNav()" class="bg-[#131921] border-t border-white/10 py-16 mt-20 text-white">
+  <div class="max-w-[1600px] mx-auto px-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 pb-12 border-b border-white/5">
+      <div class="space-y-4">
+        <span class="font-header font-black text-2xl tracking-tighter">Chommie<span class="text-primary">.central</span></span>
+        <p class="text-xs text-white/40 leading-relaxed font-medium">Empowering South African sellers with enterprise-grade marketplace tools.</p>
+      </div>
+      <div>
+        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Manage</h4>
+        <ul class="text-xs space-y-3 font-bold text-white/60">
+          <li><a routerLink="/inventory" class="hover:text-white transition-colors cursor-pointer">Inventory</a></li>
+          <li><a routerLink="/orders" class="hover:text-white transition-colors cursor-pointer">Fulfillment</a></li>
+          <li><a routerLink="/promotions" class="hover:text-white transition-colors cursor-pointer">Advertising</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Support</h4>
+        <ul class="text-xs space-y-3 font-bold text-white/60">
+          <li><a href="#" class="hover:text-white transition-colors">Seller University</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Contact Support</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Legal</h4>
+        <ul class="text-xs space-y-3 font-bold text-white/60">
+          <li><a href="#" class="hover:text-white transition-colors">Privacy Notice</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">API Policy</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-      <a href="#" class="hover:text-primary transition-colors">Privacy Notice</a>
-      <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
-      <a href="#" class="hover:text-primary transition-colors">Developer Portal</a>
+    <div class="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-black uppercase tracking-widest text-white/20">
+      <span>© 2026 Nexus Marketplace Protocol. All rights reserved.</span>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-white transition-colors">Status</a>
+        <a href="#" class="hover:text-white transition-colors">Security</a>
+      </div>
     </div>
   </div>
 </footer>

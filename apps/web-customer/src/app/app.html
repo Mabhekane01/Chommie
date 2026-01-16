@@ -37,8 +37,9 @@
              <!-- Autocomplete Suggestions (Mobile) -->
              <div *ngIf="showSuggestions()" class="absolute top-full left-0 right-0 mt-1 bg-white rounded-b-md overflow-hidden z-[60] shadow-2xl border border-neutral-200 max-h-[60vh] overflow-y-auto">
                <ul class="py-1 text-left">
-                  <li *ngFor="let suggestion of suggestions()" (click)="selectSuggestion(suggestion)" class="px-4 py-3 hover:bg-neutral-100 cursor-pointer text-[#222222] text-sm font-medium border-b border-neutral-50 last:border-0">
-                    {{ suggestion }}
+                  <li *ngFor="let suggestion of suggestions()" (click)="selectSuggestion(suggestion)" class="px-4 py-3 hover:bg-neutral-100 cursor-pointer text-[#222222] text-sm font-medium border-b border-neutral-50 last:border-0 flex justify-between items-center">
+                    <span>{{ suggestion.text }}</span>
+                    <span *ngIf="suggestion.category" class="text-[10px] font-black text-neutral-400 uppercase">in {{ suggestion.category }}</span>
                   </li>
                </ul>
              </div>
@@ -115,9 +116,12 @@
             <!-- Autocomplete Suggestions -->
             <div *ngIf="showSuggestions()" class="absolute top-full left-0 right-0 mt-1 bg-white rounded-b-md overflow-hidden z-[60] shadow-2xl border border-neutral-200">
               <ul class="py-1 text-left">
-                 <li *ngFor="let suggestion of suggestions()" (click)="selectSuggestion(suggestion)" class="px-4 py-2 hover:bg-neutral-100 cursor-pointer text-[#222222] text-sm font-medium flex items-center gap-3">
-                  <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"></path></svg>
-                  {{ suggestion }}
+                 <li *ngFor="let suggestion of suggestions()" (click)="selectSuggestion(suggestion)" class="px-4 py-2 hover:bg-neutral-100 cursor-pointer text-[#222222] text-sm font-medium flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"></path></svg>
+                    {{ suggestion.text }}
+                  </div>
+                  <span *ngIf="suggestion.category" class="text-[10px] font-black text-neutral-400 uppercase tracking-widest bg-neutral-50 px-2 py-0.5 rounded border border-neutral-100">in {{ suggestion.category }}</span>
                 </li>
               </ul>
             </div>
@@ -204,10 +208,11 @@
     }
   }
 
-  <app-sidebar *ngIf="showSidebar()" (close)="showSidebar.set(false)"></app-sidebar>
+<app-sidebar *ngIf="showSidebar()" (close)="showSidebar.set(false)"></app-sidebar>
+<app-ai-concierge></app-ai-concierge>
 
-  <!-- Main Content (Static Desktop Padding) -->
-  <main [ngClass]="{'pt-[145px]': showNav() && !deviceService.isMobile(), 'pt-[152px]': showNav() && deviceService.isMobile(), 'pt-0': !showNav()}" class="flex-grow bg-neutral-100">
+  <!-- Main Content -->
+  <main [ngClass]="{'pt-[140px] lg:pt-[156px]': showNav() && !deviceService.isMobile(), 'pt-[152px]': showNav() && deviceService.isMobile(), 'pt-0': !showNav()}" class="flex-grow bg-neutral-100">
     <router-outlet></router-outlet>
   </main>
 
@@ -221,40 +226,90 @@
       <!-- Horizontal Link Rows -->
       <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-widest border-b border-neutral-200 pb-4">
         <span class="text-primary/60 mr-2">Company:</span>
-        <a href="#" class="hover:text-primary transition-colors">Careers</a>
-        <a href="#" class="hover:text-primary transition-colors">About</a>
-        <a href="#" class="hover:text-primary transition-colors">Sustainability</a>
-        <a href="#" class="hover:text-primary transition-colors">Press</a>
+        <a routerLink="/info/careers" class="hover:text-primary transition-colors cursor-pointer">Careers</a>
+        <a routerLink="/info/about" class="hover:text-primary transition-colors cursor-pointer">About</a>
+        <a routerLink="/info/sustainability" class="hover:text-primary transition-colors cursor-pointer">Sustainability</a>
+        <a routerLink="/info/press" class="hover:text-primary transition-colors cursor-pointer">Press Center</a>
       </div>
 
       <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-widest border-b border-neutral-200 pb-4">
         <span class="text-primary/60 mr-2">Services:</span>
-        <a routerLink="/sell" class="hover:text-primary transition-colors">Sell</a>
-        <a href="#" class="hover:text-primary transition-colors">Advertise</a>
-        <a routerLink="/bnpl" class="hover:text-primary transition-colors">BNPL</a>
-        <a href="#" class="hover:text-primary transition-colors">Trust Coins</a>
+        <a routerLink="/sell" class="hover:text-primary transition-colors cursor-pointer">Become a Seller</a>
+        <a routerLink="/info/advertise" class="hover:text-primary transition-colors cursor-pointer">Advertise</a>
+        <a routerLink="/bnpl" class="hover:text-primary transition-colors cursor-pointer">BNPL</a>
+        <a routerLink="/loyalty" class="hover:text-primary transition-colors cursor-pointer">Chommie Points</a>
       </div>
 
       <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-widest pb-2">
         <span class="text-primary/60 mr-2">Support:</span>
-        <a routerLink="/account" class="hover:text-primary transition-colors">Account</a>
-        <a routerLink="/orders" class="hover:text-primary transition-colors">Orders</a>
-        <a href="#" class="hover:text-primary transition-colors">Shipping</a>
-        <a routerLink="/help" class="hover:text-primary transition-colors">Help Center</a>
+        <a routerLink="/account" class="hover:text-primary transition-colors cursor-pointer">Your Account</a>
+        <a routerLink="/orders" class="hover:text-primary transition-colors cursor-pointer">Your Orders</a>
+        <a routerLink="/help" class="hover:text-primary transition-colors cursor-pointer">Shipping Rates</a>
+        <a routerLink="/help" class="hover:text-primary transition-colors cursor-pointer">Help Center</a>
       </div>
     </div>
 
     <!-- Minimal Bottom Bar -->
-    <div class="bg-[#FAF3E1]/50 py-6 border-t border-neutral-200 flex flex-col items-center gap-3">
+    <div class="bg-[#FAF3E1]/50 py-6 border-t border-neutral-300 flex flex-col items-center gap-3">
       <a routerLink="/" class="flex items-end opacity-80 hover:opacity-100 transition-opacity">
         <span class="font-header font-black text-lg tracking-tighter text-[#222222]">Chommie<span class="text-primary">.za</span></span>
       </a>
       <div class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-[8px] font-black uppercase tracking-widest text-neutral-400">
-        <a href="#" class="hover:text-primary">Privacy</a>
-        <a href="#" class="hover:text-primary">Terms</a>
-        <a href="#" class="hover:text-primary">Cookies</a>
+        <a routerLink="/info/privacy" class="hover:text-primary cursor-pointer">Privacy Notice</a>
+        <a routerLink="/info/terms" class="hover:text-primary cursor-pointer">Conditions of Use</a>
+        <a routerLink="/info/cookies" class="hover:text-primary cursor-pointer">Cookies</a>
         <span class="text-neutral-300">© 2026 Nexus Protocol</span>
       </div>
     </div>
   </footer>
+</div>
+
+<!-- Location Modal -->
+<div *ngIf="showLocationModal()" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" (click)="showLocationModal.set(false)">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden" (click)="$event.stopPropagation()">
+    <div class="px-6 py-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
+      <h3 class="text-lg font-bold text-neutral-800">Choose your location</h3>
+      <button (click)="showLocationModal.set(false)" class="text-neutral-400 hover:text-neutral-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <p class="text-sm text-neutral-600">Select a delivery location to see product availability and delivery speeds.</p>
+      <div class="grid grid-cols-1 gap-2">
+        <button *ngFor="let loc of ['South Africa', 'Gauteng', 'Cape Town', 'Durban', 'Pretoria']" 
+                (click)="updateLocation(loc)"
+                class="flex items-center justify-between p-4 border rounded-md hover:border-primary hover:bg-primary/5 transition-all group"
+                [ngClass]="currentLocation() === loc ? 'border-primary bg-primary/5' : 'border-neutral-200'">
+          <span class="font-bold text-neutral-700 group-hover:text-primary">{{ loc }}</span>
+          <div *ngIf="currentLocation() === loc" class="w-2 h-2 rounded-full bg-primary"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Language Modal -->
+<div *ngIf="showLanguageModal()" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" (click)="showLanguageModal.set(false)">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden" (click)="$event.stopPropagation()">
+    <div class="px-6 py-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
+      <h3 class="text-lg font-bold text-neutral-800">Language Settings</h3>
+      <button (click)="showLanguageModal.set(false)" class="text-neutral-400 hover:text-neutral-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-1 gap-2">
+        <button *ngFor="let lang of ['EN', 'AF', 'ZU', 'TN']" 
+                (click)="updateLanguage(lang)"
+                class="flex items-center justify-between p-4 border rounded-md hover:border-primary hover:bg-primary/5 transition-all group"
+                [ngClass]="currentLanguage() === lang ? 'border-primary bg-primary/5' : 'border-neutral-200'">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🇿🇦</span>
+            <span class="font-bold text-neutral-700 group-hover:text-primary">{{ lang === 'EN' ? 'English' : lang === 'AF' ? 'Afrikaans' : lang === 'ZU' ? 'isiZulu' : 'Setswana' }}</span>
+          </div>
+          <div *ngIf="currentLanguage() === lang" class="w-2 h-2 rounded-full bg-primary"></div>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

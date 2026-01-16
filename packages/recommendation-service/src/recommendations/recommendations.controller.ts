@@ -35,4 +35,9 @@ export class RecommendationsController {
   getProductInsight(@Payload() productId: string) {
     return this.recommendationsService.getProductInsight(productId);
   }
+
+  @MessagePattern({ cmd: 'ai_chat' })
+  chat(@Payload() data: { userId?: string; query: string }) {
+    return this.recommendationsService.chat(data);
+  }
 }

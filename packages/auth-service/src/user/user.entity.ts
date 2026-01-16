@@ -69,6 +69,9 @@ export class User {
       isDefault: boolean;
   }[];
 
+  @Column({ default: 0 })
+  rewardPoints: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

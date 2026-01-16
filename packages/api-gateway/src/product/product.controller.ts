@@ -79,4 +79,24 @@ export class ProductController {
   getQuestions(@Param('id') id: string) {
     return this.productClient.send({ cmd: 'get_product_questions' }, id);
   }
+
+  @Get(':id/delivery-estimation')
+  getDeliveryEstimation(@Param('id') id: string, @Query('zipCode') zipCode?: string) {
+    let days = 5;
+    if (zipCode) {
+      if (zipCode.startsWith('20') || zipCode.startsWith('21')) days = 2; // Gauteng
+      else if (zipCode.startsWith('7')) days = 3; // Cape Town
+      else if (zipCode.startsWith('4')) days = 3; // Durban
+      else if (zipCode.startsWith('0')) days = 4; // Pretoria/Other
+    }
+
+    const estimate = new Date();
+    estimate.setDate(estimate.getDate() + days);
+    
+    return {
+      estimatedDate: estimate,
+      days,
+      formattedDate: estimate.toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' })
+    };
+  }
 }

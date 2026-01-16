@@ -16,4 +16,14 @@ export class PaymentController {
   getTransaction(@Param('orderId') orderId: string) {
     return this.paymentClient.send({ cmd: 'get_transaction' }, { orderId });
   }
+
+  @Post('payfast/initiate')
+  initiatePayFast(@Body() data: any) {
+    return this.paymentClient.send({ cmd: 'initiate_payfast' }, data);
+  }
+
+  @Post('payfast/notify')
+  handlePayFastNotify(@Body() data: any) {
+    return this.paymentClient.send({ cmd: 'payfast_notify' }, data);
+  }
 }

@@ -35,6 +35,9 @@ export class Order {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   discountAmount: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  vatAmount: number;
+
   @Column({ nullable: true })
   couponCode: string;
 
@@ -59,6 +62,18 @@ export class Order {
 
   @Column({ type: 'json', nullable: true })
   trackingHistory: { status: string, timestamp: Date, description: string }[];
+
+  @Column({ default: 0 })
+  pointsEarned: number;
+
+  @Column({ default: 0 })
+  pointsRedeemed: number;
+
+  @Column({ default: false })
+  isPlusOrder: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  deliveryNotes: string;
 
   @CreateDateColumn()
   createdAt: Date;

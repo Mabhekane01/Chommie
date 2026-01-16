@@ -21,7 +21,11 @@ const MOCK_PRODUCTS: IProduct[] = [
     createdAt: new Date(),
     bnplEligible: true,
     trustScoreDiscount: 10,
-    vendorId: 'v1'
+    vendorId: 'v1',
+    bulkPricing: [
+        { minQuantity: 5, discountPercentage: 10 },
+        { minQuantity: 10, discountPercentage: 20 }
+    ]
   },
   {
     _id: 'p2',
@@ -29,7 +33,8 @@ const MOCK_PRODUCTS: IProduct[] = [
     description: 'Supercharged by M2. 13.6-inch Liquid Retina display, 8GB RAM, 256GB SSD storage.',
     price: 23999,
     category: 'Electronics',
-    stock: 20,
+    stock: 5,
+    lowStockThreshold: 10,
     images: ['https://m.media-amazon.com/images/I/719C6bJv8jL._AC_SL1500_.jpg'],
     ratings: 4.9,
     numReviews: 890,
@@ -61,7 +66,8 @@ const MOCK_PRODUCTS: IProduct[] = [
     description: 'Quantum Dot technology with 100% Color Volume. AirSlim design.',
     price: 14999,
     category: 'Electronics',
-    stock: 15,
+    stock: 2,
+    lowStockThreshold: 10,
     images: ['https://m.media-amazon.com/images/I/914ZFE5Rk1L._AC_SL1500_.jpg'],
     ratings: 4.7,
     numReviews: 320,
@@ -192,17 +198,27 @@ export class ProductService {
     );
   }
 
-  getSuggestions(query: string): Observable<{ suggestions: string[] }> {
-    return this.http.get<{ suggestions: string[] }>(`${this.apiUrl}/search/suggest`, {
+  getSuggestions(query: string): Observable<{ suggestions: {text: string, category?: string}[] }> {
+    return this.http.get<{ suggestions: {text: string, category?: string}[] }>(`${this.apiUrl}/search/suggest`, {
       params: { q: query }
     }).pipe(
       catchError(() => {
         const q = query.toLowerCase();
-        const suggestions = MOCK_PRODUCTS
+        const results: {text: string, category?: string}[] = [];
+        
+        // 1. Exact match suggestions
+        MOCK_PRODUCTS
             .filter(p => p.name.toLowerCase().includes(q))
-            .map(p => p.name)
-            .slice(0, 5);
-        return of({ suggestions });
+            .slice(0, 3)
+            .forEach(p => results.push({ text: p.name }));
+
+        // 2. Scoped suggestions (Amazon Style)
+        const categories = Array.from(new Set(MOCK_PRODUCTS.map(p => p.category)));
+        categories.forEach(cat => {
+            results.push({ text: query, category: cat });
+        });
+
+        return of({ suggestions: results.slice(0, 8) });
       })
     );
   }
@@ -324,5 +340,31 @@ export class ProductService {
 
   answerQuestion(questionId: string, data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/questions/${questionId}/answer`, data).pipe(catchError(() => of({})));
+  }
+
+  aiChat(query: string, userId?: string | null): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/ai/chat`, { query, userId });
+  }
+
+  getDeliveryEstimation(productId: string, zipCode?: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${productId}/delivery-estimation`, {
+        params: zipCode ? { zipCode } : {}
+    }).pipe(
+        catchError(() => {
+            const date = new Date();
+            date.setDate(date.getDate() + 3);
+            return of({
+                estimatedDate: date,
+                days: 3,
+                formattedDate: date.toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' })
+            });
+        })
+    );
+  }
+
+  getPurchasedProductIds(userId: string): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.apiUrl}/orders/user/${userId}/purchased-products`).pipe(
+        catchError(() => of([]))
+    );
   }
 }

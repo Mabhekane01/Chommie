@@ -12,6 +12,7 @@ export class AuthService {
   
   // Track current user state
   currentUser = signal<any | null>(this.getUserFromStorage());
+  isPlusMember = signal<boolean>(localStorage.getItem('is_plus') === 'true');
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -22,11 +23,31 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+      tap((res: any) => {
+        if (res.accessToken && res.user) {
+          this.handleAuthSuccess(res);
+        }
+      })
+    );
+  }
+
+  private handleAuthSuccess(res: any) {
+    localStorage.setItem('access_token', res.accessToken);
+    localStorage.setItem('user_id', res.user.id);
+    localStorage.setItem('user_name', `${res.user.firstName} ${res.user.lastName}`);
+    localStorage.setItem('user_role', res.user.role);
+    this.currentUser.set({ id: res.user.id, token: res.accessToken, role: res.user.role });
   }
 
   register(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, data);
+    return this.http.post(`${this.apiUrl}/register`, data).pipe(
+      tap((res: any) => {
+        if (res.accessToken && res.user) {
+          this.handleAuthSuccess(res);
+        }
+      })
+    );
   }
 
   requestEmailVerification(email: string): Observable<any> {
@@ -38,7 +59,13 @@ export class AuthService {
   }
 
   verify2FA(email: string, otp: string) {
-    return this.http.post(`${this.apiUrl}/verify-2fa`, { email, otp });
+    return this.http.post(`${this.apiUrl}/verify-2fa`, { email, otp }).pipe(
+      tap((res: any) => {
+        if (res.accessToken && res.user) {
+          this.handleAuthSuccess(res);
+        }
+      })
+    );
   }
 
   resendVerification(email: string) {
@@ -74,10 +101,17 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/favorite-category`, { userId, category });
   }
 
+  setPlusMember(isPlus: boolean) {
+    localStorage.setItem('is_plus', isPlus ? 'true' : 'false');
+    this.isPlusMember.set(isPlus);
+  }
+
   logout() {
     localStorage.removeItem('user_id');
     localStorage.removeItem('access_token');
+    localStorage.removeItem('is_plus');
     this.currentUser.set(null);
+    this.isPlusMember.set(false);
     this.router.navigate(['/login']);
   }
 

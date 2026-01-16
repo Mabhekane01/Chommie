@@ -58,7 +58,7 @@ import { TranslationService } from '../../services/translation.service';
             <form (ngSubmit)="onResetPassword()" class="space-y-4">
                 <div class="space-y-1">
                     <label for="otp" class="block text-xs font-bold text-[#222222]">Enter OTP</label>
-                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6"
+                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6" minlength="6"
                         class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-[0.5em] text-center focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
                 </div>
 
@@ -97,6 +97,15 @@ import { TranslationService } from '../../services/translation.service';
           <p class="leading-relaxed">If you no longer use the email address associated with your account, contact support.</p>
       </div>
 
+      <footer class="mt-8 text-[11px] text-neutral-500 space-y-4 max-w-[350px] w-full border-t border-neutral-200 pt-6 text-center">
+        <div class="flex gap-6 justify-center text-primary font-medium">
+            <a routerLink="/info/terms" class="hover:underline">Conditions of Use</a>
+            <a routerLink="/info/privacy" class="hover:underline">Privacy Notice</a>
+            <a routerLink="/help" class="hover:underline">Help</a>
+        </div>
+        <p>&copy; 2026, Chommie.za, Inc. or its affiliates</p>
+      </footer>
+
     </div>
   `
 })
@@ -129,7 +138,10 @@ export class ForgotPasswordComponent {
   }
 
   onResetPassword() {
-    if (!this.otp || !this.password) return;
+    if (!this.otp || this.otp.length !== 6 || !this.password) {
+        if (!this.otp || this.otp.length !== 6) this.error.set('Please enter a valid 6-digit code');
+        return;
+    }
     this.loading.set(true);
     this.error.set('');
 

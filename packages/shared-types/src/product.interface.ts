@@ -6,6 +6,7 @@ export interface IProduct {
   price: number;
   category: string;
   stock: number;
+  lowStockThreshold?: number;
   images: string[];
   ratings: number;
   numReviews: number;
@@ -20,8 +21,14 @@ export interface IProduct {
   variants?: IProductVariant[];
   badges?: string[]; // e.g., ["AMAZON_CHOICE", "BEST_SELLER"]
   specifications?: Record<string, string>; // e.g., {"Brand": "Sony", "Color": "Black"}
+  bulkPricing?: IBulkPricing[];
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IBulkPricing {
+  minQuantity: number;
+  discountPercentage: number;
 }
 
 export interface IProductVariant {
@@ -42,6 +49,7 @@ export class CreateProductDto {
   price!: number;
   category!: string;
   stock!: number;
+  lowStockThreshold?: number;
   images?: string[];
   bnplEligible?: boolean;
   discountPrice?: number;
@@ -50,6 +58,7 @@ export class CreateProductDto {
   lightningDealStock?: number;
   variants?: IProductVariant[];
   specifications?: Record<string, string>;
+  bulkPricing?: IBulkPricing[];
   vendorId!: string;
 }
 
@@ -67,5 +76,6 @@ export class UpdateProductDto implements Partial<CreateProductDto> {
   lightningDealStock?: number;
   variants?: IProductVariant[];
   specifications?: Record<string, string>;
+  bulkPricing?: IBulkPricing[];
   vendorId?: string;
 }

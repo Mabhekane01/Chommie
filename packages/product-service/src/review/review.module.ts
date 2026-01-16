@@ -18,12 +18,18 @@ import { Product, ProductSchema } from '../product/product.schema';
       {
         name: 'ORDER_SERVICE',
         transport: Transport.TCP,
-        options: { host: 'localhost', port: 3004 },
+        options: {
+          host: process.env.ORDER_SERVICE_HOST || '127.0.0.1',
+          port: Number(process.env.ORDER_SERVICE_PORT) || 3004,
+        },
       },
       {
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
-        options: { host: 'localhost', port: 3001 },
+        options: {
+          host: process.env.AUTH_SERVICE_HOST || '127.0.0.1',
+          port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
+        },
       },
     ]),
   ],

@@ -20,6 +20,9 @@ export class Product {
   @Prop({ default: 0 })
   stock: number;
 
+  @Prop({ default: 10 })
+  lowStockThreshold: number;
+
   @Prop({ default: 'PENDING_REVIEW' })
   approvalStatus: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
 

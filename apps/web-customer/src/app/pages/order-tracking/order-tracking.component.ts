@@ -1,129 +1,127 @@
-import { Component, OnInit, signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, OnDestroy, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { SocketService } from '../../services/socket.service';
 import { TranslationService } from '../../services/translation.service';
+import { DeviceService } from '../../services/device.service';
 
 @Component({
   selector: 'app-order-tracking',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-white text-neutral-charcoal pb-32 pt-10">
+    <div class="min-h-screen bg-[#FAF3E1] text-neutral-charcoal pb-32" [ngClass]="deviceService.isMobile() ? 'pt-2' : 'pt-10'">
       <div class="w-full px-6 animate-fade-in">
         
         <!-- Breadcrumbs -->
-        <nav class="flex items-center gap-2 text-xs text-neutral-500 mb-8">
-          <a routerLink="/account" class="hover:underline hover:text-primary">{{ ts.t('nav.account') }}</a>
+        <nav class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-8">
+          <a routerLink="/account" class="hover:text-primary transition-colors">{{ ts.t('nav.account') }}</a>
           <span>›</span>
-          <a routerLink="/orders" class="hover:underline hover:text-primary">{{ ts.t('account.orders') }}</a>
+          <a routerLink="/orders" class="hover:text-primary transition-colors">Your Orders</a>
           <span>›</span>
-          <span class="text-primary font-bold">{{ ts.t('tracking.title') }}</span>
+          <span class="text-primary">Track Package</span>
         </nav>
 
         <div *ngIf="loading()" class="py-20 flex justify-center">
              <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
         </div>
 
-        <div *ngIf="!loading() && order()" class="space-y-8">
+        <div *ngIf="!loading() && order()" class="space-y-8 max-w-[1200px] mx-auto">
             
-            <!-- Order Header -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-neutral-200 pb-6">
-               <div>
-                  <h1 class="text-2xl font-bold text-neutral-charcoal mb-1">
-                     {{ order()!.status === 'DELIVERED' ? ts.t('tracking.delivered') : ts.t('tracking.arriving') }}
-                  </h1>
-                  <p class="text-sm text-neutral-600" *ngIf="order()!.status !== 'DELIVERED'">
-                     {{ ts.t('tracking.estimated') }}: <span class="font-bold text-emerald-700">Tomorrow, by 8pm</span>
-                  </p>
-                  <p class="text-sm text-neutral-600" *ngIf="order()!.status === 'DELIVERED'">
-                     Package was handed to resident
-                  </p>
+            <!-- Live Status Node -->
+            <div class="bg-white border border-neutral-300 rounded-sm p-8 shadow-sm relative overflow-hidden">
+               <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                  <div class="space-y-2">
+                     <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-emerald-700">Live Tracking Active</span>
+                     </div>
+                     <h1 class="text-3xl font-bold tracking-tight text-neutral-800">
+                        {{ order()!.status === 'DELIVERED' ? 'Package Delivered' : 'Your package is on its way' }}
+                     </h1>
+                     <p class="text-neutral-500 font-medium text-sm">
+                        Standard Shipping • Order #{{ order()!.id.slice(0,12).toUpperCase() }}
+                     </p>
+                  </div>
+
+                  <div class="bg-neutral-50 border border-neutral-200 p-6 rounded-sm min-w-[240px] text-center">
+                     <div class="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-1">Expected Arrival</div>
+                     <div class="text-xl font-bold text-neutral-800 tracking-tight uppercase">Today by 8 PM</div>
+                  </div>
                </div>
-               <div class="text-right">
-                  <div class="text-xs text-neutral-500 uppercase tracking-wide">Order #</div>
-                  <div class="text-sm font-mono font-bold text-neutral-charcoal">{{ order()!.id }}</div>
+
+               <!-- Live Map Simulation -->
+               <div class="mt-10 h-[300px] bg-neutral-100 rounded-sm relative overflow-hidden border border-neutral-200 shadow-inner group">
+                  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5"></div>
+                  
+                  <!-- Simulation Elements -->
+                  <div class="absolute inset-0 flex items-center justify-center p-10">
+                     <div class="w-full h-full relative border border-dashed border-neutral-300 rounded-sm">
+                        <!-- Start Point -->
+                        <div class="absolute top-1/2 left-10 -translate-y-1/2 flex flex-col items-center gap-2">
+                           <div class="w-3 h-3 bg-neutral-400 rounded-full border-2 border-white shadow-md"></div>
+                           <span class="text-[9px] font-bold text-neutral-400 uppercase">Warehouse</span>
+                        </div>
+
+                        <!-- Progress Line -->
+                        <div class="absolute top-1/2 left-10 right-10 h-1 bg-neutral-200 -translate-y-1/2">
+                           <div class="h-full bg-primary relative transition-all duration-[2000ms]" [style.width.%]="getProgressPercent()">
+                              <!-- Delivery Vehicle Icon -->
+                              <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 bg-[#131921] rounded-sm flex items-center justify-center shadow-lg border border-white/10">
+                                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                              </div>
+                           </div>
+                        </div>
+
+                        <!-- Destination -->
+                        <div class="absolute top-1/2 right-10 -translate-y-1/2 flex flex-col items-center gap-2">
+                           <div class="w-8 h-8 bg-emerald-500 rounded-sm flex items-center justify-center border-2 border-white shadow-md animate-bounce">
+                              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                           </div>
+                           <span class="text-[9px] font-bold text-emerald-600 uppercase">Home</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Status HUD Overlay -->
+                  <div class="absolute bottom-4 left-4 right-4 flex justify-between">
+                     <div class="bg-white/90 border border-neutral-200 px-4 py-2 rounded-sm flex items-center gap-3 shadow-md">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Distance Remaining: <span class="text-neutral-800">4.2 KM</span></div>
+                     </div>
+                  </div>
                </div>
             </div>
 
-            <!-- Visual Progress Bar -->
-            <div class="bg-white border border-neutral-200 rounded-lg p-8 shadow-sm">
-                <div class="relative">
-                    <!-- Progress Line Base -->
-                    <div class="absolute left-0 top-1/2 w-full h-2 bg-neutral-100 rounded-full -translate-y-1/2"></div>
-                    
-                    <!-- Active Progress Line -->
-                    <div class="absolute left-0 top-1/2 h-2 bg-emerald-600 rounded-full -translate-y-1/2 transition-all duration-1000"
-                         [style.width]="getProgressPercent() + '%'">
-                    </div>
-
-                    <!-- Steps -->
-                    <div class="relative flex justify-between">
-                        <!-- Ordered -->
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center z-10 bg-emerald-600 text-white">
-                               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <span class="text-xs font-bold text-neutral-charcoal">Ordered</span>
-                        </div>
-
-                        <!-- Shipped -->
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center z-10 transition-colors duration-500"
-                                 [ngClass]="order()!.status !== 'PENDING' && order()!.status !== 'PROCESSING' ? 'bg-emerald-600 text-white' : 'bg-neutral-200 text-neutral-400'">
-                               <svg *ngIf="order()!.status !== 'PENDING' && order()!.status !== 'PROCESSING'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <span class="text-xs font-bold" [ngClass]="order()!.status !== 'PENDING' && order()!.status !== 'PROCESSING' ? 'text-neutral-charcoal' : 'text-neutral-400'">Shipped</span>
-                        </div>
-
-                        <!-- Out for Delivery -->
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center z-10 transition-colors duration-500"
-                                 [ngClass]="order()!.status === 'SHIPPED' || order()!.status === 'DELIVERED' ? 'bg-emerald-600 text-white' : 'bg-neutral-200 text-neutral-400'">
-                               <svg *ngIf="order()!.status === 'SHIPPED' || order()!.status === 'DELIVERED'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <span class="text-xs font-bold" [ngClass]="order()!.status === 'SHIPPED' || order()!.status === 'DELIVERED' ? 'text-neutral-charcoal' : 'text-neutral-400'">Out for Delivery</span>
-                        </div>
-
-                        <!-- Delivered -->
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center z-10 transition-colors duration-500"
-                                 [ngClass]="order()!.status === 'DELIVERED' ? 'bg-emerald-600 text-white' : 'bg-neutral-200 text-neutral-400'">
-                               <svg *ngIf="order()!.status === 'DELIVERED'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <span class="text-xs font-bold" [ngClass]="order()!.status === 'DELIVERED' ? 'text-neutral-charcoal' : 'text-neutral-400'">Delivered</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detailed History -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Historical Log & Metadata -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
                 <!-- Timeline List -->
-                <div class="lg:col-span-2">
-                    <h3 class="text-lg font-bold text-neutral-charcoal mb-4">{{ ts.t('tracking.history') }}</h3>
-                    <div class="border-l-2 border-neutral-200 ml-3 space-y-8 pl-8 py-2">
+                <div class="lg:col-span-2 bg-white border border-neutral-300 rounded-sm p-8 shadow-sm">
+                    <h2 class="text-sm font-bold text-neutral-800 uppercase tracking-widest mb-8 border-b border-neutral-100 pb-4">Delivery History</h2>
+                    <div class="border-l-2 border-neutral-100 ml-2 space-y-10 pl-8 py-2 relative">
                         <div *ngFor="let step of (order()!.trackingHistory || []).slice().reverse(); let first = first" class="relative">
-                            <div class="absolute -left-[39px] top-1 w-4 h-4 rounded-full border-2 border-white"
-                                 [ngClass]="first ? 'bg-primary ring-2 ring-primary/20' : 'bg-neutral-300'">
+                            <div class="absolute -left-[41px] top-1 w-5 h-5 rounded-sm border-2 border-white flex items-center justify-center shadow-sm transition-all"
+                                 [ngClass]="first ? 'bg-primary text-white' : 'bg-neutral-200 text-neutral-400'">
+                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             
                             <div class="space-y-1">
-                                <div class="text-sm font-bold text-neutral-charcoal">{{ step.status.replace('_', ' ') | titlecase }}</div>
-                                <div class="text-xs text-neutral-500">{{ step.timestamp | date:'EEEE, MMMM d, h:mm a' }}</div>
-                                <div class="text-sm text-neutral-600">{{ step.description }}</div>
-                                <div class="text-xs text-neutral-400 uppercase tracking-wide pt-1">Cape Town, ZA</div>
+                                <div class="text-sm font-bold text-neutral-800 uppercase tracking-tight">{{ step.status.replace('_', ' ') }}</div>
+                                <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{{ step.timestamp | date:'EEEE, MMM d, h:mm a' }}</div>
+                                <p class="text-xs text-neutral-600 leading-relaxed max-w-lg">{{ step.description }}</p>
+                                <div class="text-[9px] font-bold text-neutral-400 uppercase pt-1">Location: Cape Town, ZA</div>
                             </div>
                         </div>
 
                         <!-- Initial State -->
                         <div *ngIf="!order()!.trackingHistory?.length" class="relative">
-                             <div class="absolute -left-[39px] top-1 w-4 h-4 rounded-full bg-primary ring-2 ring-primary/20 border-2 border-white"></div>
+                             <div class="absolute -left-[41px] top-1 w-5 h-5 rounded-sm bg-primary border-2 border-white flex items-center justify-center shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                             </div>
                              <div class="space-y-1">
-                                <div class="text-sm font-bold text-neutral-charcoal">Order Placed</div>
-                                <div class="text-xs text-neutral-500">{{ order()!.createdAt | date:'short' }}</div>
-                                <div class="text-sm text-neutral-600">We have received your order.</div>
+                                <div class="text-sm font-bold text-neutral-800 uppercase tracking-tight">Order Placed</div>
+                                <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{{ order()!.createdAt | date:'short' }}</div>
+                                <p class="text-xs text-neutral-600">We have received your order and are preparing it for shipment.</p>
                             </div>
                         </div>
                     </div>
@@ -131,29 +129,35 @@ import { TranslationService } from '../../services/translation.service';
 
                 <!-- Info Cards -->
                 <div class="space-y-6">
-                    <!-- Shipping Address -->
-                    <div class="bg-neutral-50 border border-neutral-200 p-6 rounded-lg">
-                        <h4 class="text-sm font-bold text-neutral-charcoal mb-2">{{ ts.t('tracking.ship_to') }}</h4>
-                        <p class="text-sm text-neutral-600 leading-relaxed">
+                    <!-- Target Address -->
+                    <div class="bg-white border border-neutral-300 p-6 rounded-sm shadow-sm space-y-4">
+                        <div class="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Shipping Address</div>
+                        <p class="text-sm font-bold text-neutral-800 leading-relaxed uppercase tracking-tight">
                             {{ order()!.shippingAddress }}
                         </p>
                     </div>
 
-                    <!-- Order Summary Small -->
-                    <div class="bg-neutral-50 border border-neutral-200 p-6 rounded-lg space-y-3">
-                        <h4 class="text-sm font-bold text-neutral-charcoal mb-2">Order Summary</h4>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-neutral-600">Item(s) Subtotal:</span>
-                            <span class="font-medium">R{{ order()!.totalAmount | number:'1.0-0' }}</span>
+                    <!-- Order Summary -->
+                    <div class="bg-[#131921] text-white p-6 rounded-sm shadow-xl space-y-6 relative overflow-hidden">
+                        <div class="text-[10px] font-black text-white/40 uppercase tracking-widest">Order Summary</div>
+                        
+                        <div class="space-y-4 relative z-10">
+                           <div class="flex justify-between items-end text-xs">
+                               <span class="text-white/40 uppercase">Items Total</span>
+                               <span class="font-bold">R{{ order()!.totalAmount | number:'1.0-0' }}</span>
+                           </div>
+                           <div class="flex justify-between items-end text-xs">
+                               <span class="text-white/40 uppercase">Shipping Fee</span>
+                               <span class="font-bold text-emerald-400 uppercase">Free</span>
+                           </div>
+                           <div class="h-px bg-white/10 my-2"></div>
+                           <div class="flex justify-between items-end">
+                               <span class="text-[10px] font-black text-primary uppercase tracking-widest">Total</span>
+                               <span class="text-xl font-black text-primary tracking-tighter">R{{ order()!.totalAmount | number:'1.0-0' }}</span>
+                           </div>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-neutral-600">Shipping:</span>
-                            <span class="font-medium text-emerald-700">R0.00</span>
-                        </div>
-                        <div class="border-t border-neutral-200 pt-3 flex justify-between font-bold text-neutral-charcoal">
-                            <span>Grand Total:</span>
-                            <span>R{{ order()!.totalAmount | number:'1.0-0' }}</span>
-                        </div>
+
+                        <button class="w-full py-3 bg-white/5 border border-white/10 rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Download Invoice</button>
                     </div>
                 </div>
             </div>
@@ -167,6 +171,7 @@ import { TranslationService } from '../../services/translation.service';
   `]
 })
 export class OrderTrackingComponent implements OnInit, OnDestroy {
+  public deviceService = inject(DeviceService);
   order = signal<any | null>(null);
   loading = signal(true);
   userId = localStorage.getItem('user_id') || '';
@@ -200,20 +205,27 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   }
 
   getProgressPercent() {
-      if (!this.order()) return 0;
+      if (!this.order()) return 5;
       const status = this.order()!.status;
       switch(status) {
-          case 'PENDING':
-          case 'PROCESSING': return 5;
-          case 'SHIPPED': return 50;
+          case 'PENDING': return 10;
+          case 'PAID':
+          case 'CONFIRMED': return 25;
+          case 'PROCESSING':
+          case 'PACKED': return 40;
+          case 'SHIPPED': return 65;
+          case 'OUT_FOR_DELIVERY': return 85;
           case 'DELIVERED': return 100;
-          default: return 0;
+          default: return 5;
       }
   }
 
   loadOrder(id: string) {
     this.orderService.getUserOrders(this.userId).subscribe(orders => {
-        this.order.set(orders.find(o => o.id === id));
+        const found = orders.find(o => o.id === id || o._id === id);
+        if (found) {
+            this.order.set(found);
+        }
         this.loading.set(false);
     });
   }

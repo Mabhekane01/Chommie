@@ -169,10 +169,19 @@ import { TranslationService } from '../../services/translation.service';
                           <label class="col-span-3 font-bold text-neutral-600 pt-4 text-right">Upload Photos</label>
                           <div class="col-span-9 space-y-4">
                              <div class="flex gap-4">
-                                <input type="text" name="imageInput" [(ngModel)]="imageInput" 
-                                    class="flex-grow bg-neutral-50 border border-neutral-300 rounded-md px-6 py-3.5 font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all hover:bg-white"
-                                    placeholder="Paste photo link here">
-                                <button type="button" (click)="addImage()" class="btn-secondary px-6 py-2 rounded-md font-bold uppercase tracking-widest text-xs border border-neutral-300">Add Photo</button>
+                                <div class="flex-grow">
+                                   <div (click)="fileInput.click()" class="w-full bg-neutral-50 border-2 border-dashed border-neutral-300 rounded-md px-6 py-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-white transition-all group">
+                                      <svg class="w-8 h-8 text-neutral-400 group-hover:text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                      <span class="text-xs font-bold text-neutral-500 group-hover:text-primary">Click to upload files</span>
+                                      <input #fileInput type="file" (change)="onFileSelected($event)" multiple accept="image/*" class="hidden">
+                                   </div>
+                                </div>
+                                <div class="w-1/3 space-y-2">
+                                   <input type="text" name="imageInput" [(ngModel)]="imageInput" 
+                                       class="w-full bg-neutral-50 border border-neutral-300 rounded-md px-4 py-2 text-xs font-medium focus:border-primary outline-none"
+                                       placeholder="Or paste URL">
+                                   <button type="button" (click)="addImage()" class="w-full btn-secondary py-2 rounded-md font-bold uppercase tracking-widest text-[9px] border border-neutral-300">Add via URL</button>
+                                </div>
                              </div>
                              
                              <div class="grid grid-cols-4 gap-4 mt-4" *ngIf="images.length > 0">
@@ -286,6 +295,23 @@ export class ProductCreateComponent {
       } catch (e: any) {
         alert(e);
       }
+    }
+  }
+
+  onFileSelected(event: any) {
+    const files: FileList = event.target.files;
+    if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+                const url = e.target.result;
+                this.validateImage(url).then(() => {
+                    this.images.push(url);
+                }).catch(err => console.warn(err));
+            };
+            reader.readAsDataURL(file);
+        }
     }
   }
 

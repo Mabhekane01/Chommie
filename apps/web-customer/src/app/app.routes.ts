@@ -21,6 +21,9 @@ import { AccountComponent } from './pages/account/account.component';
 import { SecurityComponent } from './pages/account/security/security.component';
 import { AddressesComponent } from './pages/account/addresses/addresses.component';
 import { MessagesComponent } from './pages/messages/messages.component';
+import { PlusComponent } from './pages/plus/plus.component';
+import { LoyaltyDashboardComponent } from './pages/loyalty-dashboard/loyalty-dashboard.component';
+import { InformationComponent } from './pages/info/info.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -36,12 +39,15 @@ export const routes: Routes = [
   { path: 'returns/:id', component: ReturnRequestComponent, canActivate: [authGuard] },
   { path: 'messages', component: MessagesComponent, canActivate: [authGuard] },
   { path: 'help', component: HelpComponent },
+  { path: 'info/:slug', component: InformationComponent },
   { path: 'gift-cards', component: GiftCardsComponent },
   { path: 'sell', component: SellComponent },
   { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'account/security', component: SecurityComponent, canActivate: [authGuard] },
   { path: 'account/addresses', component: AddressesComponent, canActivate: [authGuard] },
   { path: 'bnpl', component: BnplDashboardComponent, canActivate: [authGuard] },
+  { path: 'plus', component: PlusComponent },
+  { path: 'loyalty', component: LoyaltyDashboardComponent, canActivate: [authGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },

@@ -11,7 +11,7 @@ import { PaymentPlan } from './payment-plan/entities/payment-plan.entity';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST || 'localhost',
+      host: process.env.POSTGRES_HOST || '127.0.0.1',
       port: Number(process.env.POSTGRES_PORT) || 5432,
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'Ntando@postgresql!!522',

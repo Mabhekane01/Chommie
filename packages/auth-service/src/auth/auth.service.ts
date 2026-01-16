@@ -250,4 +250,12 @@ export class AuthService {
       numSellerRatings: data.numRatings
     });
   }
+
+  async getPendingVendors() {
+    return this.userService.findPendingVendors();
+  }
+
+  async updateVendorStatus(userId: string, status: string) {
+    return this.userService.update(userId, { vendorStatus: status as any });
+  }
 }

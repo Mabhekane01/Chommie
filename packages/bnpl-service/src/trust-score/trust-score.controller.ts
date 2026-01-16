@@ -31,6 +31,17 @@ export class TrustScoreController {
     return this.trustScoreService.useCoins(data.userId, data.amount);
   }
 
+  @MessagePattern({ cmd: 'redeem_coins' })
+  async redeemCoins(@Payload() data: { userId: string; amount: number }) {
+    const success = await this.trustScoreService.useCoins(data.userId, data.amount);
+    return success ? { success: true } : { status: 'error', message: 'Insufficient coins' };
+  }
+
+  @EventPattern('award_coins')
+  async awardCoins(@Payload() data: { userId: string; amount: number }) {
+    return this.trustScoreService.awardCoins(data.userId, data.amount);
+  }
+
   @EventPattern('payment_completed')
   async handlePaymentCompleted(@Payload() data: { userId: string }) {
     if (data.userId) {

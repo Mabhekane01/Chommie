@@ -222,6 +222,78 @@ export class TranslationService {
       'sell.subtitle': 'Bereik miljoene kliënte en groei jou besigheid met Suid-Afrika se mees innoverende plaaslike markplek.',
       'sell.start': 'Begin Verkoop',
       'sell.login': 'Verkoper-aanmelding'
+    },
+    'TN': {
+      'nav.deals': "Ditumalano tsa gompieno",
+      'nav.help': 'Thuso ya badirisi',
+      'nav.wishlist': 'Lenane la dikeletso',
+      'nav.giftcards': 'Dikarata tsa dimpho',
+      'nav.sell': 'Rekisa',
+      'nav.orders': 'Ditaelo le merurolwana',
+      'nav.cart': 'Kariki',
+      'nav.account': 'Akhaonto ya gago',
+      'nav.signout': 'Tswa',
+      'nav.hello': 'Dumela',
+      'nav.signin': 'Tsena',
+      'nav.home_kitchen': 'Legae le Boapeelo',
+      'nav.explore_home': 'Batlisisa Legae',
+      'nav.beauty_essentials': 'Ditshwanelo tsa bontle',
+      'nav.shop_beauty': 'Reka tsa bontle',
+      'sidebar.trending': 'Tse di rategang gompieno',
+      'sidebar.best_sellers': 'Tse di rekisiwang thata',
+      'sidebar.new_releases': 'Tse dintšha',
+      'sidebar.shop_by_dept': 'Reka ka Lefapha',
+      'sidebar.programs': 'Mananeo le diponagalo',
+      'sidebar.help_settings': 'Thuso le Dithulaganyo',
+      'search.placeholder': 'Batla mo Chommie...',
+      'hero.welcome': 'O amogetswe mo Chommie',
+      'hero.subtitle': 'Reka ditumalano tsa gompieno mme o ipelele ka BNPL.',
+      'product.add_to_cart': 'Tsenya mo kariking',
+      'product.buy_now': 'Reka gompieno',
+      'product.in_stock': 'E teng mo setokong',
+      'product.out_of_stock': 'Ga e teng mo setokong',
+      'account.title': 'Akhaonto ya gago',
+      'account.orders': 'Ditaelo tsa gago',
+      'account.orders_desc': 'Latela, busa, kgotsa reka gape',
+      'account.security': 'Tshireletsego',
+      'account.security_desc': 'Fetola leina le phasewete',
+      'account.addresses': 'Diaterese tsa gago',
+      'account.addresses_desc': 'Fetola diaterese tsa go romelwa',
+      'account.trust': 'Porofaele ya Tshepo',
+      'account.trust_desc': 'Bona dintlha tsa tshepo',
+      'account.payments': 'Dituelo tsa gago',
+      'account.payments_desc': 'Laola ditsela tsa tuelo',
+      'wishlist.title': 'Lenane la dikeletso',
+      'wishlist.empty': 'Lenane leno ga le na sepe',
+      'wishlist.add_items': 'Tsenya dilo tse o batlang go di latela fano.',
+      'auth.signin': 'Tsena',
+      'auth.create_account': 'Tlhama akhaonto',
+      'auth.email': 'Imeile kgotsa nomoro ya mogala',
+      'auth.password': 'Phasewete',
+      'auth.forgot': 'O lebetse phasewete?',
+      'auth.new_customer': 'O mošwa mo Chommie?',
+      'cart.title': 'Kariki ya go reka',
+      'cart.subtotal': 'Palogotlhe ya nakwana',
+      'cart.proceed': 'Tswelela go ya kwa tuelong',
+      'tracking.title': 'Dintlha tsa taelo',
+      'tracking.arriving': 'E goroga go tloga mono',
+      'tracking.delivered': 'E gorositswe',
+      'tracking.estimated': 'Nako e e fopheletsweng',
+      'tracking.history': 'Hisitori ya go latela',
+      'tracking.ship_to': 'Aterese ya go romelwa',
+      'returns.title': 'Senthara ya go busa dilo',
+      'returns.choose': 'Tlhopha dilo tse o batlang go di busa',
+      'returns.reason': 'Ke ka ntlha yang fa o busa se?',
+      'returns.comments': 'Dikakgelo (fa o batla)',
+      'returns.submit': 'Romela kopo ya go busa',
+      'gift.title': 'Dikarata tsa dimpho tsa Chommie',
+      'gift.subtitle': 'Mpho e e siameng ya paka nngwe le nngwe. Ba neye kgololosego ya go itlhophela.',
+      'gift.shop': 'Reka dikarata tsa dimpho',
+      'gift.redeem': 'Dirisa karata',
+      'sell.title': 'Nna morekisi wa Chommie',
+      'sell.subtitle': 'Fitlhelela dimilione tsa badirisi mme o godise kgwebo ya gago.',
+      'sell.start': 'Simolola go rekisa',
+      'sell.login': 'Go tsena ga morekisi'
     }
   };
 
@@ -231,6 +303,8 @@ export class TranslationService {
   }
 
   t(key: string): string {
-    return this.translations[this.currentLang()][key] || key;
+    const lang = this.currentLang();
+    const dict = this.translations[lang] || this.translations['EN'];
+    return dict[key] || this.translations['EN'][key] || key;
   }
 }

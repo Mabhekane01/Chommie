@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -61,6 +61,32 @@ import { DeviceService } from '../../services/device.service';
                     </div>
                     <button (click)="addNewAddress()" class="w-full btn-primary py-3 rounded-xl font-bold">Use this address</button>
                  </div>
+
+                 <!-- Delivery Instructions -->
+                 <div class="pt-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2 block">Delivery Instructions (Safe Place)</label>
+                    <textarea [(ngModel)]="deliveryNotes" placeholder="e.g. Leave with security at gate" class="w-full bg-neutral-50 border-2 border-neutral-100 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary h-20"></textarea>
+                 </div>
+              </div>
+
+              <!-- Points Redemption Mobile -->
+              <div class="space-y-3 pt-4 border-t border-neutral-100" *ngIf="coinsBalance() > 0">
+                 <h2 class="text-lg font-black flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-amber-400 text-white flex items-center justify-center text-xs">C</span>
+                    Chommie Points
+                 </h2>
+                 <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                    <div class="flex justify-between items-center mb-2">
+                       <span class="text-xs text-amber-900">You have <span class="font-bold">{{ coinsBalance() }}</span> points available.</span>
+                       <button *ngIf="appliedCoins() === 0" (click)="applyCoins()" class="text-xs font-bold text-amber-600 hover:underline">REDEEM</button>
+                       <button *ngIf="appliedCoins() > 0" (click)="removeCoins()" class="text-xs font-bold text-red-600 hover:underline">REMOVE</button>
+                    </div>
+                    <p class="text-[10px] text-amber-700/70 leading-tight">Redeem points for an instant discount. 100 points = R1.00</p>
+                    <div *ngIf="appliedCoins() > 0" class="mt-2 text-xs font-bold text-amber-600 flex items-center gap-1">
+                       <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       -R{{ coinDiscount() | number:'1.0-0' }} applied
+                    </div>
+                 </div>
               </div>
 
               <!-- Mobile Step 2: Payment -->
@@ -88,6 +114,14 @@ import { DeviceService } from '../../services/device.service';
                              <div class="w-6 h-4 bg-neutral-200 rounded-sm"></div>
                              <div class="w-6 h-4 bg-neutral-200 rounded-sm"></div>
                           </div>
+                       </div>
+                    </div>
+
+                    <div (click)="selectPayment('PAYFAST')" class="p-4 border-2 rounded-xl transition-all flex flex-col gap-2"
+                         [ngClass]="selectedPaymentMethod() === 'PAYFAST' ? 'border-primary bg-primary/5 shadow-sm' : 'border-neutral-100 bg-neutral-50'">
+                       <div class="flex justify-between items-center">
+                          <span class="text-sm font-bold text-red-600">PayFast (Instant EFT/Card)</span>
+                          <span class="text-[10px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase">FAST</span>
                        </div>
                     </div>
                  </div>
@@ -212,6 +246,12 @@ import { DeviceService } from '../../services/device.service';
                               </div>
                           </div>
                       </div>
+
+                      <!-- Delivery Instructions Desktop -->
+                      <div class="mt-6 pt-4 border-t border-neutral-100">
+                          <label class="text-sm font-bold block mb-2">Delivery Instructions (Safe Place)</label>
+                          <textarea [(ngModel)]="deliveryNotes" placeholder="e.g. Leave with security at gate" class="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm outline-none focus:ring-primary focus:border-primary h-16"></textarea>
+                      </div>
                   </div>
               </div>
 
@@ -225,6 +265,22 @@ import { DeviceService } from '../../services/device.service';
                   </div>
                   
                   <div class="p-6 space-y-4">
+                      <!-- Loyalty Points Redemption Desktop -->
+                      <div *ngIf="coinsBalance() > 0" class="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4">
+                          <div class="flex justify-between items-center">
+                              <div class="flex items-center gap-2">
+                                  <span class="w-6 h-6 bg-amber-400 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">C</span>
+                                  <span class="text-sm font-bold text-amber-900">Redeem Chommie Points</span>
+                              </div>
+                              <button *ngIf="appliedCoins() === 0" (click)="applyCoins()" class="text-xs font-bold text-amber-600 hover:underline px-3 py-1 border border-amber-200 rounded bg-white">Apply {{ coinsBalance() }} points</button>
+                              <button *ngIf="appliedCoins() > 0" (click)="removeCoins()" class="text-xs font-bold text-red-600 hover:underline px-3 py-1 border border-red-200 rounded bg-white">Remove points</button>
+                          </div>
+                          <div class="text-xs text-amber-700 mt-2 ml-8">
+                             You have R{{ (coinsBalance() / 100) | number:'1.2-2' }} worth of points available.
+                             <span *ngIf="appliedCoins() > 0" class="font-bold block mt-1">-R{{ coinDiscount() | number:'1.0-0' }} discount applied to your order total.</span>
+                          </div>
+                      </div>
+
                       <!-- BNPL -->
                       <div (click)="selectPayment('BNPL')" class="border rounded-md p-4 cursor-pointer hover:bg-neutral-50 flex items-start gap-3" [class.border-primary]="selectedPaymentMethod() === 'BNPL'" [class.bg-primary-light]="selectedPaymentMethod() === 'BNPL'">
                           <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'BNPL'" class="mt-1 text-primary focus:ring-primary">
@@ -247,6 +303,15 @@ import { DeviceService } from '../../services/device.service';
                                   <div class="w-8 h-5 bg-neutral-200 rounded"></div>
                                   <div class="w-8 h-5 bg-neutral-200 rounded"></div>
                               </div>
+                          </div>
+                      </div>
+
+                      <!-- PayFast -->
+                      <div (click)="selectPayment('PAYFAST')" class="border rounded-md p-4 cursor-pointer hover:bg-neutral-50 flex items-start gap-3" [class.border-primary]="selectedPaymentMethod() === 'PAYFAST'" [class.bg-primary-light]="selectedPaymentMethod() === 'PAYFAST'">
+                          <input type="radio" name="payment" [checked]="selectedPaymentMethod() === 'PAYFAST'" class="mt-1 text-primary focus:ring-primary">
+                          <div>
+                              <div class="font-bold text-sm text-red-600">PayFast (Instant EFT & Credit Card)</div>
+                              <div class="text-xs text-neutral-600 mt-1 font-medium">Safe & Secure payments for South Africa.</div>
                           </div>
                       </div>
                       
@@ -317,6 +382,10 @@ import { DeviceService } from '../../services/device.service';
                             <span>Promotion:</span>
                             <span class="text-red-700">-R{{ discountAmount() | number:'1.0-0' }}</span>
                         </div>
+                        <div class="flex justify-between text-neutral-500 text-xs">
+                            <span>Estimated VAT (15%):</span>
+                            <span>R{{ vatAmount() | number:'1.2-2' }}</span>
+                        </div>
                         <div class="flex justify-between font-bold text-lg text-red-700 border-t border-neutral-200 pt-2 mt-2">
                             <span>Order Total:</span>
                             <span>R{{ (cartService.totalAmount() - discountAmount() - coinDiscount()) | number:'1.0-0' }}</span>
@@ -346,7 +415,7 @@ export class CheckoutComponent implements OnInit {
     isDefault: false
   };
   
-  selectedPaymentMethod = signal<'BNPL' | 'CARD'>('BNPL');
+  selectedPaymentMethod = signal<'BNPL' | 'CARD' | 'PAYFAST'>('BNPL');
   bnplEligible = signal(false);
   bnplReason = signal('');
   processing = signal(false);
@@ -359,12 +428,18 @@ export class CheckoutComponent implements OnInit {
   coinsBalance = signal(0);
   appliedCoins = signal(0);
   coinDiscount = signal(0);
+  deliveryNotes = signal('');
+  
+  vatAmount = computed(() => {
+    const subtotal = this.cartService.totalAmount() - this.discountAmount() - this.coinDiscount();
+    return subtotal * 0.15;
+  });
 
   constructor(
     public cartService: CartService,
     private bnplService: BnplService,
     private orderService: OrderService,
-    private authService: AuthService,
+    public authService: AuthService,
     public ts: TranslationService,
     private router: Router,
     public deviceService: DeviceService
@@ -446,7 +521,7 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  selectPayment(method: 'BNPL' | 'CARD') {
+  selectPayment(method: 'BNPL' | 'CARD' | 'PAYFAST') {
     this.selectedPaymentMethod.set(method);
   }
 
@@ -526,15 +601,43 @@ export class CheckoutComponent implements OnInit {
       paymentMethod: this.selectedPaymentMethod(),
       items: orderItems,
       shippingAddress: fullAddress,
-      couponCode: this.appliedCoupon()?.code
+      couponCode: this.appliedCoupon()?.code,
+      deliveryNotes: this.deliveryNotes(),
+      pointsRedeemed: this.appliedCoins(),
+      isPlusOrder: this.authService.isPlusMember()
     };
 
     this.orderService.createOrder(orderData).subscribe({
       next: (order) => {
-        if (this.appliedCoins() > 0) {
-          this.bnplService.useCoins(this.userId, this.appliedCoins()).subscribe();
+        if (this.selectedPaymentMethod() === 'PAYFAST') {
+            this.orderService.initiatePayFast({
+                orderId: order.id,
+                userId: this.userId,
+                amount: order.totalAmount,
+                email: orderData.email,
+                items: order.items.map((i: any) => i.productName).join(', ')
+            }).subscribe(res => {
+                if (res.url) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = res.url;
+                    
+                    Object.keys(res.form).forEach(key => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = res.form[key];
+                        form.appendChild(input);
+                    });
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+            return;
         }
 
+        // Points redemption is now handled by order-service calling bnpl-service
         this.cartService.clearCart();
         this.bnplService.triggerRefresh(); 
         this.processing.set(false);

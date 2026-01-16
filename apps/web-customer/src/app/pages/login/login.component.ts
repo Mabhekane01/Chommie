@@ -77,7 +77,7 @@ import { TranslationService } from '../../services/translation.service';
             </div>
 
             <div class="text-[11px] text-neutral-600 leading-tight py-2">
-                By continuing, you agree to Chommie's <a href="#" class="text-primary hover:underline">Conditions of Use</a> and <a href="#" class="text-primary hover:underline">Privacy Notice</a>.
+                By continuing, you agree to Chommie's <a routerLink="/info/terms" class="text-primary hover:underline">Conditions of Use</a> and <a routerLink="/info/privacy" class="text-primary hover:underline">Privacy Notice</a>.
             </div>
 
             <!-- Divider -->
@@ -106,7 +106,7 @@ import { TranslationService } from '../../services/translation.service';
             <form (ngSubmit)="onVerify2FA()" class="space-y-4">
                 <div class="space-y-1">
                     <label for="otp" class="block text-xs font-bold text-[#222222]">Enter OTP</label>
-                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6"
+                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6" minlength="6"
                         class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-widest text-center focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
                 </div>
 
@@ -130,9 +130,9 @@ import { TranslationService } from '../../services/translation.service';
 
       <footer class="mt-8 text-[11px] text-neutral-500 space-y-4 max-w-[350px] w-full border-t border-neutral-200 pt-6 text-center">
         <div class="flex gap-6 justify-center text-primary font-medium">
-            <a href="#" class="hover:underline">Conditions of Use</a>
-            <a href="#" class="hover:underline">Privacy Notice</a>
-            <a href="#" class="hover:underline">Help</a>
+            <a routerLink="/info/terms" class="hover:underline">Conditions of Use</a>
+            <a routerLink="/info/privacy" class="hover:underline">Privacy Notice</a>
+            <a routerLink="/help" class="hover:underline">Help</a>
         </div>
         <p>&copy; 2026, Chommie.za, Inc. or its affiliates</p>
       </footer>
@@ -161,9 +161,6 @@ export class LoginComponent {
         if (res.status === '2fa_required') {
             this.show2FA.set(true);
         } else if (res.accessToken) {
-            localStorage.setItem('access_token', res.accessToken);
-            localStorage.setItem('user_id', res.user.id);
-            this.authService.currentUser.set({ id: res.user.id, token: res.accessToken });
             this.router.navigate(['/']);
         }
       },
@@ -175,16 +172,16 @@ export class LoginComponent {
   }
 
   onVerify2FA() {
-    if (!this.otp) return;
+    if (!this.otp || this.otp.length !== 6) {
+        this.error.set('Please enter a valid 6-digit code');
+        return;
+    }
     this.loading.set(true);
     this.error.set('');
 
     this.authService.verify2FA(this.email, this.otp).subscribe({
         next: (res: any) => {
             if (res.accessToken) {
-                localStorage.setItem('access_token', res.accessToken);
-                localStorage.setItem('user_id', res.user.id);
-                this.authService.currentUser.set({ id: res.user.id, token: res.accessToken });
                 this.router.navigate(['/']);
             }
             this.loading.set(false);

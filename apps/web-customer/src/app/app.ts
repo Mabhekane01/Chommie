@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, effect, OnInit } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,8 +8,10 @@ import { TrustScoreWidgetComponent } from './components/trust-score-widget/trust
 import { FabCartComponent } from './components/fab-cart/fab-cart.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { NotificationDropdownComponent } from './components/notification-dropdown/notification-dropdown.component';
+import { AiConciergeComponent } from './components/ai-concierge/ai-concierge.component';
 import { CartService } from './services/cart.service';
 import { ProductService } from './services/product.service';
+import { AuthService } from './services/auth.service';
 import { TranslationService } from './services/translation.service';
 import { NotificationService } from './services/notification.service';
 import { BnplService } from './services/bnpl.service';
@@ -18,14 +20,14 @@ import { DeviceService } from './services/device.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule, TrustScoreWidgetComponent, FabCartComponent, SidebarComponent, NotificationDropdownComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule, TrustScoreWidgetComponent, FabCartComponent, SidebarComponent, NotificationDropdownComponent, AiConciergeComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  isLoggedIn = signal(false);
+  isLoggedIn = computed(() => !!this.authService.currentUser());
   userName = signal<string | null>(null);
-  userId = signal<string | null>(null);
+  userId = computed(() => this.authService.currentUser()?.id || null);
   showNotifications = signal(false);
   showSidebar = signal(false);
   coinsBalance = signal(0);
@@ -41,7 +43,7 @@ export class App implements OnInit {
   searchQuery = '';
   selectedCategory = 'All';
   categories = signal(['All', 'Electronics', 'Books', 'Fashion', 'Home', 'Beauty', 'Sports']);
-  suggestions = signal<string[]>([]);
+  suggestions = signal<{text: string, category?: string}[]>([]);
   showSuggestions = signal(false);
   private searchSubject = new Subject<string>();
 
@@ -62,12 +64,26 @@ export class App implements OnInit {
     public notificationService: NotificationService,
     public ts: TranslationService,
     private bnplService: BnplService,
-    public deviceService: DeviceService
+    public deviceService: DeviceService,
+    private authService: AuthService
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.currentUrl.set(event.urlAfterRedirects || event.url);
+    });
+
+    // Reactive Auth Sync
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (user) {
+        this.userName.set(localStorage.getItem('user_name') || 'User');
+        this.loadCoins(user.id);
+        this.notificationService.loadNotifications(user.id);
+      } else {
+        this.userName.set(null);
+        this.coinsBalance.set(0);
+      }
     });
 
     // Setup autocomplete debouncing
@@ -86,10 +102,14 @@ export class App implements OnInit {
 
   ngOnInit() {
     this.currentUrl.set(window.location.pathname);
-    this.checkAuth();
-    if (this.userId()) {
-      this.notificationService.loadNotifications(this.userId()!);
-    }
+  }
+
+  loadCoins(id: string) {
+    this.bnplService.getProfile(id).subscribe(profile => {
+      if (profile) {
+        this.coinsBalance.set(profile.coinsBalance);
+      }
+    });
   }
 
   toggleNotifications() {
@@ -117,8 +137,11 @@ export class App implements OnInit {
     this.searchSubject.next(this.searchQuery);
   }
 
-  selectSuggestion(suggestion: string) {
-    this.searchQuery = suggestion;
+  selectSuggestion(suggestion: {text: string, category?: string}) {
+    this.searchQuery = suggestion.text;
+    if (suggestion.category) {
+        this.selectedCategory = suggestion.category;
+    }
     this.showSuggestions.set(false);
     this.performSearch();
   }
@@ -144,31 +167,8 @@ export class App implements OnInit {
     this.router.navigate(['/products'], { queryParams: { filter: 'buy-again' } });
   }
 
-  checkAuth() {
-    const token = localStorage.getItem('access_token');
-    const id = localStorage.getItem('user_id');
-    const name = localStorage.getItem('user_name');
-    this.isLoggedIn.set(!!token);
-    this.userId.set(id);
-    this.userName.set(name || 'User');
-
-    if (id) {
-      this.bnplService.getProfile(id).subscribe(profile => {
-        if (profile) {
-          this.coinsBalance.set(profile.coinsBalance);
-        }
-      });
-    }
-  }
-
   logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_name');
-    this.isLoggedIn.set(false);
-    this.userId.set(null);
-    this.userName.set(null);
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   scrollToTop() {

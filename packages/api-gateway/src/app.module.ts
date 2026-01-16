@@ -16,62 +16,82 @@ import { EventsGateway } from './events.gateway';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: 'AUTH_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.AUTH_SERVICE_HOST || 'localhost',
-          port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
+        useFactory: () => {
+          console.log('AUTH_SERVICE config:', {
+            host: process.env.AUTH_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
+          });
+          return {
+            transport: Transport.TCP,
+            options: {
+              host: process.env.AUTH_SERVICE_HOST || '127.0.0.1',
+              port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
+            },
+          };
         },
       },
       {
         name: 'PRODUCT_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.PRODUCT_SERVICE_HOST || 'localhost',
-          port: Number(process.env.PRODUCT_SERVICE_PORT) || 3002,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.PRODUCT_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.PRODUCT_SERVICE_PORT) || 3002,
+          },
+        }),
       },
       {
         name: 'BNPL_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.BNPL_SERVICE_HOST || 'localhost',
-          port: Number(process.env.BNPL_SERVICE_PORT) || 3003,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.BNPL_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.BNPL_SERVICE_PORT) || 3003,
+          },
+        }),
       },
       {
         name: 'ORDER_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.ORDER_SERVICE_HOST || 'localhost',
-          port: Number(process.env.ORDER_SERVICE_PORT) || 3004,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.ORDER_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.ORDER_SERVICE_PORT) || 3004,
+          },
+        }),
       },
       {
         name: 'NOTIFICATION_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.NOTIFICATION_SERVICE_HOST || 'localhost',
-          port: Number(process.env.NOTIFICATION_SERVICE_PORT) || 3005,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.NOTIFICATION_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.NOTIFICATION_SERVICE_PORT) || 3005,
+          },
+        }),
       },
       {
         name: 'PAYMENT_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.PAYMENT_SERVICE_HOST || 'localhost',
-          port: Number(process.env.PAYMENT_SERVICE_PORT) || 3006,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.PAYMENT_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.PAYMENT_SERVICE_PORT) || 3006,
+          },
+        }),
       },
       {
         name: 'RECOMMENDATION_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: process.env.RECOMMENDATION_SERVICE_HOST || 'localhost',
-          port: Number(process.env.RECOMMENDATION_SERVICE_PORT) || 3007,
-        },
+        useFactory: () => ({
+          transport: Transport.TCP,
+          options: {
+            host: process.env.RECOMMENDATION_SERVICE_HOST || '127.0.0.1',
+            port: Number(process.env.RECOMMENDATION_SERVICE_PORT) || 3007,
+          },
+        }),
       },
     ]),
   ],

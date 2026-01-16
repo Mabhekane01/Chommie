@@ -76,4 +76,12 @@ export class VendorService {
   updateStoreSettings(vendorId: string, settings: any): Observable<any> {
     return this.http.patch(`${environment.apiUrl}/vendors/${vendorId}/settings`, settings);
   }
+
+  getPendingVendors(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/approvals/pending`);
+  }
+
+  approveVendor(vendorId: string, status: 'APPROVED' | 'REJECTED'): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${vendorId}/approve`, { status });
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('vendors')
@@ -42,5 +42,15 @@ export class VendorsController {
   @Patch(':id/settings')
   updateSettings(@Param('id') id: string, @Body() settings: any) {
     return this.authClient.send({ cmd: 'update_profile' }, { userId: id, ...settings });
+  }
+
+  @Get('approvals/pending')
+  getPendingVendors() {
+    return this.authClient.send({ cmd: 'get_pending_vendors' }, {});
+  }
+
+  @Post(':id/approve')
+  approveVendor(@Param('id') id: string, @Body() data: { status: string }) {
+    return this.authClient.send({ cmd: 'update_vendor_status' }, { userId: id, status: data.status });
   }
 }

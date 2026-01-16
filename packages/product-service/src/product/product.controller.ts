@@ -11,8 +11,8 @@ export class ProductController {
   ) {}
 
   @MessagePattern({ cmd: 'findAllProducts' })
-  findAll() {
-    return this.productService.findAll();
+  findAll(@Payload() data?: { bypassApproval?: boolean }) {
+    return this.productService.findAll(data?.bypassApproval);
   }
 
   @MessagePattern({ cmd: 'findOneProduct' })

@@ -13,8 +13,8 @@ import { Transaction } from './entities/transaction.entity';
         name: 'ORDER_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3004,
+          host: process.env.ORDER_SERVICE_HOST || '127.0.0.1',
+          port: Number(process.env.ORDER_SERVICE_PORT) || 3004,
         },
       },
     ]),

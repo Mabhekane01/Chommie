@@ -105,4 +105,14 @@ export class AuthController {
   async updateSellerStats(@Payload() data: any) {
     return this.authService.updateSellerStats(data);
   }
+
+  @MessagePattern({ cmd: 'get_pending_vendors' })
+  async getPendingVendors() {
+    return this.authService.getPendingVendors();
+  }
+
+  @MessagePattern({ cmd: 'update_vendor_status' })
+  async updateVendorStatus(@Payload() data: { userId: string; status: string }) {
+    return this.authService.updateVendorStatus(data.userId, data.status);
+  }
 }

@@ -21,6 +21,7 @@ export class App implements OnInit {
   private router = inject(Router);
 
   isLoggedIn = signal(false);
+  userRole = signal<string | null>(null);
   vendorName = signal<string | null>(null);
   showSidebar = signal(false);
   currentUrl = signal('');
@@ -47,8 +48,10 @@ export class App implements OnInit {
   checkAuth() {
     const token = localStorage.getItem('access_token');
     const name = localStorage.getItem('user_name');
+    const role = localStorage.getItem('user_role');
     this.isLoggedIn.set(!!token);
     this.vendorName.set(name || 'Vendor');
+    this.userRole.set(role);
   }
 
   logout() {

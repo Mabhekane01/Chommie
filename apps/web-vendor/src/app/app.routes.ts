@@ -13,6 +13,7 @@ import { SecurityComponent } from './pages/account/security/security.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ApprovalsComponent } from './pages/approvals/approvals.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'dashboard', component: VendorDashboardComponent, canActivate: [authGuard] },
+  { path: 'approvals', component: ApprovalsComponent, canActivate: [authGuard] },
   { path: 'orders', component: VendorOrdersComponent, canActivate: [authGuard] },
   { path: 'orders/:id', component: OrderDetailsComponent, canActivate: [authGuard] },
   { path: 'messages', component: VendorMessagesComponent, canActivate: [authGuard] },

@@ -18,6 +18,11 @@ export class OrdersController {
     return this.ordersService.findAllByUser(data.userId);
   }
 
+  @MessagePattern({ cmd: 'get_purchased_products' })
+  getPurchasedProducts(@Payload() data: { userId: string }) {
+    return this.ordersService.getPurchasedProducts(data.userId);
+  }
+
   @MessagePattern({ cmd: 'get_vendor_orders' })
   getVendorOrders(@Payload() data: { vendorId: string }) {
     return this.ordersService.findByVendor(data.vendorId);

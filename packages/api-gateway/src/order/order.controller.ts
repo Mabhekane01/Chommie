@@ -20,6 +20,11 @@ export class OrderController {
     return this.orderClient.send({ cmd: 'get_user_orders' }, { userId });
   }
 
+  @Get('user/:userId/purchased-products')
+  getPurchasedProducts(@Param('userId') userId: string) {
+    return this.orderClient.send({ cmd: 'get_purchased_products' }, { userId });
+  }
+
   @Get('vendor/:vendorId')
   findVendorOrders(@Param('vendorId') vendorId: string) {
     return this.orderClient.send({ cmd: 'get_vendor_orders' }, { vendorId });

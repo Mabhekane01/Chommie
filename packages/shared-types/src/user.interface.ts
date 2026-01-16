@@ -4,5 +4,6 @@ export interface User {
   firstName: string;
   lastName: string;
   role: 'CUSTOMER' | 'ADMIN' | 'VENDOR';
+  rewardPoints: number;
   createdAt: Date;
 }

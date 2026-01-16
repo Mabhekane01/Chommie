@@ -14,16 +14,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         name: 'BNPL_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3003,
+          host: process.env.BNPL_SERVICE_HOST || '127.0.0.1',
+          port: Number(process.env.BNPL_SERVICE_PORT) || 3003,
         },
       },
       {
         name: 'NOTIFICATION_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: 3005,
+          host: process.env.NOTIFICATION_SERVICE_HOST || '127.0.0.1',
+          port: Number(process.env.NOTIFICATION_SERVICE_PORT) || 3005,
         },
       },
     ]),

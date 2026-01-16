@@ -53,7 +53,7 @@ export class OrdersService {
   }
 
   async create(createOrderDto: any): Promise<Order | null> {
-    const { items, email, couponCode, ...orderData } = createOrderDto;
+    const { items, email, couponCode, pointsRedeemed, deliveryNotes, isPlusOrder, ...orderData } = createOrderDto;
 
     // 1. Check stock for all items
     for (const item of items) {
@@ -75,24 +75,49 @@ export class OrdersService {
     let totalAmount = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
     let discountAmount = 0;
 
+    // Loyalty Points Redemption (100 points = R1)
+    if (pointsRedeemed && pointsRedeemed > 0) {
+      const redemptionDiscount = pointsRedeemed / 100;
+      discountAmount += redemptionDiscount;
+      
+      try {
+        const result = await lastValueFrom(
+          this.bnplClient.send({ cmd: 'redeem_coins' }, { userId: orderData.userId, amount: pointsRedeemed })
+        );
+        if (result.status === 'error') {
+          throw new BadRequestException(result.message);
+        }
+      } catch (e) {
+        throw new BadRequestException('Failed to redeem coins: ' + (e instanceof Error ? e.message : 'Unknown error'));
+      }
+    }
+
     if (couponCode) {
       try {
-        const coupon = await this.validateCoupon(couponCode, totalAmount);
+        const coupon = await this.validateCoupon(couponCode, totalAmount - discountAmount);
+        let couponDiscount = 0;
         if (coupon.type === CouponType.PERCENTAGE) {
-          discountAmount = (totalAmount * Number(coupon.value)) / 100;
+          couponDiscount = ((totalAmount - discountAmount) * Number(coupon.value)) / 100;
         } else {
-          discountAmount = Number(coupon.value);
+          couponDiscount = Number(coupon.value);
         }
-        totalAmount = Math.max(0, totalAmount - discountAmount);
+        discountAmount += couponDiscount;
       } catch (e) {
-        // Log but maybe continue without coupon? Or fail? Usually fail if user specifically applied it.
         throw e;
       }
     }
 
+    totalAmount = Math.max(0, totalAmount - discountAmount);
+    const vatAmount = totalAmount * 0.15; // 15% VAT
+
     const order = this.orderRepository.create({
       ...orderData,
       totalAmount,
+      discountAmount,
+      vatAmount,
+      pointsRedeemed: pointsRedeemed || 0,
+      isPlusOrder: !!isPlusOrder,
+      deliveryNotes,
       status: OrderStatus.PENDING,
       paymentMethod: orderData.paymentMethod as PaymentMethod,
     } as any);
@@ -180,6 +205,21 @@ export class OrdersService {
     });
   }
 
+  async getPurchasedProducts(userId: string): Promise<string[]> {
+    const items = await this.orderItemRepository.find({
+      where: {
+        order: {
+          userId,
+          status: OrderStatus.PAID // Assuming PAID/DELIVERED/CONFIRMED are successful
+        }
+      },
+      relations: ['order']
+    });
+
+    const productIds = items.map(item => item.productId);
+    return [...new Set(productIds)]; // Return unique IDs
+  }
+
   async findOne(id: string): Promise<Order | null> {
     return this.orderRepository.findOne({
       where: { id },
@@ -243,10 +283,20 @@ export class OrdersService {
         description: this.getStatusDescription(status)
     });
 
-    await this.orderRepository.update(id, { 
+    const updateData: any = { 
         status,
         trackingHistory: history 
-    });
+    };
+
+    // Loyalty Points Earning (R1 = 1 point, 2x for Plus)
+    if (status === OrderStatus.DELIVERED && (!order.pointsEarned || order.pointsEarned === 0)) {
+      const multiplier = order.isPlusOrder ? 2 : 1;
+      const pointsEarned = Math.floor(Number(order.totalAmount) * multiplier);
+      updateData.pointsEarned = pointsEarned;
+      this.bnplClient.emit('award_coins', { userId: order.userId, amount: pointsEarned });
+    }
+
+    await this.orderRepository.update(id, updateData);
     return this.findOne(id);
   }
 

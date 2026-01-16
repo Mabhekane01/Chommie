@@ -68,6 +68,7 @@ import { TranslationService } from '../../services/translation.service';
                  <button *ngIf="order.status === 'PAID' || order.status === 'PROCESSING'" 
                          (click)="confirmShipment()"
                          class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] shadow-lg active:scale-[0.98] transition-all">Confirm Shipment</button>
+                 <button (click)="downloadShippingLabel()" class="w-full bg-white border-2 border-neutral-100 text-primary py-4 rounded-2xl font-black uppercase tracking-[0.2em] shadow-sm transition-all">Print Shipping Label</button>
                  <button class="w-full bg-white border-2 border-neutral-100 text-neutral-400 py-4 rounded-2xl font-black uppercase tracking-[0.2em]">Contact Buyer</button>
               </div>
            </div>
@@ -85,7 +86,7 @@ import { TranslationService } from '../../services/translation.service';
                 <h1 class="text-3xl font-header font-bold text-neutral-charcoal tracking-tight">Order Details</h1>
              </div>
              <div class="flex gap-4">
-                <button class="bg-white border-2 border-neutral-300 px-6 py-2 rounded-xl hover:bg-neutral-50 shadow-sm font-black uppercase text-[10px] tracking-widest text-neutral-600 transition-all">Print Packing Slip</button>
+                <button (click)="downloadShippingLabel()" class="bg-white border-2 border-neutral-300 px-6 py-2 rounded-xl hover:bg-neutral-50 shadow-sm font-black uppercase text-[10px] tracking-widest text-neutral-600 transition-all">Print Packing Slip</button>
                 <button class="bg-white border-2 border-neutral-300 px-6 py-2 rounded-xl hover:bg-neutral-50 shadow-sm font-black uppercase text-[10px] tracking-widest text-neutral-600 transition-all">Edit Shipment</button>
              </div>
           </div>
@@ -215,6 +216,76 @@ export class OrderDetailsComponent implements OnInit {
             },
             error: () => alert('Failed to update status.')
         });
+    }
+  }
+
+  downloadShippingLabel() {
+    if (!this.order) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        const itemsHtml = this.order.items.map((item: any) => `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.productName}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+            </tr>
+        `).join('');
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Shipping Label - ${this.order.id}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 40px; color: #333; }
+                        .label-container { border: 2px solid #000; padding: 30px; max-width: 600px; margin: auto; }
+                        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+                        .logo { font-size: 24px; font-weight: 900; }
+                        .address-section { margin-bottom: 30px; }
+                        .address-label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+                        .address-text { font-size: 18px; font-weight: bold; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th { text-align: left; font-size: 10px; text-transform: uppercase; color: #888; padding: 10px; border-bottom: 2px solid #eee; }
+                        .barcode { margin-top: 40px; height: 60px; background: #eee; display: flex; items-center; justify-content: center; font-size: 10px; border: 1px solid #ddd; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label-container">
+                        <div class="header">
+                            <div class="logo">CHOMMIE<span style="color: #FF6D1F;">.central</span></div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">STANDARD LOGISTICS</div>
+                                <div style="font-size: 12px;">ORDER #${this.order.id.slice(0, 12).toUpperCase()}</div>
+                            </div>
+                        </div>
+                        <div class="address-section">
+                            <div class="address-label">Ship To:</div>
+                            <div class="address-text">${this.order.shippingAddress}</div>
+                        </div>
+                        <div class="address-section">
+                            <div class="address-label">Shipping Instructions:</div>
+                            <div style="font-size: 14px;">${this.order.deliveryNotes || 'No specific instructions provided.'}</div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item Description</th>
+                                    <th style="text-align: center;">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                        <div class="barcode">
+                            |||| ||| || |||| | |||| ||| ||| || |||| | |||| ||| || |||| | |||| |||
+                        </div>
+                        <div style="text-align: center; font-size: 10px; margin-top: 5px;">${this.order.id}</div>
+                    </div>
+                    <script>window.print();</script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
     }
   }
 }

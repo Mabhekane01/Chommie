@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface CreateOrderDto {
   userId: string;
-  paymentMethod: 'CARD' | 'EFT' | 'BNPL' | 'ZAPPER' | 'SNAPSCAN';
+  paymentMethod: 'CARD' | 'EFT' | 'BNPL' | 'ZAPPER' | 'SNAPSCAN' | 'PAYFAST';
   items: {
     productId: string;
     productName: string;
@@ -25,6 +25,10 @@ export class OrderService {
 
   createOrder(orderData: any): Observable<any> {
     return this.http.post(this.apiUrl, orderData);
+  }
+
+  initiatePayFast(data: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/payments/payfast/initiate`, data);
   }
 
   requestReturn(userId: string, returnData: any): Observable<any> {

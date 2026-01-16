@@ -88,11 +88,19 @@ export class TrustScoreService {
 
   async useCoins(userId: string, amount: number): Promise<boolean> {
     const profile = await this.getProfile(userId);
-    if (!profile || profile.coinsBalance < amount) return false;
+    if (!profile || Number(profile.coinsBalance) < Number(amount)) return false;
 
-    profile.coinsBalance -= amount;
+    profile.coinsBalance = Number(profile.coinsBalance) - Number(amount);
     await this.trustProfileRepository.save(profile);
     return true;
+  }
+
+  async awardCoins(userId: string, amount: number): Promise<void> {
+    const profile = await this.getProfile(userId);
+    if (profile) {
+      profile.coinsBalance = Number(profile.coinsBalance || 0) + Number(amount);
+      await this.trustProfileRepository.save(profile);
+    }
   }
 
   private calculateTier(score: number): TrustTier {

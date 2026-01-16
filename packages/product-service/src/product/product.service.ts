@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { Product, ProductDocument } from './product.schema';
 import { InboundShipment, InboundShipmentDocument } from './inbound-shipment.schema';
 import { CreateProductDto, UpdateProductDto } from '@chommie/shared-types';
@@ -31,26 +31,39 @@ export class ProductService {
     return createdProduct.save();
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find({ approvalStatus: 'APPROVED' }).exec();
+  async checkStock_multiple(items: { id: string, quantity: number }[]): Promise<boolean> {
+    for (const item of items) {
+      if (!isValidObjectId(item.id)) continue;
+      const product = await this.productModel.findById(item.id).exec();
+      if (!product || product.stock < item.quantity) return false;
+    }
+    return true;
   }
 
-  async findOne(id: string): Promise<Product> {
-    // Customers can only see Approved products. Admin/Vendor logic might need bypass, but for now strict.
+  async findAll(bypassApproval = false): Promise<Product[]> {
+    const filter = bypassApproval ? {} : { approvalStatus: 'APPROVED' };
+    return this.productModel.find(filter).exec();
+  }
+
+  async findOne(id: string): Promise<Product | null> {
+    if (!isValidObjectId(id)) return null;
     return this.productModel.findOne({ _id: id, approvalStatus: 'APPROVED' }).exec();
   }
 
   async findByIds(ids: string[]): Promise<Product[]> {
-    return this.productModel.find({ _id: { $in: ids }, approvalStatus: 'APPROVED' }).exec();
+    const validIds = ids.filter(id => isValidObjectId(id));
+    return this.productModel.find({ _id: { $in: validIds }, approvalStatus: 'APPROVED' }).exec();
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product | null> {
+    if (!isValidObjectId(id)) return null;
     return this.productModel
       .findByIdAndUpdate(id, updateProductDto, { new: true })
       .exec();
   }
 
   async remove(id: string): Promise<any> {
+    if (!isValidObjectId(id)) return null;
     return this.productModel.findByIdAndDelete(id).exec();
   }
 
@@ -158,11 +171,13 @@ export class ProductService {
   }
 
   async checkStock(id: string, quantity: number): Promise<boolean> {
+    if (!isValidObjectId(id)) return false;
     const product = await this.productModel.findById(id).exec();
     return product ? product.stock >= quantity : false;
   }
 
   async decrementStock(id: string, quantity: number): Promise<Product> {
+    if (!isValidObjectId(id)) throw new Error('Invalid product ID');
     const product = await this.productModel.findById(id);
     if (!product || product.stock < quantity) {
       throw new Error('Insufficient stock');

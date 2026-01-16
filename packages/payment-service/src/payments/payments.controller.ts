@@ -15,4 +15,14 @@ export class PaymentsController {
   findOne(@Payload() data: { orderId: string }) {
     return this.paymentsService.getTransactionByOrder(data.orderId);
   }
+
+  @MessagePattern({ cmd: 'initiate_payfast' })
+  initiatePayFast(@Payload() data: any) {
+    return this.paymentsService.createPayFastPayment(data);
+  }
+
+  @MessagePattern({ cmd: 'payfast_notify' })
+  handleNotify(@Payload() data: any) {
+    return this.paymentsService.handlePayFastNotify(data);
+  }
 }

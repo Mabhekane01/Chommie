@@ -57,9 +57,9 @@ import { TranslationService } from '../../services/translation.service';
 
             <form (ngSubmit)="onResetPassword()" class="space-y-4">
                 <div class="space-y-1">
-                    <label for="otp" class="block text-xs font-bold text-[#222222]">Enter OTP</label>
-                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6"
-                        class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-[0.5em] text-center focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
+                    <label for="otp" class="block text-xs font-bold text-white/70">Enter OTP</label>
+                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6" minlength="6"
+                        class="w-full bg-white/5 border border-white/20 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-[0.5em] text-center text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
                 </div>
 
                 <div class="space-y-1">
@@ -129,7 +129,10 @@ export class ForgotPasswordComponent {
   }
 
   onResetPassword() {
-    if (!this.otp || !this.password) return;
+    if (!this.otp || this.otp.length !== 6 || !this.password) {
+        if (!this.otp || this.otp.length !== 6) this.error.set('Please enter a valid 6-digit code');
+        return;
+    }
     this.loading.set(true);
     this.error.set('');
 

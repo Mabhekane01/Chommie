@@ -124,4 +124,8 @@ export class UserService {
     }
     return user;
   }
+
+  async findPendingVendors(): Promise<User[]> {
+    return this.usersRepository.find({ where: { vendorStatus: 'PENDING' } });
+  }
 }

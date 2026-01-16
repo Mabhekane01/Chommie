@@ -83,7 +83,7 @@ import { TranslationService } from '../../services/translation.service';
             <form (ngSubmit)="onVerifyAndRegister()" class="space-y-4">
                 <div class="space-y-1">
                     <label for="otp" class="block text-xs font-bold text-[#222222]">Enter OTP</label>
-                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6"
+                    <input id="otp" name="otp" type="text" [(ngModel)]="otp" required maxlength="6" minlength="6"
                         class="w-full border border-neutral-400 rounded-[3px] px-2 py-1.5 text-lg font-bold tracking-widest text-center focus:border-primary focus:ring-1 focus:ring-primary outline-none shadow-inner transition-all">
                 </div>
 
@@ -175,7 +175,10 @@ export class RegisterComponent {
   }
 
   onVerifyAndRegister() {
-    if (!this.otp) return;
+    if (!this.otp || this.otp.length !== 6) {
+        this.error.set('Please enter a valid 6-digit code');
+        return;
+    }
     this.loading.set(true);
     this.error.set('');
 
