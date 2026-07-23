@@ -3,6 +3,11 @@ export interface IProduct {
   _id?: any;
   name: string;
   description: string;
+  brand?: string;
+  sku?: string;
+  /** Pack size for price-per-unit display, e.g. unitValue 10 + unitMeasure 'kg'. */
+  unitValue?: number;
+  unitMeasure?: string;
   price: number;
   category: string;
   stock: number;
@@ -14,7 +19,6 @@ export interface IProduct {
   trustScoreDiscount: number;
   discountPrice?: number;
   dealEndsAt?: Date;
-  vendorId: string;
   isLightningDeal?: boolean;
   lightningDealStock?: number;
   lightningDealSold?: number;
@@ -24,6 +28,18 @@ export interface IProduct {
   bulkPricing?: IBulkPricing[];
   createdAt?: Date;
   updatedAt?: Date;
+
+  // --- Chommie staples/discovery blueprint fields (do.md §3.1, §3.5) ---
+  isStaple?: boolean;
+  retailPrice?: number;
+  landedCost?: number;
+  blackOwned?: boolean;
+  localProducer?: boolean;
+  producerName?: string;
+  /** The producer/supplier Chommie sources this from (do.md §5) — NOT a marketplace seller. */
+  supplierId: string;
+  deliveryRegions?: string[];
+  reliabilityScore?: number;
 }
 
 export interface IBulkPricing {
@@ -46,6 +62,10 @@ export interface IVariantOption {
 export class CreateProductDto {
   name!: string;
   description!: string;
+  brand?: string;
+  sku?: string;
+  unitValue?: number;
+  unitMeasure?: string;
   price!: number;
   category!: string;
   stock!: number;
@@ -59,7 +79,17 @@ export class CreateProductDto {
   variants?: IProductVariant[];
   specifications?: Record<string, string>;
   bulkPricing?: IBulkPricing[];
-  vendorId!: string;
+
+  // Chommie staples/discovery blueprint fields (do.md §3.1, §3.5)
+  isStaple?: boolean;
+  retailPrice?: number;
+  landedCost?: number;
+  blackOwned?: boolean;
+  localProducer?: boolean;
+  producerName?: string;
+  supplierId!: string;
+  deliveryRegions?: string[];
+  reliabilityScore?: number;
 }
 
 export class UpdateProductDto implements Partial<CreateProductDto> {
@@ -77,5 +107,4 @@ export class UpdateProductDto implements Partial<CreateProductDto> {
   variants?: IProductVariant[];
   specifications?: Record<string, string>;
   bulkPricing?: IBulkPricing[];
-  vendorId?: string;
 }

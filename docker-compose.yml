@@ -51,13 +51,18 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: packages/api-gateway/Dockerfile
+      dockerfile: services/api-gateway/Dockerfile
     container_name: chommie_api_gateway
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
       - JWT_SECRET=${JWT_SECRET}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
+      # Dev-only: lets scripts/seed.js hit admin routes locally. Ignored in production.
+      - ADMIN_BYPASS=${ADMIN_BYPASS:-true}
       - PAYFAST_MERCHANT_ID=${PAYFAST_MERCHANT_ID}
       - PAYFAST_MERCHANT_KEY=${PAYFAST_MERCHANT_KEY}
       - PAYFAST_PASSPHRASE=${PAYFAST_PASSPHRASE}
@@ -75,6 +80,14 @@ services:
       - PAYMENT_SERVICE_PORT=3006
       - RECOMMENDATION_SERVICE_HOST=recommendation-service
       - RECOMMENDATION_SERVICE_PORT=3007
+      - CIRCLE_SERVICE_HOST=circle-service
+      - CIRCLE_SERVICE_PORT=3008
+      - MEMBERSHIP_SERVICE_HOST=membership-service
+      - MEMBERSHIP_SERVICE_PORT=3009
+      - AD_SERVICE_HOST=ad-service
+      - AD_SERVICE_PORT=3010
+      - SUPPLY_SERVICE_HOST=supply-service
+      - SUPPLY_SERVICE_PORT=3011
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,7 +99,7 @@ services:
   auth-service:
     build:
       context: .
-      dockerfile: packages/auth-service/Dockerfile
+      dockerfile: services/auth-service/Dockerfile
     container_name: chommie_auth_service
     environment:
       - PORT=3001
@@ -108,7 +121,7 @@ services:
   product-service:
     build:
       context: .
-      dockerfile: packages/product-service/Dockerfile
+      dockerfile: services/product-service/Dockerfile
     container_name: chommie_product_service
     environment:
       - PORT=3002
@@ -126,7 +139,7 @@ services:
   bnpl-service:
     build:
       context: .
-      dockerfile: packages/bnpl-service/Dockerfile
+      dockerfile: services/bnpl-service/Dockerfile
     container_name: chommie_bnpl_service
     environment:
       - PORT=3003
@@ -143,7 +156,7 @@ services:
   order-service:
     build:
       context: .
-      dockerfile: packages/order-service/Dockerfile
+      dockerfile: services/order-service/Dockerfile
     container_name: chommie_order_service
     environment:
       - PORT=3004
@@ -159,6 +172,10 @@ services:
       - BNPL_SERVICE_PORT=3003
       - PAYMENT_SERVICE_HOST=payment-service
       - PAYMENT_SERVICE_PORT=3006
+      - MEMBERSHIP_SERVICE_HOST=membership-service
+      - MEMBERSHIP_SERVICE_PORT=3009
+      - CIRCLE_SERVICE_HOST=circle-service
+      - CIRCLE_SERVICE_PORT=3008
     depends_on:
       postgres:
         condition: service_healthy
@@ -168,7 +185,7 @@ services:
   notification-service:
     build:
       context: .
-      dockerfile: packages/notification-service/Dockerfile
+      dockerfile: services/notification-service/Dockerfile
     container_name: chommie_notification_service
     environment:
       - PORT=3005
@@ -178,7 +195,7 @@ services:
   payment-service:
     build:
       context: .
-      dockerfile: packages/payment-service/Dockerfile
+      dockerfile: services/payment-service/Dockerfile
     container_name: chommie_payment_service
     environment:
       - PORT=3006
@@ -189,6 +206,13 @@ services:
       - PAYFAST_MERCHANT_ID=${PAYFAST_MERCHANT_ID}
       - PAYFAST_MERCHANT_KEY=${PAYFAST_MERCHANT_KEY}
       - PAYFAST_PASSPHRASE=${PAYFAST_PASSPHRASE}
+      - OZOW_SITE_CODE=${OZOW_SITE_CODE}
+      - OZOW_PRIVATE_KEY=${OZOW_PRIVATE_KEY}
+      - OZOW_API_KEY=${OZOW_API_KEY}
+      - OZOW_IS_TEST=${OZOW_IS_TEST:-true}
+      - YOCO_SECRET_KEY=${YOCO_SECRET_KEY}
+      - YOCO_WEBHOOK_SECRET=${YOCO_WEBHOOK_SECRET}
+      - PAYSHAP_PROXY=${PAYSHAP_PROXY}
       - ORDER_SERVICE_HOST=order-service
       - ORDER_SERVICE_PORT=3004
     depends_on:
@@ -200,10 +224,33 @@ services:
   recommendation-service:
     build:
       context: .
-      dockerfile: packages/recommendation-service/Dockerfile
+      dockerfile: services/recommendation-service/Dockerfile
     container_name: chommie_recommendation_service
     environment:
       - PORT=3007
+      - PRODUCT_SERVICE_HOST=product-service
+      - PRODUCT_SERVICE_PORT=3002
+      - CIRCLE_SERVICE_HOST=circle-service
+      - CIRCLE_SERVICE_PORT=3008
+      - MEMBERSHIP_SERVICE_HOST=membership-service
+      - MEMBERSHIP_SERVICE_PORT=3009
+      - AD_SERVICE_HOST=ad-service
+      - AD_SERVICE_PORT=3010
+    depends_on:
+      - product-service
+      - circle-service
+      - membership-service
+      - ad-service
+    networks:
+      - chommie-net
+
+  circle-service:
+    build:
+      context: .
+      dockerfile: services/circle-service/Dockerfile
+    container_name: chommie_circle_service
+    environment:
+      - PORT=3008
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -214,24 +261,66 @@ services:
     networks:
       - chommie-net
 
-  # --- Frontends ---
-  web-customer:
+  membership-service:
     build:
       context: .
-      dockerfile: apps/web-customer/Dockerfile
-    ports:
-      - "4200:80"
+      dockerfile: services/membership-service/Dockerfile
+    container_name: chommie_membership_service
+    environment:
+      - PORT=3009
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - chommie-net
 
-  web-vendor:
+  ad-service:
     build:
       context: .
-      dockerfile: apps/web-vendor/Dockerfile
-    ports:
-      - "4201:80"
+      dockerfile: services/ad-service/Dockerfile
+    container_name: chommie_ad_service
+    environment:
+      - PORT=3010
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - PRODUCT_SERVICE_HOST=product-service
+      - PRODUCT_SERVICE_PORT=3002
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - chommie-net
+
+  supply-service:
+    build:
+      context: .
+      dockerfile: services/supply-service/Dockerfile
+    container_name: chommie_supply_service
+    environment:
+      - PORT=3011
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - MEMBERSHIP_SERVICE_HOST=membership-service
+      - MEMBERSHIP_SERVICE_PORT=3009
+      - CIRCLE_SERVICE_HOST=circle-service
+      - CIRCLE_SERVICE_PORT=3008
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - chommie-net
+
+  # --- Frontend ---
+  # The customer storefront (apps/web, Next.js) runs via `npm run dev` (port 4300).
+  # Chommie is the retailer — there is no vendor/seller app.
 
 networks:
   chommie-net:

@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Chommie design tokens — "Vibrant Amazonia" (see README / docs/ARCHITECTURE.md §2) */
+@theme {
+  --color-brand: #ff6d1f;
+  --color-brand-600: #e85f14;
+  --color-beige: #faf3e1;
+  --color-beige-200: #f3e9cf;
+  --color-charcoal: #131921;
+  --color-charcoal-800: #222222;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-beige);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

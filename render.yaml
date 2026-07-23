@@ -1,139 +1,357 @@
+# Chommie — Render blueprint.
+# Backend microservices are private services (pserv), reachable internally by
+# service name. MongoDB is NOT a Render-managed database — point product-service
+# at MongoDB Atlas via MONGODB_URI (set in the dashboard; sync:false below).
+# See docs/ARCHITECTURE.md §5.
+#
+# FIRST DEPLOY ONLY: set DB_SYNCHRONIZE=true on each Postgres service to bootstrap
+# the schema, then remove it (prod runs with synchronize off). Real TypeORM
+# migrations are the long-term path — see project-production-readiness memory.
 services:
-  # API Gateway (Web Service)
+  # --- API Gateway (public) ---
   - type: web
     name: chommie-api-gateway
     env: node
     plan: free
-    rootDir: packages/api-gateway
+    rootDir: services/api-gateway
     buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
       - key: PORT
         value: 3000
-      - key: AUTH_SERVICE_HOST
-        value: chommie-auth-service
-      - key: AUTH_SERVICE_PORT
-        value: 3001
-      - key: PRODUCT_SERVICE_HOST
-        value: chommie-product-service
-      - key: PRODUCT_SERVICE_PORT
-        value: 3002
-      - key: BNPL_SERVICE_HOST
-        value: chommie-bnpl-service
-      - key: BNPL_SERVICE_PORT
-        value: 3003
-      - key: ORDER_SERVICE_HOST
-        value: chommie-order-service
-      - key: ORDER_SERVICE_PORT
-        value: 3004
-      - key: NOTIFICATION_SERVICE_HOST
-        value: chommie-notification-service
-      - key: NOTIFICATION_SERVICE_PORT
-        value: 3005
-      - key: PAYMENT_SERVICE_HOST
-        value: chommie-payment-service
-      - key: PAYMENT_SERVICE_PORT
-        value: 3006
-      - key: RECOMMENDATION_SERVICE_HOST
-        value: chommie-recommendation-service
-      - key: RECOMMENDATION_SERVICE_PORT
-        value: 3007
+      - key: JWT_SECRET
+        sync: false
+      - key: PAYFAST_MERCHANT_ID
+        sync: false
+      - key: PAYFAST_MERCHANT_KEY
+        sync: false
+      - key: PAYFAST_PASSPHRASE
+        sync: false
+      - key: SUPABASE_URL
+        sync: false # for verifying Supabase JWTs at the gateway (docs/ARCHITECTURE.md §3)
+      - key: SUPABASE_JWT_SECRET
+        sync: false # legacy HS256 fallback if the project isn't on asymmetric keys
+      - { key: CORS_ORIGIN, value: https://chommie-web.onrender.com } # lock CORS to the storefront
+      - key: ADMIN_EMAILS
+        sync: false # comma-separated operator emails for the /admin ops console
+      - { key: AUTH_SERVICE_HOST, value: chommie-auth-service }
+      - { key: AUTH_SERVICE_PORT, value: 3001 }
+      - { key: PRODUCT_SERVICE_HOST, value: chommie-product-service }
+      - { key: PRODUCT_SERVICE_PORT, value: 3002 }
+      - { key: BNPL_SERVICE_HOST, value: chommie-bnpl-service }
+      - { key: BNPL_SERVICE_PORT, value: 3003 }
+      - { key: ORDER_SERVICE_HOST, value: chommie-order-service }
+      - { key: ORDER_SERVICE_PORT, value: 3004 }
+      - { key: NOTIFICATION_SERVICE_HOST, value: chommie-notification-service }
+      - { key: NOTIFICATION_SERVICE_PORT, value: 3005 }
+      - { key: PAYMENT_SERVICE_HOST, value: chommie-payment-service }
+      - { key: PAYMENT_SERVICE_PORT, value: 3006 }
+      - { key: RECOMMENDATION_SERVICE_HOST, value: chommie-recommendation-service }
+      - { key: RECOMMENDATION_SERVICE_PORT, value: 3007 }
+      - { key: CIRCLE_SERVICE_HOST, value: chommie-circle-service }
+      - { key: CIRCLE_SERVICE_PORT, value: 3008 }
+      - { key: MEMBERSHIP_SERVICE_HOST, value: chommie-membership-service }
+      - { key: MEMBERSHIP_SERVICE_PORT, value: 3009 }
+      - { key: AD_SERVICE_HOST, value: chommie-ad-service }
+      - { key: AD_SERVICE_PORT, value: 3010 }
+      - { key: SUPPLY_SERVICE_HOST, value: chommie-supply-service }
+      - { key: SUPPLY_SERVICE_PORT, value: 3011 }
 
-  # Auth Service (Private Service)
-  - type: pweb
+  # --- Auth (private) ---
+  - type: pserv
     name: chommie-auth-service
     env: node
     plan: free
-    rootDir: packages/auth-service
+    rootDir: services/auth-service
     buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
-      - key: PORT
-        value: 3001
+      - { key: PORT, value: 3001 }
+      - key: JWT_SECRET
+        sync: false
       - key: POSTGRES_HOST
-        value: chommie-db
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
       - key: POSTGRES_USER
-        fromDatabase:
-          name: chommie-db
-          property: user
+        fromDatabase: { name: chommie-db, property: user }
       - key: POSTGRES_PASSWORD
-        fromDatabase:
-          name: chommie-db
-          property: password
+        fromDatabase: { name: chommie-db, property: password }
       - key: POSTGRES_DB
-        fromDatabase:
-          name: chommie-db
-          property: database
+        fromDatabase: { name: chommie-db, property: database }
+      - { key: BNPL_SERVICE_HOST, value: chommie-bnpl-service }
+      - { key: BNPL_SERVICE_PORT, value: 3003 }
+      - { key: NOTIFICATION_SERVICE_HOST, value: chommie-notification-service }
+      - { key: NOTIFICATION_SERVICE_PORT, value: 3005 }
 
-  # Product Service (Private Service)
-  - type: pweb
+  # --- Product catalogue (private, MongoDB Atlas) ---
+  - type: pserv
     name: chommie-product-service
     env: node
     plan: free
-    rootDir: packages/product-service
+    rootDir: services/product-service
     buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
-      - key: PORT
-        value: 3002
+      - { key: PORT, value: 3002 }
       - key: MONGODB_URI
-        fromDatabase:
-          name: chommie-mongo
-          property: connectionString
+        sync: false # set to your MongoDB Atlas connection string
+      - { key: ORDER_SERVICE_HOST, value: chommie-order-service }
+      - { key: ORDER_SERVICE_PORT, value: 3004 }
+      - { key: AUTH_SERVICE_HOST, value: chommie-auth-service }
+      - { key: AUTH_SERVICE_PORT, value: 3001 }
 
-  # Order Service (Private Service)
-  - type: pweb
-    name: chommie-order-service
-    env: node
-    plan: free
-    rootDir: packages/order-service
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:prod
-    envVars:
-      - key: PORT
-        value: 3004
-
-  # BNPL Service (Private Service)
-  - type: pweb
+  # --- BNPL (private) ---
+  - type: pserv
     name: chommie-bnpl-service
     env: node
     plan: free
-    rootDir: packages/bnpl-service
+    rootDir: services/bnpl-service
     buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
-      - key: PORT
-        value: 3003
+      - { key: PORT, value: 3003 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
 
-  # Web Customer (Static Site)
-  - type: static
-    name: chommie-web-customer
-    env: static
+  # --- Order (private) ---
+  - type: pserv
+    name: chommie-order-service
+    env: node
     plan: free
-    rootDir: apps/web-customer
+    rootDir: services/order-service
     buildCommand: npm install && npm run build
-    publishDir: dist/web-customer/browser
+    startCommand: npm run start:prod
     envVars:
-      - key: API_URL
-        value: https://chommie-api-gateway.onrender.com
+      - { key: PORT, value: 3004 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+      - { key: NOTIFICATION_SERVICE_HOST, value: chommie-notification-service }
+      - { key: NOTIFICATION_SERVICE_PORT, value: 3005 }
+      - { key: PRODUCT_SERVICE_HOST, value: chommie-product-service }
+      - { key: PRODUCT_SERVICE_PORT, value: 3002 }
+      - { key: BNPL_SERVICE_HOST, value: chommie-bnpl-service }
+      - { key: BNPL_SERVICE_PORT, value: 3003 }
+      - { key: PAYMENT_SERVICE_HOST, value: chommie-payment-service }
+      - { key: PAYMENT_SERVICE_PORT, value: 3006 }
+      - { key: MEMBERSHIP_SERVICE_HOST, value: chommie-membership-service }
+      - { key: MEMBERSHIP_SERVICE_PORT, value: 3009 }
+      - { key: CIRCLE_SERVICE_HOST, value: chommie-circle-service }
+      - { key: CIRCLE_SERVICE_PORT, value: 3008 }
 
-  # Web Vendor (Static Site)
-  - type: static
-    name: chommie-web-vendor
-    env: static
+  # --- Notification (private) ---
+  - type: pserv
+    name: chommie-notification-service
+    env: node
     plan: free
-    rootDir: apps/web-vendor
+    rootDir: services/notification-service
     buildCommand: npm install && npm run build
-    publishDir: dist/web-vendor/browser
+    startCommand: npm run start:prod
     envVars:
-      - key: API_URL
-        value: https://chommie-api-gateway.onrender.com
+      - { key: PORT, value: 3005 }
+      - key: RESEND_API_KEY
+        sync: false
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+
+  # --- Payment (private) ---
+  - type: pserv
+    name: chommie-payment-service
+    env: node
+    plan: free
+    rootDir: services/payment-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3006 }
+      - key: PAYFAST_MERCHANT_ID
+        sync: false
+      - key: PAYFAST_MERCHANT_KEY
+        sync: false
+      - key: PAYFAST_PASSPHRASE
+        sync: false
+      - key: OZOW_SITE_CODE
+        sync: false
+      - key: OZOW_PRIVATE_KEY
+        sync: false
+      - key: OZOW_API_KEY
+        sync: false
+      - { key: OZOW_IS_TEST, value: true }
+      - key: YOCO_SECRET_KEY
+        sync: false
+      - key: YOCO_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSHAP_PROXY
+        sync: false
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+      - { key: ORDER_SERVICE_HOST, value: chommie-order-service }
+      - { key: ORDER_SERVICE_PORT, value: 3004 }
+
+  # --- Recommendation / discovery (private) ---
+  - type: pserv
+    name: chommie-recommendation-service
+    env: node
+    plan: free
+    rootDir: services/recommendation-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3007 }
+      - key: ANTHROPIC_API_KEY
+        sync: false # optional — discovery falls back to the deterministic ranker without it
+      - { key: DISCOVERY_LLM_MODEL, value: claude-opus-4-8 }
+      - { key: PRODUCT_SERVICE_HOST, value: chommie-product-service }
+      - { key: PRODUCT_SERVICE_PORT, value: 3002 }
+      - { key: CIRCLE_SERVICE_HOST, value: chommie-circle-service }
+      - { key: CIRCLE_SERVICE_PORT, value: 3008 }
+      - { key: MEMBERSHIP_SERVICE_HOST, value: chommie-membership-service }
+      - { key: MEMBERSHIP_SERVICE_PORT, value: 3009 }
+      - { key: AD_SERVICE_HOST, value: chommie-ad-service }
+      - { key: AD_SERVICE_PORT, value: 3010 }
+
+  # --- Buying circles (private) ---
+  - type: pserv
+    name: chommie-circle-service
+    env: node
+    plan: free
+    rootDir: services/circle-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3008 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+
+  # --- Membership + standing baskets (private) ---
+  - type: pserv
+    name: chommie-membership-service
+    env: node
+    plan: free
+    rootDir: services/membership-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3009 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+
+  # --- Marketplace advertising (private) ---
+  - type: pserv
+    name: chommie-ad-service
+    env: node
+    plan: free
+    rootDir: services/ad-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3010 }
+      - { key: PRODUCT_SERVICE_HOST, value: chommie-product-service }
+      - { key: PRODUCT_SERVICE_PORT, value: 3002 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+
+  # --- Supply side: suppliers + off-take + demand forecast (private) ---
+  - type: pserv
+    name: chommie-supply-service
+    env: node
+    plan: free
+    rootDir: services/supply-service
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - { key: PORT, value: 3011 }
+      - { key: MEMBERSHIP_SERVICE_HOST, value: chommie-membership-service }
+      - { key: MEMBERSHIP_SERVICE_PORT, value: 3009 }
+      - { key: CIRCLE_SERVICE_HOST, value: chommie-circle-service }
+      - { key: CIRCLE_SERVICE_PORT, value: 3008 }
+      - key: POSTGRES_HOST
+        fromDatabase: { name: chommie-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: chommie-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: chommie-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: chommie-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: chommie-db, property: database }
+
+  # --- Customer web (Next.js) ---
+  - type: web
+    name: chommie-web
+    env: node
+    plan: free
+    rootDir: apps/web
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - { key: NEXT_PUBLIC_API_URL, value: https://chommie-api-gateway.onrender.com }
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+
+  # NOTE: no vendor/seller app — Chommie is the retailer, sourcing direct from
+  # producers (see supply-service). The legacy Angular customer app (apps/web-customer)
+  # is deprecated in favour of apps/web and is not deployed.
 
 databases:
   - name: chommie-db
-    type: postgres
-    plan: free
-
-  - name: chommie-mongo
-    type: mongodb
+    databaseName: chommie
     plan: free

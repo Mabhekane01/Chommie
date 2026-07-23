@@ -1,90 +1,55 @@
-# 🌐 Chommie Nexus: Enterprise Marketplace Protocol
+# Chommie
 
-Chommie is a high-performance, microservices-driven e-commerce platform designed to rival the customer experience of global giants like Amazon. It features a unique **BNPL Trust Engine**, an **AI Concierge**, and a sophisticated **Beige & Orange** design system.
+**Chommie is a direct-to-consumer staples retailer for South Africa** — it removes
+the retail middle layer and connects households directly with the farmers, producers
+and manufacturers who make what they buy. Chommie *is* the retailer; it sources
+staples direct from producers and sells them near cost. The full product/business
+blueprint is in [`do.md`](./do.md).
 
-## 🏗️ Architecture: The Nexus Grid
+> **Not a marketplace.** There are no third-party vendors/sellers. Products are
+> Chommie's own catalogue, **sourced from producers** (`supplierId`, see
+> `supply-service`). The legacy multi-vendor code is being retired — see
+> `apps/web-customer/DEPRECATED.md`.
 
-The system follows a **Microservices-First** pattern, orchestrated by **Turbo** and communicating via **NestJS TCP Transports**.
+## The model (from `do.md`)
 
-### 🏛️ API Gateway (`packages/api-gateway`)
-The central coordinator. 
-- **Internal Routing**: Translates RESTful HTTP requests into microservice commands.
-- **Vendor Unification**: Specialized logic to reconstruct fragmented order data for the Vendor Portal.
-- **Port**: `3000` (Production: Dynamic)
+- **Membership funds the platform, not markup** (§3.1) — a flat fee is the profit centre so staples sit near cost. → `membership-service`
+- **One standing basket per household** (§3.2) — recurring demand that becomes the supplier-negotiation asset. → `membership-service`
+- **Stokvel buying circles** (§3.3) — pooled demand unlocks a deeper discount tier. → `circle-service`
+- **Household + reseller tiers** (§3.4) — resellers get volume-scaled wholesale pricing at checkout. → `membership-service` + `order-service`
+- **Culture-aware discovery** (§3.5) — circle-, calendar-, geo- and savings-aware, with a grounded LLM re-rank. Staples are never pay-to-rank. → `recommendation-service`
+- **Marketplace advertising** (§3.6) — sponsored placement in the *discretionary* tier only. → `ad-service`
+- **Supply / off-take** (§5) — suppliers, off-take agreements, and a demand forecast aggregating standing-basket + circle demand. → `supply-service`
+- **Price transparency** (§6) — every order records savings vs retail; the member's running total is the trust metric. → `order-service` + `membership-service`
+- **Payments** (§9) — Ozow · PayShap · PayFast · Yoco behind one provider abstraction. → `payment-service`
 
-### ⚙️ Core Microservices
-| Service | Data Store | Primary Responsibility |
-| :--- | :--- | :--- |
-| **Auth** | Postgres | Identity, 2FA (OTP), Seller Statistics, and Vetting. |
-| **Product** | MongoDB | High-scale catalog, Stock management, Q&A, and Search. |
-| **BNPL** | Postgres | The "Trust Engine": Score calculation (0-1000) and Credit Limits. |
-| **Order** | Postgres | Transaction persistence, Shipping Manifests, and Coupon logic. |
-| **Payment** | Postgres | CARD/EFT processing simulation and event emission. |
-| **Notification**| Postgres | Real-time system alerts and Email dispatch simulation. |
-| **Recommendation**| MongoDB | AI Insights, Discovery Matrix, and the **AI Concierge**. |
+## Architecture
 
----
+Turborepo monorepo:
 
-## 🚀 Premium Protocol Features
+- **`apps/web`** — the customer storefront (Next.js App Router + Tailwind + Supabase auth: passkeys / Google / email / phone).
+- **`services/*`** — NestJS microservices over TCP behind an `api-gateway` (REST):
+  `auth`, `product`, `order`, `bnpl`, `payment`, `notification`,
+  `recommendation` (discovery), `circle`, `membership`, `ad`, `supply`.
+- **`packages/shared-types`** — shared DTOs (`@chommie/shared-types`).
+- Data: **Postgres** (identity, orders, payments, circles, membership, ads, supply) · **MongoDB** (catalogue) · **Redis** (cache).
 
-### 🤖 Chommie AI Concierge
-A floating neural assistant that guides users through the marketplace.
-- **Action-Oriented**: Can trigger UI navigations (Orders, BNPL, Deals).
-- **Heuristic Logic**: Backend located in `recommendation-service` for centralized intelligence.
+Design detail: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and the discovery moat: [`docs/discovery-algorithm.md`](./docs/discovery-algorithm.md).
 
-### 🛡️ BNPL Trust Protocol
-A behavioral loyalty system that rewards "Good Players."
-- **Tiered Limits**: Bronze (R500) to Platinum (R2000+).
-- **Trust Discounts**: High scores (>700) unlock automated price drops at checkout.
-- **Trust Coins**: Native marketplace currency earned through on-time settlements.
+## Running locally
 
-### 📍 Live Logistics Simulation
-An Amazon-rivaling tracking experience.
-- **Nexus Node Map**: Visual SVG simulation of the package's physical location.
-- **HUD Telemetry**: Real-time distance and environment data display.
-
----
-
-## 🎨 Design System: Vibrant Amazonia
-- **Core Palette**: 
-  - Primary: `#FF6D1F` (Action Orange)
-  - Background: `#FAF3E1` (Deep Ocean Beige)
-  - High-Contrast: `#131921` / `#222222` (Charcoal)
-- **Visual Language**: Boxy informational density, rounded-sm corners, and horizontal-scroll navigation for mobile-first accessibility.
-
----
-
-## 🛠️ Developer Operations
-
-### Prerequisites
-- Node.js 20+
-- PostgreSQL
-- MongoDB
-
-### Installation
 ```bash
 npm install
-npm run build
+docker compose up -d postgres mongodb redis   # or point env at managed DBs
+cp apps/web/.env.example apps/web/.env.local   # NEXT_PUBLIC_API_URL + Supabase keys
+npm run dev                                     # gateway + services + web (turbo)
+npm run seed                                    # seed SA staples + a demo stokvel
+# customer app: http://localhost:4300 · gateway: http://localhost:3000
 ```
 
-### Running Locally
-```bash
-npm run dev
-```
-
-### Database Seeding
-```bash
-# Populates the product catalog via the API Gateway
-npm run seed
-```
+Optional: set `ANTHROPIC_API_KEY` (+ `DISCOVERY_LLM_MODEL`) to enable the LLM
+discovery re-rank and concierge — without it, discovery runs on the deterministic
+ranker. Payment rails need each provider's credentials to transact.
 
 ---
-
-## ☁️ Deployment (Render Blueprint)
-The project is 100% Render-Ready via `render.yaml`.
-1. Connect GitHub repository to Render.
-2. Create a "New Blueprint Instance".
-3. Render will auto-provision Postgres, Mongo, and all 11 services.
-
----
-© 2026 Chommie.za Marketplace Protocol. All Rights Reserved.
+© 2026 Chommie — staples, direct from producers.
