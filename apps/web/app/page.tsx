@@ -13,41 +13,55 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4">
-      {/* Hero — the staples / circles / savings promise, not a generic store */}
-      <section className="mt-6 grid gap-6 rounded-sm bg-charcoal px-6 py-10 text-beige md:grid-cols-2 md:items-center">
+      {/* Hero — a friend who's good with money, not a store (design-philosophy §1) */}
+      <section className="mt-6 grid gap-8 rounded-card bg-ink px-6 py-12 text-sand md:grid-cols-2 md:items-center md:px-10">
         <div>
-          <h1 className="text-3xl font-extrabold leading-tight md:text-4xl">
-            Staples at <span className="text-brand">cost</span>, not at markup.
-          </h1>
-          <p className="mt-3 max-w-md text-beige/70">
-            Membership funds the platform — so eggs, maize meal, rice and oil sit close to what they
-            actually cost. Pool your basket into a <strong className="text-beige">buying circle</strong> and
-            the price drops again.
+          <p className="text-sm font-semibold uppercase tracking-wide text-sand/45">
+            Chommie · your people, your prices
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <h1 className="display mt-3 text-[2.6rem] font-extrabold sm:text-5xl">
+            Staples at <span className="text-shop">cost</span>.
+            <br />
+            Not at markup.
+          </h1>
+          <p className="mt-4 max-w-md text-lg text-sand/70">
+            Membership funds the platform, so the food doesn&apos;t have to. Pool your basket with
+            your people and the price drops again.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/membership"
-              className="rounded-sm bg-brand px-4 py-2 font-semibold text-charcoal hover:bg-brand-600 transition-colors"
+              href="/staples"
+              className="rounded-pill bg-shop px-5 py-2.5 font-semibold text-ink transition-[transform,background-color] duration-[120ms] ease-chommie hover:bg-shop-600 active:scale-95"
             >
-              See membership
+              Shop the staples
             </Link>
             <Link
               href="/circles"
-              className="rounded-sm border border-beige/30 px-4 py-2 font-semibold text-beige hover:border-beige transition-colors"
+              className="rounded-pill border border-sand/25 px-5 py-2.5 font-semibold text-sand transition-colors duration-[120ms] ease-chommie hover:border-sand"
             >
-              Start a buying circle
+              Start a circle
             </Link>
           </div>
         </div>
+
+        {/* Proof over persuasion (§5.1) — the mechanism, stated plainly. */}
         <ul className="grid gap-3 text-sm">
           {[
-            ['Near-cost staples', 'Priced to an auditable margin ceiling — no hidden markup.'],
-            ['Stokvel buying circles', 'Pool demand with your family, street or workplace for a deeper tier.'],
-            ['Built for how SA shops', 'Circle-, calendar- and area-aware discovery, not a national feed.'],
-          ].map(([title, body]) => (
-            <li key={title} className="rounded-sm bg-charcoal-800 p-4">
-              <p className="font-semibold text-beige">{title}</p>
-              <p className="mt-1 text-beige/60">{body}</p>
+            ['shop', 'No markup on staples', 'Priced to a stated margin ceiling we hold ourselves to.'],
+            ['circles', 'Together is cheaper', 'Three people is 3% off. Eleven is 8%. Same basket.'],
+            ['money', 'You keep the difference', 'Every order shows what you saved against retail.'],
+          ].map(([world, title, body]) => (
+            <li key={title} className="flex gap-3 rounded-card bg-white/[0.06] p-4">
+              <span
+                aria-hidden
+                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                  world === 'shop' ? 'bg-shop' : world === 'circles' ? 'bg-circles' : 'bg-money'
+                }`}
+              />
+              <div>
+                <p className="font-bold text-sand">{title}</p>
+                <p className="mt-0.5 text-sand/60">{body}</p>
+              </div>
             </li>
           ))}
         </ul>

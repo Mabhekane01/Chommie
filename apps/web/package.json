@@ -6,21 +6,21 @@
     "dev": "next dev -p 4300",
     "build": "next build",
     "start": "next start -p 4300",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^15.1.6",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@chommie/shared-types": "*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.1",
-    "@chommie/shared-types": "*"
+    "next": "^16.2.11",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
-    "@types/react": "^19.0.7",
-    "@types/react-dom": "^19.0.3",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2"
   }

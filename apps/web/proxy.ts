@@ -1,7 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
-export async function middleware(request: NextRequest) {
+// Renamed from `middleware` in Next 16 — the file convention is now `proxy`.
+export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
 

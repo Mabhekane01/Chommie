@@ -9,11 +9,19 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3000';
 
 type FetchOpts = RequestInit & { revalidate?: number };
 
+/**
+ * Server renders block on these calls, so a gateway that hangs would stall the
+ * whole response until the router gives up — which shows in the browser as an
+ * opaque "Failed to fetch". Fail fast instead and let `safe()` degrade.
+ */
+const TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS ?? 4000);
+
 async function request<T>(path: string, opts: FetchOpts = {}): Promise<T> {
   const { revalidate, ...init } = opts;
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...(init.headers ?? {}) },
+    signal: init.signal ?? AbortSignal.timeout(TIMEOUT_MS),
     // ISR-style caching by default; discovery endpoints pass revalidate: 0
     next: revalidate === undefined ? undefined : { revalidate },
   });
@@ -30,11 +38,19 @@ export class ApiError extends Error {
   }
 }
 
-/** Returns [] / null instead of throwing, so a down gateway degrades gracefully. */
+/**
+ * Returns [] / null instead of throwing, so a down gateway degrades gracefully
+ * rather than 500-ing the render. Logs once per failure in development — a
+ * silently empty page is much harder to debug than a noisy one.
+ */
 async function safe<T>(p: Promise<T>, fallback: T): Promise<T> {
   try {
     return await p;
-  } catch {
+  } catch (e) {
+    if (process.env.NODE_ENV !== 'production') {
+      const why = e instanceof Error ? e.message : String(e);
+      console.warn(`[chommie] API unreachable at ${API_URL} — using fallback. (${why})`);
+    }
     return fallback;
   }
 }

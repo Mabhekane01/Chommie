@@ -1,14 +1,74 @@
 @import "tailwindcss";
 
-/* Chommie design tokens — "Vibrant Amazonia" (see README / docs/ARCHITECTURE.md §2) */
+/*
+ * Chommie design tokens — see docs/design-philosophy.md
+ *
+ * "Calm at the till, loud in the aisles." Money surfaces stay quiet and precise;
+ * discovery, circles and rewards get to be expressive. One skeleton, five worlds.
+ */
 @theme {
-  --color-brand: #ff6d1f;
-  --color-brand-600: #e85f14;
-  --color-beige: #faf3e1;
-  --color-beige-200: #f3e9cf;
-  --color-charcoal: #131921;
-  --color-charcoal-800: #222222;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* ---- Base: warm, never grey -------------------------------------------- */
+  --color-ink: #14100e;          /* warm near-black — NOT Amazon's blue-black */
+  --color-ink-700: #4a403a;
+  --color-ink-500: #7a6b61;
+  --color-sand: #fdf6ec;         /* page background */
+  --color-sand-200: #f4e8d8;     /* subtle fill */
+  --color-sand-300: #e7d6c0;     /* border */
+  --color-paper: #ffffff;        /* card surface */
+
+  /* ---- World accents (one per vertical) ---------------------------------- */
+  --color-shop: #ff5a1f;         /* staples & marketplace — also the brand */
+  --color-shop-600: #e8480f;
+  --color-circles: #e9407a;      /* stokvel buying circles */
+  --color-circles-600: #d02c65;
+  --color-money: #0fa968;        /* BNPL, wallet, banking */
+  --color-money-600: #0b8a54;
+  --color-ride: #0ea5e9;         /* e-hailing */
+  --color-ride-600: #0284c7;
+  --color-play: #a855f7;         /* entertainment */
+  --color-play-600: #9333ea;
+
+  /* ---- Semantics: kept separate from world accents ----------------------- */
+  --color-positive: #0fa968;
+  --color-warning: #f59e0b;
+  --color-danger: #e5484d;
+
+  /* ---- Legacy aliases ----------------------------------------------------
+   * Existing components use brand/beige/charcoal. Mapping them onto the new
+   * palette means the whole app inherits the redesign without touching every
+   * file, and lets us migrate call sites gradually.
+   */
+  --color-brand: var(--color-shop);
+  --color-brand-600: var(--color-shop-600);
+  --color-beige: var(--color-sand);
+  --color-beige-200: var(--color-sand-200);
+  --color-charcoal: var(--color-ink);
+  --color-charcoal-800: var(--color-ink-700);
+
+  /* ---- Type --------------------------------------------------------------
+   * Two roles, deliberately contrasted. No webfont: a blocking font request is
+   * a real cost on a R10 data bundle (§5.3). Swap --font-display for a variable
+   * face later and the whole system inherits it.
+   */
+  --font-display: "Segoe UI Variable Display", ui-rounded, "SF Pro Rounded",
+    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
+
+  /* ---- Shape: friendliness is carried by curvature ------------------------
+   * `sm` is overridden because existing components lean on `rounded-sm`; this
+   * single line rounds the entire app at once.
+   */
+  --radius-sm: 0.75rem;   /* 12px — inputs, small surfaces */
+  --radius-card: 1.125rem;/* 18px — cards, sheets */
+  --radius-pill: 999px;   /* buttons, chips */
+
+  /* ---- Elevation: ink-tinted, never black -------------------------------- */
+  --shadow-card: 0 1px 2px rgb(20 16 14 / 0.04), 0 2px 8px rgb(20 16 14 / 0.06);
+  --shadow-lift: 0 2px 6px rgb(20 16 14 / 0.06), 0 12px 28px rgb(20 16 14 / 0.10);
+
+  /* ---- Motion: quick out, soft landing ----------------------------------- */
+  --ease-chommie: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
@@ -16,8 +76,44 @@
 }
 
 body {
-  background-color: var(--color-beige);
-  color: var(--color-charcoal);
+  background-color: var(--color-sand);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Money is always tabular. Proportional digits make columns of rands jitter,
+ * which reads as sloppy — the one impression a financial product cannot afford.
+ */
+.money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Display voice: big, tight, confident. The "loud in the aisles" half. */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Focus: visible on both sand and ink, never removed. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-shop);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* §5.6 — motion is a preference, not an assumption. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

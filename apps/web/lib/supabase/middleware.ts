@@ -28,6 +28,16 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Touch the session so expired tokens refresh into the response cookies.
-  await supabase.auth.getUser();
+  //
+  // This must never throw. Middleware runs on every request — including the RSC
+  // payload fetches the router makes when prefetching links — so an unhandled
+  // rejection here 500s those requests and surfaces in the browser as an opaque
+  // "Failed to fetch". An unreachable or misconfigured Supabase should degrade
+  // to "signed out", not take the whole app down.
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    /* leave the session untouched; the user simply reads as signed out */
+  }
   return response;
 }
