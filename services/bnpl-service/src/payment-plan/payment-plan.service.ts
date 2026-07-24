@@ -16,27 +16,19 @@ export class PaymentPlanService {
   async create(createDto: CreatePaymentPlanDto): Promise<PaymentPlan> {
     const { userId, totalAmount } = createDto;
 
-    // 1. Check Eligibility
-    const { eligible, reason } = await this.trustScoreService.checkEligibility(userId, totalAmount);
-    // Note: checkEligibility currently only checks if totalAmount < limit. 
-    // It does NOT check if (currentDebt + newAmount) < limit.
-    // We need to fix that.
-    
-    // Quick fix: Get current active debt
-    const currentDebt = await this.calculateCurrentDebt(userId);
+    // Eligibility is enforced against total exposure, not just this order:
+    // (existing active debt + this amount) must sit within the credit limit.
     const profile = await this.trustScoreService.getProfile(userId);
-    
     if (!profile) throw new BadRequestException('User profile not found');
 
-    if (currentDebt + totalAmount > profile.creditLimit) {
-        throw new BadRequestException(`Exceeds credit limit. Current debt: ${currentDebt}, Limit: ${profile.creditLimit}`);
+    const currentDebt = await this.calculateCurrentDebt(userId);
+    if (currentDebt + Number(totalAmount) > Number(profile.creditLimit)) {
+        throw new BadRequestException(
+            `Exceeds credit limit. Current debt: ${currentDebt}, Limit: ${profile.creditLimit}`,
+        );
     }
 
-    // 2. Create Plan (Default: 4 installments, bi-weekly)
-    // First payment is immediate (handled by Order Service -> Payment Service usually, but let's assume this plan tracks it)
-    // Actually, usually BNPL collects 1st installment immediately.
-    // Let's generate the schedule.
-    
+    // 4 installments, bi-weekly, first due immediately.
     const installments = this.generateInstallments(totalAmount);
 
     const plan = this.paymentPlanRepository.create({
@@ -85,15 +77,18 @@ export class PaymentPlanService {
 
     // Mark paid
     installment.status = 'PAID';
-    // installment.paidAt = new Date(); // Need to update type if using this
-    
-    // Update plan balance
-    plan.remainingBalance = Number(plan.remainingBalance) - Number(installment.amount);
-    
+    installment.paidAt = new Date();
+
+    // Update plan balance — round to cents so repeated decimal subtraction can't
+    // leave a sub-cent residue that shows as a non-zero balance on a paid plan.
+    plan.remainingBalance =
+        Math.round((Number(plan.remainingBalance) - Number(installment.amount)) * 100) / 100;
+
     // Check if fully paid
     const allPaid = plan.installments.every(i => i.status === 'PAID');
     if (allPaid) {
         plan.status = PlanStatus.COMPLETED;
+        plan.remainingBalance = 0; // guard against any accumulated float drift
     }
 
     // Save changes
@@ -107,7 +102,13 @@ export class PaymentPlanService {
 
   private generateInstallments(totalAmount: number) {
     const count = 4;
-    const amountPerInstallment = totalAmount / count;
+    // Split in whole cents so the four amounts sum back to the total exactly.
+    // Any rounding remainder lands on the first (immediate) installment, which
+    // is the BNPL convention — never leave fractional cents on a schedule.
+    const totalCents = Math.round(Number(totalAmount) * 100);
+    const baseCents = Math.floor(totalCents / count);
+    const remainderCents = totalCents - baseCents * count;
+
     const installments: {
         dueDate: Date;
         amount: number;
@@ -117,14 +118,15 @@ export class PaymentPlanService {
     for (let i = 0; i < count; i++) {
         const date = new Date();
         date.setDate(date.getDate() + (i * 14)); // Every 2 weeks
-        
+
+        const cents = i === 0 ? baseCents + remainderCents : baseCents;
         installments.push({
             dueDate: date,
-            amount: amountPerInstallment,
+            amount: cents / 100,
             status: 'PENDING'
         });
     }
-    
+
     return installments;
   }
 }
