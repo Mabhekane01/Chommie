@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { tierProgress } from '@/lib/circle-tiers';
 
 const configured =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -17,6 +18,71 @@ interface Circle {
   discountTier: string;
   extraDiscountPct: number;
   memberCount?: number;
+}
+
+/** One circle, with progress toward the next discount tier (do.md §3.3). */
+function CircleRow({ circle: c }: { circle: Circle }) {
+  const [copied, setCopied] = useState(false);
+  const members = c.memberCount ?? 1;
+  const { next, needed, fraction } = tierProgress(members);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(c.inviteCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked — the code is visible next to the button anyway */
+    }
+  };
+
+  return (
+    <li className="rounded-sm border border-beige-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-semibold text-charcoal">{c.name}</span>
+        <span className="whitespace-nowrap rounded-sm bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand-600">
+          {c.extraDiscountPct > 0 ? `${c.discountTier.replace('CIRCLE_', '')} · +${c.extraDiscountPct}%` : 'No tier yet'}
+        </span>
+      </div>
+
+      <p className="mt-1 text-xs text-charcoal-800/60">
+        {members} member{members === 1 ? '' : 's'}
+        {c.region ? ` · ${c.region}` : ''}
+      </p>
+
+      {/* The recruiting nudge: what the next tier is worth, in members. */}
+      {next ? (
+        <div className="mt-3">
+          <div className="flex justify-between text-xs">
+            <span className="text-charcoal-800/70">
+              {needed} more member{needed === 1 ? '' : 's'} to {next.label}
+            </span>
+            <span className="font-semibold text-brand-600">+{next.pct}%</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-beige-200">
+            <div
+              className="h-full rounded-full bg-brand transition-all"
+              style={{ width: `${Math.round(fraction * 100)}%` }}
+            />
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-xs font-semibold text-brand-600">
+          Gold tier — the deepest circle discount.
+        </p>
+      )}
+
+      <div className="mt-3 flex items-center gap-2 border-t border-beige-200 pt-3">
+        <span className="text-xs text-charcoal-800/50">Invite code</span>
+        <code className="rounded-sm bg-beige-200/60 px-2 py-0.5 text-xs font-semibold text-charcoal">
+          {c.inviteCode}
+        </code>
+        <button onClick={copy} className="text-xs font-semibold text-brand-600 hover:underline">
+          {copied ? 'Copied ✓' : 'Copy'}
+        </button>
+      </div>
+    </li>
+  );
 }
 
 /** Signed-in members create/join circles; the gateway derives their id from the token. */
@@ -62,7 +128,8 @@ export function CircleManager() {
   const load = useCallback(async () => {
     if (!token) return;
     try {
-      setCircles(await authFetch('/circles/mine'));
+      const mine = await authFetch('/circles/mine');
+      setCircles(Array.isArray(mine) ? mine : []);
     } catch {
       /* keep prior list */
     }
@@ -132,18 +199,7 @@ export function CircleManager() {
         ) : (
           <ul className="mt-3 space-y-2">
             {circles.map((c) => (
-              <li key={c.id} className="rounded-sm border border-beige-200 bg-white p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-charcoal">{c.name}</span>
-                  <span className="rounded-sm bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand-600">
-                    {c.discountTier.replace('CIRCLE_', '')} · +{c.extraDiscountPct}%
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-charcoal-800/60">
-                  {c.memberCount ?? 1} member(s){c.region ? ` · ${c.region}` : ''} · invite{' '}
-                  <code className="font-semibold">{c.inviteCode}</code>
-                </p>
-              </li>
+              <CircleRow key={c.id} circle={c} />
             ))}
           </ul>
         )}
