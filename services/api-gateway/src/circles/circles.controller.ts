@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Delete, Body, Param, Inject, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Inject,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   SupabaseAuthGuard,
@@ -6,6 +16,7 @@ import {
   type AuthUser,
 } from '../auth/supabase-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { resolveActingUserId } from '../auth/dev-fallback';
 
 /**
  * REST surface for buying circles (do.md §3.3). Translates HTTP into
@@ -15,19 +26,23 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class CirclesController {
   constructor(@Inject('CIRCLE_SERVICE') private readonly circleClient: ClientProxy) {}
 
-  // Optional auth: when a Supabase token is present the userId comes from the
-  // verified token (a client cannot spoof it); a body userId is only honoured as
-  // a fallback for trusted server callers like the seed script during migration.
+  // Optional auth: a verified token always decides who is acting. A body userId
+  // is honoured only under the local-dev escape hatch (the seed script) — in
+  // production an unauthenticated caller cannot act as someone else.
   @UseGuards(OptionalSupabaseAuthGuard)
   @Post()
   create(@CurrentUser() user: AuthUser | undefined, @Body() data: any) {
-    return this.circleClient.send({ cmd: 'create_circle' }, { ...data, userId: user?.id ?? data.userId });
+    const userId = resolveActingUserId(user?.id, data?.userId);
+    if (!userId) throw new UnauthorizedException('Sign in to create a circle');
+    return this.circleClient.send({ cmd: 'create_circle' }, { ...data, userId });
   }
 
   @UseGuards(OptionalSupabaseAuthGuard)
   @Post('join')
   join(@CurrentUser() user: AuthUser | undefined, @Body() data: any) {
-    return this.circleClient.send({ cmd: 'join_circle' }, { ...data, userId: user?.id ?? data.userId });
+    const userId = resolveActingUserId(user?.id, data?.userId);
+    if (!userId) throw new UnauthorizedException('Sign in to join a circle');
+    return this.circleClient.send({ cmd: 'join_circle' }, { ...data, userId });
   }
 
   // Per-user route: requires a verified Supabase token; the user id comes from
@@ -51,9 +66,11 @@ export class CirclesController {
   @UseGuards(OptionalSupabaseAuthGuard)
   @Post(':id/basket')
   addItem(@CurrentUser() user: AuthUser | undefined, @Param('id') id: string, @Body() data: any) {
+    const userId = resolveActingUserId(user?.id, data?.userId);
+    if (!userId) throw new UnauthorizedException('Sign in to add to a circle basket');
     return this.circleClient.send(
       { cmd: 'add_circle_basket_item' },
-      { ...data, circleId: id, userId: user?.id ?? data.userId },
+      { ...data, circleId: id, userId },
     );
   }
 
@@ -62,8 +79,14 @@ export class CirclesController {
     return this.circleClient.send({ cmd: 'get_circle_affinity' }, { circleId: id });
   }
 
+  // Requires a verified token: the circle-service checks the caller is an active
+  // member of the circle the item belongs to before deleting anything.
+  @UseGuards(SupabaseAuthGuard)
   @Delete('basket/:itemId')
-  removeItem(@Param('itemId') itemId: string) {
-    return this.circleClient.send({ cmd: 'remove_circle_basket_item' }, { itemId });
+  removeItem(@CurrentUser() user: AuthUser, @Param('itemId') itemId: string) {
+    return this.circleClient.send(
+      { cmd: 'remove_circle_basket_item' },
+      { itemId, userId: user.id },
+    );
   }
 }

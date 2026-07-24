@@ -30,6 +30,8 @@ export class ReviewController {
 
   // Seller/vendor reviews removed — Chommie is the retailer; only products are reviewed.
 
+  // Requires a verified user so votes can't be stuffed anonymously.
+  @UseGuards(SupabaseAuthGuard)
   @Post(':id/helpful')
   voteHelpful(@Param('id') id: string) {
     return this.productClient.send({ cmd: 'vote_helpful' }, id);

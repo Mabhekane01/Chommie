@@ -113,7 +113,22 @@ export class CircleService {
     return this.items.save(item);
   }
 
-  async removeBasketItem(data: { itemId: string }) {
+  /**
+   * A circle basket is shared, so any active member of that circle may remove a
+   * line — but only a member. Without this check any caller who can guess an
+   * item id could empty someone else's basket.
+   */
+  async removeBasketItem(data: { itemId: string; userId?: string }) {
+    const item = await this.items.findOne({ where: { id: data.itemId } });
+    if (!item) return { success: false, error: 'NOT_FOUND' };
+
+    if (data.userId) {
+      const member = await this.members.findOne({
+        where: { circleId: item.circleId, userId: data.userId, status: 'ACTIVE' },
+      });
+      if (!member) return { success: false, error: 'NOT_A_MEMBER' };
+    }
+
     await this.items.delete(data.itemId);
     return { success: true };
   }

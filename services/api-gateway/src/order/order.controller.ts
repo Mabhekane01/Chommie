@@ -75,6 +75,9 @@ export class OrderController {
     return this.orderClient.send({ cmd: 'get_user_returns' }, user.id);
   }
 
+  // Requires a verified user: unauthenticated callers could otherwise brute-force
+  // the coupon space. Checkout is signed-in anyway.
+  @UseGuards(SupabaseAuthGuard)
   @Post('validate-coupon')
   validateCoupon(@Body() body: { code: string; orderAmount: number }) {
     return this.orderClient.send({ cmd: 'validate_coupon' }, body);

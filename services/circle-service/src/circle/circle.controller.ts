@@ -33,7 +33,7 @@ export class CircleController {
   }
 
   @MessagePattern({ cmd: 'remove_circle_basket_item' })
-  removeItem(@Payload() data: { itemId: string }) {
+  removeItem(@Payload() data: { itemId: string; userId?: string }) {
     return this.circleService.removeBasketItem(data);
   }
 
